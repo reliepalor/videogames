@@ -1,0 +1,56 @@
+<div class="max-w-5xl mx-auto px-6 py-10">
+  <h1 class="text-3xl font-extrabold mb-6 text-gray-900">Checkout</h1>
+
+  <p *ngIf="errorMessage" class="mb-4 text-red-600 font-semibold">{{ errorMessage }}</p>
+
+  <ng-container *ngIf="!errorMessage">
+    <div class="bg-white rounded-xl shadow p-6 space-y-6">
+      <div *ngFor="let item of (cart$ | async)?.items" class="flex items-center space-x-4">
+        <input
+          type="checkbox"
+          (change)="toggleItemSelection(item, $event)"
+          aria-label="Select {{item.title || item.videoGame?.title}} for checkout"
+          class="w-5 h-5"
+        />
+        <img
+          [src]="item.videoGame?.imageUrl"
+          alt="{{item.title || item.videoGame?.title}}"
+          class="w-20 h-20 rounded-lg object-cover"
+          loading="lazy"
+        />
+        <div class="flex-grow">
+          <h3 class="text-lg font-semibold text-gray-900">{{ item.title || item.videoGame?.title }}</h3>
+          <p class="text-sm text-gray-600">₱{{ (item.price || item.videoGame?.price || 0) | number:'1.2-2' }} each</p>
+          <p class="text-sm text-gray-600">Quantity: {{ item.quantity }}</p>
+        </div>
+        <p class="text-lg font-semibold text-gray-900">
+          ₱{{ ((item.price || item.videoGame?.price || 0) * item.quantity) | number:'1.2-2' }}
+        </p>
+      </div>
+
+      <button
+        (click)="checkout()"
+        [disabled]="isLoading"
+        class="w-full bg-green-600 text-white font-semibold py-3 rounded-full hover:bg-green-700 active:scale-95 shadow-md transition"
+      >
+        {{ isLoading ? 'Processing...' : 'Confirm Purchase' }}
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- Success Modal -->
+  <div
+    *ngIf="showSuccessModal"
+    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300"
+    [class.opacity-0]="isFadingOut"
+  >
+    <div
+      class="bg-white rounded-xl p-6 shadow-lg max-w-sm text-center"
+      [class.opacity-0]="isFadingOut"
+      [class.translate-y-4]="isFadingOut"
+      style="transition: opacity 0.3s ease, transform 0.3s ease;"
+    >
+      <p class="text-gray-900 font-semibold text-lg">{{ successMessage }}</p>
+    </div>
+  </div>
+</div>

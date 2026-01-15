@@ -1,0 +1,117 @@
+<style>
+  @layer utilities {
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.3s ease-out;
+    }
+  }
+</style>
+
+<div class="max-w-6xl mx-auto p-6 animate-fade">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-semibold">Shopping Cart</h1>
+
+    <input
+      type="text"
+      [(ngModel)]="search"
+      (input)="filterItems()"
+      placeholder="Search items..."
+      class="px-4 py-2 rounded-xl border w-64"
+    />
+  </div>
+
+  <!-- Checkout Error -->
+  <div *ngIf="errorMsg" class="px-4 py-3 mb-4 rounded-xl bg-red-100 text-red-700 font-medium">
+    {{ errorMsg }}
+  </div>
+
+  <!-- CART LIST -->
+  <div *ngIf="filteredItems.length; else empty">
+
+    <!-- SELECT ALL -->
+    <div class="flex items-center gap-3 mb-4">
+      <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()" />
+      <span class="text-sm text-gray-600">Select all</span>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="space-y-4">
+      <div
+        *ngFor="let item of filteredItems; trackBy: trackByFn"
+        class="flex items-center justify-between bg-white rounded-2xl p-5 shadow-sm border"
+      >
+        <div class="flex items-center gap-4">
+          <input type="checkbox" [(ngModel)]="item.selected" (change)="toggleItem()" />
+
+          <img [src]="item.imageUrl" alt="{{ item.title }}" class="w-16 h-16 object-cover rounded" />
+
+          <div>
+            <h3 class="font-medium text-lg">{{ item.title }}</h3>
+            <p class="text-sm text-gray-500">₱{{ item.price | number:'1.2-2' }}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <!-- QTY 
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="item.quantity"
+            (change)="updateQuantity(item, item.quantity)"
+            class="w-20 px-3 py-1 border rounded-lg"
+          />-->
+
+          <span class="font-semibold w-24 text-right">
+            ₱{{ item.subtotal | number:'1.2-2' }}
+          </span>
+
+          <!-- DELETE -->
+          <button
+            (click)="removeItem(item)"
+            class="text-red-500 hover:text-red-700 text-sm"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="mt-8 flex justify-between items-center border-t pt-6">
+      <div class="text-xl font-semibold">
+        Total: ₱{{ total | number:'1.2-2' }}
+      </div>
+
+      <button
+        (click)="checkout()"
+        [disabled]="!total || loading"
+        class="px-8 py-3 bg-violet-900 text-white cursor-pointer
+               disabled:opacity-40 hover:bg-purple-950 transition"
+      >
+        Checkout
+      </button>
+    </div>
+
+  </div>
+
+  <!-- EMPTY -->
+  <ng-template #empty>
+    <div class="text-center text-gray-500 py-20">
+      Your cart is empty 🛒
+    </div>
+  </ng-template>
+
+  <!-- SUCCESS MODAL -->
+  <div *ngIf="showSuccessModal" class="fixed inset-0 backdrop-blur-md bg-opacity-20 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-sm mx-4 text-center shadow-lg animate-fade-in">
+      <div class="text-green-500 text-4xl mb-4">✓</div>
+      <h2 class="text-xl font-semibold mb-2">Checkout Successful!</h2>
+      <p class="text-gray-600">Your order has been placed successfully.</p>
+    </div>
+  </div>
+</div>

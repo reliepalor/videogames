@@ -1,0 +1,239 @@
+<style>
+  @layer utilities {
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.35s ease-out both;
+    }
+  }
+</style>
+
+<div class="max-w-7xl mx-auto px-6 py-10 font-sans text-gray-900">
+
+  <!-- Header -->
+  <h1 class="text-4xl font-bold tracking-tight mb-8 text-gray-900">
+    Pending Orders
+  </h1>
+
+  <!-- View Toggle -->
+  <div class="flex justify-end mb-8 gap-3">
+    <button
+      (click)="viewMode = 'card'"
+      class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer"
+      [ngClass]="viewMode === 'card'
+        ? 'bg-purple-600 text-white shadow-md'
+        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
+      Card View
+    </button>
+
+    <button
+      (click)="viewMode = 'table'"
+      class="px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 cursor-pointer"
+      [ngClass]="viewMode === 'table'
+        ? 'bg-purple-600 text-white shadow-md'
+        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'">
+      Table View
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-lg opacity-60 animate-pulse">
+    Loading…
+  </div>
+
+  <!-- Alerts -->
+  <div *ngIf="errorMsg" class="mb-4 px-5 py-3 rounded-xl bg-red-100 text-red-700 font-medium shadow-sm animate-fade-in">
+    {{ errorMsg }}
+  </div>
+
+  <div *ngIf="successMsg" class="mb-4 px-5 py-3 rounded-xl bg-green-100 text-green-700 font-medium shadow-sm animate-fade-in">
+    {{ successMsg }}
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && orders.length === 0" class="text-center opacity-50 py-10">
+    No pending orders at the moment.
+  </div>
+
+  <!-- CARD VIEW -->
+  <div *ngIf="viewMode === 'card'" class="space-y-8 animate-fade-in">
+
+    <div 
+      *ngFor="let order of orders"
+      class="bg-white border border-gray-200 rounded-3xl p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-[2px]"
+    >
+      
+      <!-- User Info -->
+      <div class="flex justify-between items-center mb-5">
+        <span class="text-gray-500 text-sm">
+          {{ order.username }} • {{ order.email }}
+        </span>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="flex justify-between text-sm text-gray-600 mb-6">
+        <div>
+          Ordered:
+          <span class="font-semibold text-gray-900">{{ order.createdAt | date:'medium' }}</span>
+        </div>
+        <div>
+          Total:
+          <span class="font-semibold text-gray-900">₱{{ order.totalPrice | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Items Table -->
+      <div class="rounded-2xl overflow-hidden border border-gray-200">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-100 text-gray-700">
+            <tr>
+              <th class="py-3 px-4 text-left">Game Title</th>
+              <th class="py-3 px-4 text-right">Unit Price</th>
+              <th class="py-3 px-4 text-center">Product Key</th>
+              <th class="py-3 px-4 text-center">Generate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              *ngFor="let item of order.items"
+              class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <td class="py-3 px-4">{{ item.gameTitle }}</td>
+              <td class="py-3 px-4 text-right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
+
+              <td class="py-3 px-4 text-center">
+                <input
+                  type="text"
+                  [ngModel]="getProductKey(item.id)"
+                  (ngModelChange)="setProductKey(item.id, $event)"
+                  class="px-3 py-2 rounded-xl border border-gray-300 w-full max-w-xs focus:ring-4 focus:ring-purple-300 transition"
+                  placeholder="Enter key"
+                />
+              </td>
+
+              <td class="py-3 px-4 text-center">
+                <button
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 transition cursor-pointer"
+                  (click)="generateProductKey(item.id)"
+                >
+                  Generate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          class="px-4 py-1.5 rounded-xl border border-purple-600 text-purple-900 font-medium shadow-md hover:bg-purple-100 transition cursor-pointer"
+          (click)="approveOrder(order)"
+        >
+          Approve
+        </button>
+
+        <button
+          class="px-6 py-2.5 rounded-xl bg-red-100 border border-red-500 text-gray-900 font-medium shadow-md hover:bg-red-200 cursor-pointer transition"
+          (click)="rejectOrder(order.id)"
+        >
+          Reject
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TABLE VIEW -->
+  <div *ngIf="viewMode === 'table'" class="animate-fade-in">
+
+    <div class="overflow-x-auto rounded-3xl border border-gray-200 shadow-md">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-100 text-gray-700">
+          <tr>
+            <th class="p-4 text-left">Order ID</th>
+            <th class="p-4 text-left">User</th>
+            <th class="p-4 text-left">Created</th>
+            <th class="p-4 text-left">Total</th>
+            <th class="p-4 text-center">Items</th>
+            <th class="p-4 text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let order of orders" class="border-t border-gray-200 hover:bg-gray-50 transition">
+            <td class="p-4 font-medium">{{ order.id }}</td>
+            <td class="p-4">
+              {{ order.username }}<br>
+              <span class="text-xs text-gray-500">{{ order.email }}</span>
+            </td>
+            <td class="p-4">{{ order.createdAt | date:'medium' }}</td>
+            <td class="p-4 font-medium">₱{{ order.totalPrice | number:'1.2-2' }}</td>
+
+            <td class="p-4 text-center">
+              <button
+                class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition"
+                (click)="order.showItems = !order.showItems"
+              >
+                {{ order.showItems ? 'Hide' : 'Show' }}
+              </button>
+            </td>
+
+            <td class="flex justify-center p-4 text-center gap-1">
+              <button
+                  class="px-4 py-1.5 rounded-xl border border-purple-600 text-purple-900 font-medium shadow-md hover:bg-purple-100 transition cursor-pointer"
+                  (click)="approveOrder(order)"
+                >
+                  Approve
+                </button>
+
+                <button
+                  class="px-4 py-1.5 rounded-xl bg-red-50 border border-red-500 text-gray-900 font-medium shadow-md hover:bg-red-100 cursor-pointer transition"
+                  (click)="rejectOrder(order.id)"
+                >
+                  Reject
+                </button>
+            </td>
+          </tr>
+
+          <!-- Expanded Items Section -->
+          <tr *ngFor="let order of orders" [hidden]="!order.showItems">
+            <td colspan="6" class="p-6 bg-gray-50">
+              <div class="space-y-4">
+
+                <div *ngFor="let item of order.items" class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border">
+                  
+                  <div>
+                    <div class="font-semibold text-gray-900">{{ item.gameTitle }}</div>
+                    <div class="text-gray-500 text-sm">₱{{ item.unitPrice | number:'1.2-2' }}</div>
+                  </div>
+
+                  <input 
+                    [ngModel]="getProductKey(item.id)"
+                    (ngModelChange)="setProductKey(item.id, $event)"
+                    class="px-3 py-2 border border-gray-300 rounded-xl w-64 focus:ring-4 focus:ring-purple-300 transition"
+                    placeholder="Enter product key"
+                  />
+
+                  <button
+                    class="px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition"
+                    (click)="generateProductKey(item.id)"
+                  >
+                    Generate
+                  </button>
+
+                </div>
+
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

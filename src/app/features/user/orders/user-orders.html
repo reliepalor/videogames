@@ -1,0 +1,178 @@
+<style>
+  @layer utilities {
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-up {
+      animation: slide-up 0.3s ease-out both;
+    }
+  }
+</style>
+
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans text-gray-900">
+
+  <h1 class="text-3xl font-bold tracking-tight mb-6 text-gray-800">
+    My Orders
+  </h1>
+
+  <!-- Filters -->
+  <div class="flex flex-col sm:flex-row gap-4 mb-6">
+    <!-- Status Filter -->
+    <select
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="onStatusFilterChange()"
+      class="px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 focus:outline-none transition"
+    >
+      <option [ngValue]="null">All Statuses</option>
+      <option [ngValue]="0">Pending</option>
+      <option [ngValue]="1">Approved</option>
+      <option [ngValue]="2">Rejected</option>
+    </select>
+
+    <!-- Search -->
+    <input
+      type="text"
+      placeholder="Search by game title..."
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="onSearchChange()"
+      class="px-4 py-3 flex-1 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 focus:outline-none transition"
+    />
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center text-lg opacity-60 animate-pulse">
+    Loading orders…
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMsg" class="px-4 py-3 mb-4 rounded-xl bg-red-100 text-red-700 font-medium shadow-sm">
+    {{ errorMsg }}
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && paginatedOrders.length === 0" class="text-center opacity-60 py-8">
+    No orders found.
+  </div>
+
+  <!-- Order Cards -->
+  <div
+    *ngFor="let order of paginatedOrders"
+    class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 mb-6 animate-slide-up border border-gray-100"
+  >
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-3">
+      <div class="text-sm text-gray-500">
+        {{ order.createdAt | date:'medium' }}
+      </div>
+    </div>
+
+    <!-- Summary Info -->
+    <div class="flex justify-between items-center mb-4 text-sm">
+
+      <div class="flex flex-col">
+        <span class="font-medium text-purple-800">Total Price</span>
+        <span class="text-lg font-semibold text-gray-900">₱{{ order.totalPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="flex justify-center gap-1">
+        <span class="font-medium text-purple-800 mt-1">Status</span><br />
+        <span 
+          class="font-semibold px-3 py-1 rounded-lg text-sm transition"
+          [ngClass]="{
+            'bg-yellow-100 text-yellow-700': order.status === 0,
+            'bg-green-100 text-green-700': order.status === 1,
+            'bg-red-100 text-red-700': order.status === 2
+          }"
+        >
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+    </div>
+
+    <!-- Items Table (Desktop/Tablet) -->
+    <div class="hidden sm:block overflow-hidden rounded-xl border border-gray-200">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-700">
+          <tr>
+            <th class="p-3 text-left font-medium">Image</th>
+            <th class="p-3 text-left font-medium">Game</th>
+            <th class="p-3 text-right font-medium">Price</th>
+            <th class="p-3 text-center font-medium">Key</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of order.items" class="border-t border-gray-200 hover:bg-purple-50 transition">
+            <td class="p-3">
+              <img [src]="item.imageUrl" alt="{{ item.gameTitle }}" class="w-12 h-12 object-cover rounded">
+            </td>
+            <td class="p-3">{{ item.gameTitle }}</td>
+            <td class="p-3 text-right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
+            <td class="p-3 text-center font-mono text-xs">
+              {{ item.productKey || '—' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Mobile Responsive Stacked Items -->
+    <div class="sm:hidden space-y-4">
+      <div
+        *ngFor="let item of order.items"
+        class="flex items-center gap-3 bg-gray-50 rounded-xl p-3 shadow-sm border border-gray-200"
+      >
+        <img [src]="item.imageUrl" class="w-12 h-12 rounded object-cover" />
+
+        <div class="flex-1">
+          <div class="font-semibold text-gray-900">{{ item.gameTitle }}</div>
+          <div class="text-gray-600 text-sm">₱{{ item.unitPrice | number:'1.2-2' }}</div>
+          <div class="text-xs font-mono text-gray-500">
+            {{ item.productKey || '—' }}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="fixed bottom-0 left-0 right-0 bg-transparent border-t border-gray-50 py-4 z-10 shadow-lg">
+    <div class="max-w-5xl mx-auto px-4">
+      <div *ngIf="totalPages > 1" class="flex justify-center items-center space-x-2">
+        <button
+          (click)="prevPage()"
+          [disabled]="currentPage === 1"
+          class="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          &larr; Previous
+        </button>
+
+        <div *ngFor="let page of pages" class="inline-flex space-x-1">
+          <button
+            (click)="goToPage(page)"
+            [ngClass]="{
+              'bg-purple-600 text-white': page === currentPage,
+              'bg-gray-200 text-gray-700 hover:bg-gray-300': page !== currentPage
+            }"
+            class="px-3 py-2 rounded-lg transition"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <button
+          (click)="nextPage()"
+          [disabled]="currentPage === totalPages"
+          class="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          Next &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

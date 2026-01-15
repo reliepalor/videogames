@@ -1,0 +1,107 @@
+<style>
+  @layer utilities {
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes toast-out {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(20px) scale(0.95); }
+    }
+
+    .toast-enter {
+      animation: toast-in 0.3s ease-out forwards;
+    }
+    .toast-leave {
+      animation: toast-out 0.3s ease-in forwards;
+    }
+  }
+</style>
+
+<div class="max-w-7xl mx-auto px-4 py-10 font-sans text-gray-900">
+
+  <!-- Header & Search -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+
+    <h1 class="text-4xl font-bold tracking-tight text-gray-900">
+      Games Store
+    </h1>
+
+    <input
+      type="search"
+      placeholder="Search games..."
+      class="border border-gray-300 rounded-2xl px-5 py-3 w-full md:w-72 shadow-sm focus:ring-4 focus:ring-purple-300 transition"
+      (input)="searchTerm$.next($event.target.value)"
+    />
+  </div>
+
+  <!-- Responsive Grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-fade-slow">
+    
+    <div 
+      *ngFor="let game of filteredGames$ | async" 
+      class="relative bg-white rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 hover:-translate-y-1 cursor-pointer"
+    >
+
+      <!-- Image -->
+      <div class="h-40 sm:h-48 md:h-56 bg-gray-200 relative">
+        <img *ngIf="game.imageUrl" [src]="game.imageUrl" class="w-full h-full object-cover" />
+
+        <span class="absolute bottom-3 right-3 px-3 py-1 text-xs font-semibold bg-white/60 backdrop-blur-md border border-white/80 rounded-full text-gray-900 shadow-sm">
+          {{ game.platform }}
+        </span>
+      </div>
+
+      <div class="p-4 sm:p-5">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 line-clamp-1 mb-1">
+          {{ game.title }}
+        </h3>
+
+        <p class="text-gray-600 text-xs sm:text-sm line-clamp-2 mb-4">
+          Experience immersive gameplay and stunning graphics.
+        </p>
+
+        <div class="flex justify-between items-center">
+
+          <span class="text-md font-bold text-gray-900">
+            ₱{{ game.price | number:'1.2-2' }}
+          </span>
+
+          <button
+            (click)="addToCart(game)"
+            [disabled]="game.id && loadingGames.has(game.id)"
+            class="rounded-full border border-purple-600 text-gray-800 px-3 py-1 font-semibold text-sm hover:bg-purple-100 disabled:bg-gray-300 transition active:scale-95 shadow-md flex items-center gap-1"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4"></path>
+              <circle cx="7" cy="21" r="1"></circle>
+              <circle cx="17" cy="21" r="1"></circle>
+            </svg>
+            Add
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Success Toast -->
+  <div
+    *ngIf="showSuccessModal"
+    class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+  >
+    <div class="bg-white shadow-xl border border-purple-200 rounded-2xl px-6 py-3 backdrop-blur-xl text-center min-w-[260px]"
+         [ngClass]="{
+           'toast-enter': !isFadingOut,
+           'toast-leave': isFadingOut
+         }">
+      <p class="text-gray-900 font-semibold text-sm flex items-center justify-center gap-2">
+        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        {{ successMessage }}
+      </p>
+    </div>
+  </div>
+
+</div>

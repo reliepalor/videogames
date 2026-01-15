@@ -1,0 +1,148 @@
+<div class="max-w-xl mx-auto px-6 pb-16">
+
+  <!-- Card -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+
+    <!-- Header -->
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold tracking-tight text-gray-900">
+        {{ isEdit ? 'Edit Video Game' : 'Add Video Game' }}
+      </h2>
+      <p class="text-sm text-gray-500 mt-1">
+        Enter the details of the video game below.
+      </p>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6" enctype="multipart/form-data">
+
+      <!-- Title -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Title <span class="text-red-500">*</span>
+        </label>
+        <input
+          formControlName="title"
+          type="text"
+          placeholder="e.g. The Legend of Zelda"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+
+      <!-- Platform -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Platform
+        </label>
+        <input
+          formControlName="platform"
+          type="text"
+          placeholder="e.g. Nintendo Switch"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+
+      <!-- Developer -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Developer
+        </label>
+        <input
+          formControlName="developer"
+          type="text"
+          placeholder="e.g. Nintendo"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+
+      <!-- Publisher -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Publisher
+        </label>
+        <input
+          formControlName="publisher"
+          type="text"
+          placeholder="e.g. Nintendo"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+
+      <!-- Price -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Price
+        </label>
+        <input
+          formControlName="price"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="e.g. 59.99"
+          class="w-full rounded-xl border border-gray-300 px-4 py-3
+                 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+
+      <!-- IMAGE UPLOAD -->
+      <div>
+        <label class="block text-sm font-medium mb-1 text-gray-700">Game Image</label>
+
+        <label
+          for="file-upload"
+          class="cursor-pointer flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300
+                px-4 py-6 text-center text-gray-500 hover:border-gray-400 hover:text-gray-700 transition
+                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+        >
+          <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4v16m8-8H4"></path>
+          </svg>
+          <span>Choose an image...</span>
+        </label>
+
+        <input
+          id="file-upload"
+          type="file"
+          accept="image/*"
+          (change)="onFileChange($event)"
+          class="sr-only"
+        />
+      </div>
+
+
+      <!-- Preview newly selected image -->
+      <img *ngIf="previewUrl"
+          [src]="previewUrl"
+          alt="Selected Image Preview"
+          class="h-40 rounded-xl object-cover border mt-4" />
+
+      <!-- Preview existing image (edit mode) -->
+      <div *ngIf="!previewUrl && form.value.imageUrl" class="pt-2">
+        <img
+          [src]="form.value.imageUrl"
+          alt="Current Game Image"
+          class="h-40 w-full object-cover rounded-xl border mt-4" />
+      </div>
+
+      <!-- Actions -->
+      <div class="flex justify-end gap-3 pt-6">
+        <button
+          type="button"
+          (click)="router.navigate(['/videogames'])"
+          class="px-6 py-2.5 rounded-full border border-gray-300
+                 text-gray-700 hover:bg-gray-50 transition">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          [disabled]="form.invalid"
+          class="px-8 py-2.5 rounded-full bg-black text-white
+                 hover:bg-gray-800 disabled:opacity-50 transition">
+          {{ isEdit ? 'Update Game' : 'Create Game' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

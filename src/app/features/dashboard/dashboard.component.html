@@ -1,0 +1,88 @@
+<div class="max-w-7xl mx-auto px-8 pb-12" *ngIf="games$ | async as games; else loading">
+
+  <!-- Header -->
+  <div class="mb-10">
+    <h1 class="text-3xl font-semibold text-gray-900 tracking-tight">
+      Dashboard
+    </h1>
+    <p class="text-gray-500 mt-1 text-sm">
+      Welcome back {{ user?.email }}
+    </p>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
+    <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <p class="text-sm text-gray-500">Total Games</p>
+      <p class="text-3xl font-semibold text-gray-900 mt-2">
+        {{ games.length }}
+      </p>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <p class="text-sm text-gray-500">Completed</p>
+      <p class="text-3xl font-semibold text-gray-900 mt-2">
+        {{ completedGames(games) }}
+      </p>
+    </div>
+
+    <div class="bg-white border border-gray-200 rounded-2xl p-6">
+      <p class="text-sm text-gray-500">In Progress</p>
+      <p class="text-3xl font-semibold text-gray-900 mt-2">
+        {{ inProgressGames(games) }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="games.length === 0" class="text-center py-20 text-gray-400">
+    No games yet. Start by adding one.
+  </div>
+
+  <!-- Games Table -->
+  <div *ngIf="games.length > 0"
+       class="bg-white border border-gray-200 rounded-3xl overflow-hidden">
+    <table class="w-full">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Title</th>
+          <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Platform</th>
+          <th class="px-6 py-4 text-left text-sm font-medium text-gray-500">Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let game of games"
+            class="border-t border-gray-200 hover:bg-gray-50 transition">
+          <td class="px-6 py-4 font-medium text-gray-900">
+            {{ game.title }}
+          </td>
+
+          <td class="px-6 py-4 text-sm text-gray-600">
+            {{ game.platform }}
+          </td>
+
+          <td class="px-6 py-4">
+            <span
+              class="px-3 py-1 rounded-full text-xs font-medium"
+              [ngClass]="{
+                'bg-green-100 text-green-700': game.status === 'Completed',
+                'bg-blue-100 text-blue-700': game.status === 'In Progress',
+                'bg-gray-100 text-gray-600': game.status === 'Backlog'
+              }">
+              {{ game.status }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Loading -->
+<ng-template #loading>
+  <div class="text-center py-20 text-gray-400">
+    Loading your games…
+  </div>
+</ng-template>
