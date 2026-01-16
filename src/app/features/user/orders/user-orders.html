@@ -10,19 +10,19 @@
   }
 </style>
 
-<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans text-gray-900">
+<div class="nt-5 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans text-gray-900">
 
+  <!-- HEADER -->
   <h1 class="text-3xl font-bold tracking-tight mb-6 text-gray-800">
     My Orders
   </h1>
 
-  <!-- Filters -->
+  <!-- FILTERS -->
   <div class="flex flex-col sm:flex-row gap-4 mb-6">
-    <!-- Status Filter -->
     <select
       [(ngModel)]="statusFilter"
       (ngModelChange)="onStatusFilterChange()"
-      class="px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 focus:outline-none transition"
+      class="px-4 py-3 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 transition"
     >
       <option [ngValue]="null">All Statuses</option>
       <option [ngValue]="0">Pending</option>
@@ -30,149 +30,177 @@
       <option [ngValue]="2">Rejected</option>
     </select>
 
-    <!-- Search -->
     <input
       type="text"
       placeholder="Search by game title..."
       [(ngModel)]="searchTerm"
       (ngModelChange)="onSearchChange()"
-      class="px-4 py-3 flex-1 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 focus:outline-none transition"
+      class="px-4 py-3 flex-1 rounded-xl border border-gray-300 shadow-sm focus:ring-4 focus:ring-purple-300 transition"
     />
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center text-lg opacity-60 animate-pulse">
-    Loading orders…
-  </div>
+  <!-- LOADING SKELETON -->
+  <ng-container *ngIf="loading; else content">
 
-  <!-- Error -->
-  <div *ngIf="errorMsg" class="px-4 py-3 mb-4 rounded-xl bg-red-100 text-red-700 font-medium shadow-sm">
-    {{ errorMsg }}
-  </div>
-
-  <!-- Empty -->
-  <div *ngIf="!loading && paginatedOrders.length === 0" class="text-center opacity-60 py-8">
-    No orders found.
-  </div>
-
-  <!-- Order Cards -->
-  <div
-    *ngFor="let order of paginatedOrders"
-    class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 mb-6 animate-slide-up border border-gray-100"
-  >
-
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-3">
-      <div class="text-sm text-gray-500">
-        {{ order.createdAt | date:'medium' }}
-      </div>
+    <!-- Filters Skeleton -->
+    <div class="flex flex-col sm:flex-row gap-4 mb-6">
+      <app-skeleton-box width="200px" height="50px" rounded="12px"></app-skeleton-box>
+      <app-skeleton-box width="100%" height="50px" rounded="12px"></app-skeleton-box>
     </div>
 
-    <!-- Summary Info -->
-    <div class="flex justify-between items-center mb-4 text-sm">
+    <!-- Order Card Skeleton -->
+    <div *ngFor="let i of [1,2,3]" class="bg-white rounded-2xl shadow-md border border-gray-200 p-5 mb-6">
 
-      <div class="flex flex-col">
-        <span class="font-medium text-purple-800">Total Price</span>
-        <span class="text-lg font-semibold text-gray-900">₱{{ order.totalPrice | number:'1.2-2' }}</span>
+      <!-- Header -->
+      <app-skeleton-box width="150px" height="20px"></app-skeleton-box>
+
+      <div class="flex justify-between items-center mt-4 mb-4">
+        <div>
+          <app-skeleton-box width="100px" height="16px"></app-skeleton-box>
+          <app-skeleton-box width="120px" height="24px" class="mt-2"></app-skeleton-box>
+        </div>
+
+        <app-skeleton-box width="80px" height="24px" rounded="12px"></app-skeleton-box>
       </div>
 
-      <div class="flex justify-center gap-1">
-        <span class="font-medium text-purple-800 mt-1">Status</span><br />
-        <span 
-          class="font-semibold px-3 py-1 rounded-lg text-sm transition"
-          [ngClass]="{
-            'bg-yellow-100 text-yellow-700': order.status === 0,
-            'bg-green-100 text-green-700': order.status === 1,
-            'bg-red-100 text-red-700': order.status === 2
-          }"
-        >
-          {{ getStatusLabel(order.status) }}
-        </span>
+      <!-- Table Skeleton (desktop) -->
+      <div class="hidden sm:block space-y-3">
+        <div *ngFor="let x of [1,2]" class="grid grid-cols-4 items-center gap-4">
+          <app-skeleton-box width="50px" height="50px" rounded="12px"></app-skeleton-box>
+          <app-skeleton-box width="120px" height="18px"></app-skeleton-box>
+          <app-skeleton-box width="80px" height="18px"></app-skeleton-box>
+          <app-skeleton-box width="100px" height="18px"></app-skeleton-box>
+        </div>
       </div>
 
-    </div>
+      <!-- Mobile Skeleton Items -->
+      <div class="sm:hidden mt-4 space-y-4">
+        <div *ngFor="let m of [1,2]" class="flex gap-3 items-center bg-gray-50 border border-gray-200 p-3 rounded-xl">
+          <app-skeleton-box width="50px" height="50px" rounded="8px"></app-skeleton-box>
 
-    <!-- Items Table (Desktop/Tablet) -->
-    <div class="hidden sm:block overflow-hidden rounded-xl border border-gray-200">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-700">
-          <tr>
-            <th class="p-3 text-left font-medium">Image</th>
-            <th class="p-3 text-left font-medium">Game</th>
-            <th class="p-3 text-right font-medium">Price</th>
-            <th class="p-3 text-center font-medium">Key</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let item of order.items" class="border-t border-gray-200 hover:bg-purple-50 transition">
-            <td class="p-3">
-              <img [src]="item.imageUrl" alt="{{ item.gameTitle }}" class="w-12 h-12 object-cover rounded">
-            </td>
-            <td class="p-3">{{ item.gameTitle }}</td>
-            <td class="p-3 text-right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
-            <td class="p-3 text-center font-mono text-xs">
-              {{ item.productKey || '—' }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Mobile Responsive Stacked Items -->
-    <div class="sm:hidden space-y-4">
-      <div
-        *ngFor="let item of order.items"
-        class="flex items-center gap-3 bg-gray-50 rounded-xl p-3 shadow-sm border border-gray-200"
-      >
-        <img [src]="item.imageUrl" class="w-12 h-12 rounded object-cover" />
-
-        <div class="flex-1">
-          <div class="font-semibold text-gray-900">{{ item.gameTitle }}</div>
-          <div class="text-gray-600 text-sm">₱{{ item.unitPrice | number:'1.2-2' }}</div>
-          <div class="text-xs font-mono text-gray-500">
-            {{ item.productKey || '—' }}
+          <div class="flex-1 space-y-2">
+            <app-skeleton-box width="60%" height="16px"></app-skeleton-box>
+            <app-skeleton-box width="40%" height="14px"></app-skeleton-box>
+            <app-skeleton-box width="50%" height="14px"></app-skeleton-box>
           </div>
         </div>
-
       </div>
 
     </div>
-  </div>
 
-  <!-- Pagination -->
-  <div class="fixed bottom-0 left-0 right-0 bg-transparent border-t border-gray-50 py-4 z-10 shadow-lg">
-    <div class="max-w-5xl mx-auto px-4">
-      <div *ngIf="totalPages > 1" class="flex justify-center items-center space-x-2">
-        <button
-          (click)="prevPage()"
-          [disabled]="currentPage === 1"
-          class="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          &larr; Previous
-        </button>
+    <!-- Pagination Skeleton -->
+    <div class="w-full flex justify-center mt-8">
+      <app-skeleton-box width="200px" height="40px" rounded="12px"></app-skeleton-box>
+    </div>
 
-        <div *ngFor="let page of pages" class="inline-flex space-x-1">
-          <button
-            (click)="goToPage(page)"
-            [ngClass]="{
-              'bg-purple-600 text-white': page === currentPage,
-              'bg-gray-200 text-gray-700 hover:bg-gray-300': page !== currentPage
-            }"
-            class="px-3 py-2 rounded-lg transition"
-          >
-            {{ page }}
-          </button>
+  </ng-container>
+
+
+  <!-- ========== ACTUAL CONTENT WHEN NOT LOADING ========== -->
+  <ng-template #content>
+
+    <!-- Error -->
+    <div *ngIf="errorMsg" class="px-4 py-3 mb-4 rounded-xl bg-red-100 text-red-700 font-medium shadow-sm">
+      {{ errorMsg }}
+    </div>
+
+    <!-- Empty -->
+    <div *ngIf="!loading && paginatedOrders.length === 0" class="text-center opacity-60 py-8">
+      No orders found.
+    </div>
+
+    <!-- Orders -->
+    <div
+      *ngFor="let order of paginatedOrders"
+      class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-5 mb-6 animate-slide-up border border-gray-100">
+
+      <div class="text-sm text-gray-500 mb-3">
+        {{ order.createdAt | date:'medium' }}
+      </div>
+
+      <!-- Summary -->
+      <div class="flex justify-between items-center mb-4 text-sm">
+        <div>
+          <span class="font-medium text-purple-800">Total Price</span>
+          <div class="text-lg font-semibold text-gray-900">₱{{ order.totalPrice | number:'1.2-2' }}</div>
         </div>
 
-        <button
-          (click)="nextPage()"
-          [disabled]="currentPage === totalPages"
-          class="cursor-pointer px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          Next &rarr;
-        </button>
+        <div class="text-right flex justify-center items-center gap-1">
+          <span class="font-medium text-purple-800">Status:</span><br>
+          <span 
+            class="font-semibold px-3 py-1 rounded-lg text-sm transition"
+            [ngClass]="{
+              'bg-yellow-100 text-yellow-700': order.status === 0,
+              'bg-green-100 text-green-700': order.status === 1,
+              'bg-red-100 text-red-700': order.status === 2
+            }">
+            {{ getStatusLabel(order.status) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Desktop Table -->
+      <div class="hidden sm:block overflow-hidden rounded-xl border border-gray-200">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-700">
+            <tr>
+              <th class="p-3 text-left font-medium">Image</th>
+              <th class="p-3 text-left font-medium">Game</th>
+              <th class="p-3 text-right font-medium">Price</th>
+              <th class="p-3 text-center font-medium">Key</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of order.items" class="border-t border-gray-200 hover:bg-purple-50 transition">
+              <td class="p-3"><img [src]="item.imageUrl" class="w-12 h-12 rounded object-cover"></td>
+              <td class="p-3">{{ item.gameTitle }}</td>
+              <td class="p-3 text-right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
+              <td class="p-3 text-center font-mono text-xs">{{ item.productKey || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mobile Items -->
+      <div class="sm:hidden space-y-4">
+        <div *ngFor="let item of order.items" class="flex items-center gap-3 bg-gray-50 rounded-xl p-3 shadow-sm border border-gray-200">
+          <img [src]="item.imageUrl" class="w-12 h-12 rounded object-cover" />
+          <div class="flex-1">
+            <div class="font-semibold text-gray-900">{{ item.gameTitle }}</div>
+            <div class="text-gray-600 text-sm">₱{{ item.unitPrice | number:'1.2-2' }}</div>
+            <div class="text-xs font-mono text-gray-500">{{ item.productKey || '—' }}</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pagination -->
+    <div class="fixed bottom-0 left-0 right-0 bg-transparent border-t border-gray-50 py-4 z-10 shadow-lg">
+      <div class="max-w-5xl mx-auto px-4">
+        <div *ngIf="totalPages > 1" class="flex justify-center items-center space-x-2">
+
+          <button (click)="prevPage()" [disabled]="currentPage === 1"
+            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50">
+            ← Previous
+          </button>
+
+          <button *ngFor="let p of pages" (click)="goToPage(p)"
+            [ngClass]="{ 'bg-purple-600 text-white': p === currentPage, 'bg-gray-200': p !== currentPage }"
+            class="px-3 py-2 rounded-lg">
+            {{ p }}
+          </button>
+
+          <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+            class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-50">
+            Next →
+          </button>
+
+        </div>
       </div>
     </div>
-  </div>
+
+  </ng-template>
+
 </div>

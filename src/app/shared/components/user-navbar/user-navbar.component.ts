@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
+import { Component, inject, OnInit, Output, EventEmitter, HostListener, ElementRef, Renderer2 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -18,19 +18,48 @@ export class UserNavbarComponent implements OnInit {
   private userService = inject(UserService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
+  private renderer = inject(Renderer2);
 
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
   user$!: Observable<User | null>;
   isDropdownOpen = false;
+  isDarkMode = false;
 
   ngOnInit(): void {
+    this.loadTheme();
+
     if (this.authService.isLoggedIn()) {
       this.user$ = this.userService.getProfile().pipe(
         catchError(() => of({ username: 'User', email: '' } as User))
       );
     } else {
       this.user$ = of(null);
+    }
+  }
+
+  toggleTheme(): void {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
+    this.applyTheme();
+  }
+
+  loadTheme(): void {
+    const saved = localStorage.getItem('theme');
+    this.isDarkMode = saved === 'dark';
+    this.applyTheme();
+  }
+
+  applyTheme(): void {
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (this.isDarkMode) {
+      html.classList.add('dark');
+      body.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+      body.classList.remove('dark');
     }
   }
 

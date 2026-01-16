@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core'
+import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewEncapsulation } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
 import { VideoGameService } from '../../../core/services/videogame.service'
 import { CartService } from '../../../core/services/cart.service'
 import { VideoGame } from '../../../core/models/videogame.model'
+import { SkeletonBoxComponent } from '../../../shared/skeleton/skeleton-box.component'
 import { environment } from 'src/environments/environment';
 import {
   Observable,
@@ -19,8 +20,9 @@ import {
 @Component({
   standalone: true,
   selector: 'app-games-list',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SkeletonBoxComponent],
   templateUrl: './games-list.html',
+  encapsulation: ViewEncapsulation.None,
 })
 export class GamesListComponent implements OnInit, OnDestroy {
   apiUrl = environment.apiUrl;

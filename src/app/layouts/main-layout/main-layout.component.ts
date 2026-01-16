@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 import { UserNavbarComponent } from 'src/app/shared/components/user-navbar/user-navbar.component';
 import { AuthService } from 'src/app/core/services/auth.service';
+import { SidebarService } from 'src/app/core/services/sidebar.service';
 
 @Component({
   standalone: true,
@@ -34,7 +35,7 @@ import { AuthService } from 'src/app/core/services/auth.service';
 
     <ng-template #userLayout>
       <app-user-navbar></app-user-navbar>
-      <main class="p-8">
+      <main [class]="getMainClass()">
         <router-outlet></router-outlet>
       </main>
     </ng-template>
@@ -49,10 +50,20 @@ import { AuthService } from 'src/app/core/services/auth.service';
 export class MainLayoutComponent {
 
   auth = inject(AuthService);
+  sidebarService = inject(SidebarService);
+  router = inject(Router);
 
   isSidebarMinimized = false;
 
   onSidebarToggle(minimized: boolean): void {
     this.isSidebarMinimized = minimized;
+    this.sidebarService.setMinimized(minimized);
+  }
+
+  getMainClass(): string {
+    if (this.router.url.includes('user-dashboard')) {
+      return '';
+    }
+    return 'p-8';
   }
 }

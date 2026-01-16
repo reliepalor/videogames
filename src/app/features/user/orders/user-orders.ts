@@ -2,12 +2,13 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { UserOrdersService, UserOrder } from 'src/app/core/services/user-orders.service';
 import { CommonModule } from '@angular/common';
+import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   standalone: true,
   selector: 'app-user-orders',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
   templateUrl: './user-orders.html',
 })
 export class UserOrdersComponent implements OnInit {

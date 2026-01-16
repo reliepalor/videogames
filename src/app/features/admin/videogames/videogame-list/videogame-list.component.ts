@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
 import { VideoGameService } from '../../../../core/services/videogame.service'
 import { VideoGame } from '../../../../core/models/videogame.model'
+import { SkeletonBoxComponent } from '../../../../shared/skeleton/skeleton-box.component'
 import { environment } from 'src/environments/environment';
 
 import {
@@ -19,7 +20,7 @@ import {
 @Component({
   standalone: true,
   selector: 'app-videogame-list',
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SkeletonBoxComponent],
   templateUrl: './videogame-list.component.html',
 })
 export class VideoGameListComponent implements OnInit, OnDestroy {

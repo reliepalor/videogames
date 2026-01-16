@@ -1,73 +1,115 @@
-<nav class="bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-  <div class="flex items-center">
-    <span class="text-2xl">🎮</span>
-     <a
-          routerLink="/user-dashboard"
-          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-          (click)="closeDropdown()"
-        >
-        Video Games
-        </a>   
+<nav class="fixed top-0 left-0 w-full bg-white dark:bg-[#111111] px-8 py-3 flex items-center justify-between text-gray-900 dark:text-white shadow-md border-b border-gray-200 dark:border-gray-800 z-50">
+
+  <!-- LEFT SECTION -->
+  <div class="flex items-center gap-5">
+
+    <!-- Gamepad Icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-width="2" d="M9 8H7v2H5v2h2v2h2v-2h2v-2H9V8zm7 2a1 1 0 11-2 0 1 1 0 112 0zm-2 4a1 1 0 100-2 1 1 0 000 2zm3-3a1 1 0 100-2 1 1 0 000 2z"/>
+    </svg>
+
+    <a routerLink="/user-dashboard"
+       class="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white text-sm px-2 transition"
+       (click)="closeDropdown()">
+      Video Games
+    </a>
   </div>
 
-  <div class="flex items-center space-x-4">
-    <a routerLink="/games" class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded hover:bg-gray-100">Games</a>
-            <a
-          routerLink="/orders"
-          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-          (click)="closeDropdown()"
-        >
-          📦 <span>My Orders</span>
-        </a>
-        <a
-          routerLink="/cart"
-          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-          (click)="closeDropdown()"
-        >
-          🛒 <span>Cart</span>
-        </a>
+  <!-- CENTER NAV LINKS (original links kept) -->
+  <div class="flex items-center gap-6">
+
+    <a routerLink="/games"
+      class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded transition">
+      Games
+    </a>
+
+    <a routerLink="/orders"
+      class="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded transition"
+      (click)="closeDropdown()">
+
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 dark:text-purple-300" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M3 6h18M3 6l2 14h14l2-14M8 6V4h8v2"/>
+      </svg>
+      My Orders
+    </a>
+
+    <a routerLink="/cart"
+      class="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-2 py-1 rounded transition"
+      (click)="closeDropdown()">
+
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 dark:text-purple-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9M10 21a1 1 0 11.001-2.001A1 1 0 0110 21zm8 0a1 1 0 11.001-2.001A1 1 0 0118 21z"/>
+      </svg>
+      Cart
+    </a>
+
   </div>
 
+  <!-- THEME TOGGLE BUTTON -->
+  <button (click)="toggleTheme()"
+    class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition">
+    <svg *ngIf="!isDarkMode" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5"/>
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+    </svg>
+    <svg *ngIf="isDarkMode" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 dark:text-purple-300" fill="currentColor" viewBox="0 0 24 24">
+      <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+    </svg>
+    <span class="text-sm text-gray-600 dark:text-gray-300">{{ isDarkMode ? 'Dark' : 'Light' }}</span>
+  </button>
+
+  <!-- USER SECTION (original logic kept) -->
   <div class="flex items-center space-x-4" *ngIf="user$ | async as user">
-    <span class="text-sm text-gray-600">{{ user.username }}</span>
+
+    <span class="text-sm text-gray-600 dark:text-gray-300">{{ user.username }}</span>
+
     <div class="relative">
-      <button
-        (click)="toggleDropdown()"
-        class="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100"
-      >
-        <div class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm font-bold">
+      <button (click)="toggleDropdown()"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition">
+
+        <div class="w-8 h-8 rounded-full bg-blue-600 dark:bg-purple-700 flex items-center justify-center text-sm font-bold text-white">
           {{ (user.username || user.email || '')[0] | uppercase }}
         </div>
-        <span>⌄</span>
+
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-600 dark:text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
-      <!-- DROPDOWN -->
-      <div
-        *ngIf="isDropdownOpen"
-        class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50"
-      >
-        <a
-          routerLink="/profile"
-          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-          (click)="closeDropdown()"
-        >
-          👤 <span>Profile</span>
-        </a>
-        <a
-          routerLink="/settings/password"
-          class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 text-sm text-gray-700"
-          (click)="closeDropdown()"
-        >
-          🔐 <span>Change Password</span>
+      <div *ngIf="isDropdownOpen"
+        class="absolute right-0 mt-3 w-48 bg-white dark:bg-[#1b0f3d] border border-gray-300 dark:border-purple-500/30 rounded-xl shadow-xl z-50 p-2 backdrop-blur-md">
+
+        <a routerLink="/profile"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition"
+          (click)="closeDropdown()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-width="2" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.878 2.804M12 12a5 5 0 100-10 5 5 0 000 10z"/>
+          </svg>
+          Profile
         </a>
 
-        <button
-          (click)="logout()"
-          class="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-        >
-          🚪 <span>Logout</span>
+        <a routerLink="/settings/password"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition"
+          (click)="closeDropdown()">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-blue-500 dark:text-purple-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-width="2" d="M15 7a3 3 0 11-6 0 3 3 0 016 0zM9 7v10m6-10v10"/>
+          </svg>
+          Change Password
+        </a>
+
+
+        <button (click)="logout()"
+          class="flex items-center gap-2 w-full px-4 py-2 rounded-lg text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition">
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-13V4"/>
+          </svg>
+
+          Logout
         </button>
       </div>
     </div>
+
   </div>
+
 </nav>
