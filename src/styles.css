@@ -22,15 +22,15 @@
     opacity: 1;
   }
 }
-html{
+/* html{
   @apply bg-white dark:bg-black;
   transition: background-color 0.3s ease, color 0.3s ease;
-}
+} */
 
-body {
+/* body {
   @apply bg-white dark:bg-black;
   transition: background-color 0.3s ease;
-}
+} */
 .animate-slide-in {
   animation: slideIn 0.3s ease-out;
 }
