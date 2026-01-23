@@ -22,6 +22,10 @@ export class AdminOrdersApprovalComponent implements OnInit {
 
   productKeyMap = new Map<number, string>();
 
+  showRejectModal = false;
+  rejectionReason = '';
+  orderToReject: number | null = null;
+
   ngOnInit() {
     this.loadPendingOrders();
   }
@@ -35,7 +39,7 @@ export class AdminOrdersApprovalComponent implements OnInit {
         this.orders = orders.map(o => ({
           ...o,
           showItems: false
-        }));
+        })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         this.productKeyMap.clear();
 
@@ -88,17 +92,30 @@ export class AdminOrdersApprovalComponent implements OnInit {
   }
 
   rejectOrder(orderId: number) {
-    if (!confirm('Are you sure you want to reject this order?')) return;
+    this.orderToReject = orderId;
+    this.rejectionReason = '';
+    this.showRejectModal = true;
+  }
 
-    this.adminOrdersService.rejectOrder(orderId).subscribe({
+  confirmReject() {
+    if (!this.orderToReject) return;
+
+    this.adminOrdersService.rejectOrder(this.orderToReject, this.rejectionReason).subscribe({
       next: () => {
-        this.successMsg = `Order #${orderId} rejected.`;
+        this.successMsg = `Order #${this.orderToReject} rejected.`;
+        this.closeRejectModal();
         this.loadPendingOrders();
       },
       error: () => {
         this.errorMsg = 'Failed to reject order.';
       }
     });
+  }
+
+  closeRejectModal() {
+    this.showRejectModal = false;
+    this.orderToReject = null;
+    this.rejectionReason = '';
   }
 
   getProductKey(orderItemId: number): string {

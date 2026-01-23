@@ -11,6 +11,7 @@ export interface UserOrderItem {
   quantity: number;
   productKey?: string | null;
   imageUrl?: string;
+  videoGameId?: number;
 }
 
 export interface UserOrder {
@@ -35,13 +36,17 @@ export class UserOrdersService {
       switchMap(orders => {
         return this.videoGameService.getAll().pipe(
           map(games => {
-            const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
+            const gameMap = new Map(games.map(g => [g.title, { imageUrl: g.imageUrl, id: g.id }]));
             return orders.map(order => ({
               ...order,
-              items: order.items.map(item => ({
-                ...item,
-                imageUrl: gameMap.get(item.gameTitle) || '/assets/no-image.png'
-              }))
+              items: order.items.map(item => {
+                const gameData = gameMap.get(item.gameTitle);
+                return {
+                  ...item,
+                  imageUrl: gameData?.imageUrl || '/assets/no-image.png',
+                  videoGameId: gameData?.id
+                };
+              })
             }));
           })
         );

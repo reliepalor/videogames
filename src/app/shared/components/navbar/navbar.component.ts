@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../core/models/user.model';
+import { Profile } from '../../../core/models/UserProfile.model';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -38,14 +38,14 @@ export class NavbarComponent implements OnInit {
   // 🔁 Sidebar toggle output
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
-  user$!: Observable<User | null>;
+  user$!: Observable<Profile | null>;
   isDropdownOpen = false;
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      this.user$ = this.userService.getProfile().pipe(
+      this.user$ = this.userService.Profile.pipe(
         catchError(() =>
-          of({ username: 'User', email: '' } as User)
+          of({ username: 'User', email: '' } as Profile)
         )
       );
     } else {

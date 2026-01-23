@@ -1,0 +1,26 @@
+@reference "tailwindcss";
+
+@layer utilities {
+  .ios-checkbox {
+    @apply appearance-none w-5 h-5 rounded-full
+           border
+           flex items-center justify-center
+           transition
+           checked:bg-violet-600 dark:checked:bg-violet-500
+           checked:border-violet-600 dark:checked:border-violet-500;
+  }
+
+  .ios-checkbox::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: white;
+    transform: scale(0);
+    transition: transform 0.15s ease;
+  }
+
+  .ios-checkbox:checked::after {
+    transform: scale(1);
+  }
+}

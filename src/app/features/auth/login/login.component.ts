@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService, LoginRequest } from '../../../core/services/auth.service';
 import { TokenService } from '../../../core/services/token.service';
+import { signInWithPopup } from 'firebase/auth';
+import { firebaseAuth, googleProvider } from '../../../core/firebase/firebase';
 
 @Component({
   selector: 'app-login',
@@ -39,6 +41,7 @@ export class LoginComponent implements OnInit {
     return;
   }
 
+
   this.isLoading = true;
   this.errorMessage = '';
 
@@ -65,6 +68,38 @@ export class LoginComponent implements OnInit {
       this.isLoading = false;
     }
   });
-}
+ }
+
+  loginWithGoogle(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    signInWithPopup(firebaseAuth, googleProvider)
+      .then((result) => {
+        return result.user.getIdToken();
+      })
+      .then((idToken) => {
+        this.authService.loginWithGoogle(idToken).subscribe({
+          next: () => {
+            console.log('Google login successful, redirecting...');
+            const redirect = this.authService.getRedirectUrlAfterLogin();
+            console.log('Redirect URL:', redirect);
+            this.isLoading = false;
+            this.router.navigate([redirect]);
+          },
+          error: (err) => {
+              console.error('Google login error:', err);
+              this.errorMessage = err?.message || 'Google sign-in failed';
+              this.isLoading = false;
+            }
+        });
+      })
+      .catch((error) => {
+        console.error('Firebase sign-in error:', error);
+        this.errorMessage = 'Google sign-in failed';
+        this.isLoading = false;
+      });
+  }
+
 
 }

@@ -1,10 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 import { UserNavbarComponent } from 'src/app/shared/components/user-navbar/user-navbar.component';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { SidebarService } from 'src/app/core/services/sidebar.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -35,7 +37,7 @@ import { SidebarService } from 'src/app/core/services/sidebar.service';
 
     <ng-template #userLayout>
       <app-user-navbar></app-user-navbar>
-      <main [class]="getMainClass()">
+      <main [class]="getMainClass() + (isDark() ? ' dark bg-gray-900' : ' bg-white') + ' transition-colors duration-300'">
         <router-outlet></router-outlet>
       </main>
     </ng-template>
@@ -47,13 +49,26 @@ import { SidebarService } from 'src/app/core/services/sidebar.service';
     }
   `]
 })
-export class MainLayoutComponent {
+export class MainLayoutComponent implements OnInit, OnDestroy {
 
   auth = inject(AuthService);
   sidebarService = inject(SidebarService);
   router = inject(Router);
+  themeService = inject(ThemeService);
 
   isSidebarMinimized = false;
+  isDark = signal(false);
+  private sub?: Subscription;
+
+  ngOnInit(): void {
+    this.sub = this.themeService.isDarkMode$.subscribe(isDark => {
+      this.isDark.set(isDark);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
 
   onSidebarToggle(minimized: boolean): void {
     this.isSidebarMinimized = minimized;
@@ -65,5 +80,9 @@ export class MainLayoutComponent {
       return '';
     }
     return 'p-8';
+  }
+
+  isDarkRoute(): boolean {
+    return this.router.url.includes('/cart') || this.router.url.includes('/orders');
   }
 }

@@ -1,0 +1,59 @@
+<div class="mt-12">
+
+  <!-- HEADER -->
+  <div *ngIf="data" class="mb-6">
+    <h2 class="text-xl font-semibold text-gray-900">
+      Reviews for {{ data.videoGameTitle }}
+    </h2>
+
+    <div class="flex items-center gap-3 mt-2">
+      <div class="flex text-purple-400">
+        <ng-container *ngFor="let _ of stars(roundRating(data.averageRating))">
+          ★
+        </ng-container>
+      </div>
+      <span class="text-sm text-gray-600">
+        {{ data.averageRating }} · {{ data.totalReviews }} reviews
+      </span>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="space-y-4">
+    <app-skeleton-box height="60px"></app-skeleton-box>
+    <app-skeleton-box height="120px"></app-skeleton-box>
+    <app-skeleton-box height="120px"></app-skeleton-box>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && data && data.reviews.length === 0"
+       class="text-gray-500 text-sm">
+    No reviews yet. Be the first to review this game.
+  </div>
+
+  <!-- REVIEWS -->
+  <div *ngIf="data && data.reviews.length"
+       class="space-y-4">
+    <div *ngFor="let r of data.reviews"
+         class="bg-white border border-gray-200 rounded-xl p-5">
+
+      <div class="flex justify-between items-center mb-2">
+        <p class="font-medium text-gray-900">{{ r.Username }}</p>
+        <span class="text-xs text-gray-400">
+          {{ r.createdAt | date:'mediumDate' }}
+        </span>
+      </div>
+
+      <div class="flex text-purple-400 mb-2">
+        <ng-container *ngFor="let _ of stars(r.rating)">
+          ★
+        </ng-container>
+      </div>
+
+      <p class="text-gray-700 text-sm">
+        {{ r.comment }}
+      </p>
+    </div>
+  </div>
+
+</div>

@@ -3,7 +3,7 @@
   <!-- FULLSCREEN VIDEO BACKGROUND -->
   <video #backgroundVideo
     class="absolute inset-0 w-full h-full object-cover"
-    src="/assets/videos/demo-vmake.mp4"
+    [src]="videoSrc"
     autoplay
     muted
     loop
@@ -16,16 +16,19 @@
 
   <!-- CONTENT ON TOP -->
   <div class="relative z-10 px-10 pt-25 max-w-7xl mx-auto">
-    <h1 class="text-white text-6xl font-bold leading-tight">
+    <h1 class="text-6xl font-bold leading-tight"
+        [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
       Explore your games<br />
-      with <span class="text-purple-300">Outspace.</span>
+      with <span [ngClass]="isDarkMode ? 'text-purple-300' : 'text-purple-600'">Outspace.</span>
     </h1>
 
-    <p class="text-gray-200 text-xl mt-6 max-w-xl">
+    <p class="text-xl mt-6 max-w-xl"
+       [ngClass]="isDarkMode ? 'text-gray-200' : 'text-gray-700'">
       Get access to unlimited games on Outspace resources and make your experience look real.
     </p>
 
-    <button class="mt-8 px-8 py-4 bg-purple-500 hover:bg-purple-600 text-white rounded-2xl text-lg font-semibold">
+    <button class="mt-8 px-8 py-4 text-white rounded-2xl text-lg font-semibold"
+            [ngClass]="isDarkMode ? 'bg-purple-500 hover:bg-purple-600' : 'bg-blue-500 hover:bg-blue-600'">
       Explore now
     </button>
 
@@ -48,13 +51,15 @@
       <!-- Play/Pause Button Bottom Left -->
       <button
         class="absolute bottom-3 left-3 flex items-center justify-center opacity-60 hover:opacity-100 transition
-              w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20"
+              w-10 h-10 rounded-full backdrop-blur-sm"
+        [ngClass]="isDarkMode ? 'bg-black/40 border border-white/20' : 'bg-white/40 border border-black/20'"
         (click)="togglePreview(preview1); $event.stopPropagation();">
 
         <!-- Play Icon Modern -->
         <svg *ngIf="preview1.paused"
           xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 text-white"
+          class="w-5 h-5"
+          [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
           viewBox="0 0 24 24"
           fill="currentColor">
           <path d="M5 3l14 9-14 9V3z"/>
@@ -75,9 +80,10 @@
 
 
       <!-- Video Preview 2 -->
-      <div class="relative w-80 h-48 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20 p-3 group"
-          (mouseenter)="preview2.play()"
-          (mouseleave)="preview2.pause()">
+      <div class="relative w-80 h-48 rounded-2xl backdrop-blur-sm p-3 group"
+           [ngClass]="isDarkMode ? 'bg-white/10 border border-white/20' : 'bg-black/10 border border-black/20'"
+           (mouseenter)="preview2.play()"
+           (mouseleave)="preview2.pause()">
 
         <video #preview2
           src="/assets/videos/3d1.mp4"
@@ -90,13 +96,15 @@
         <!-- Play/Pause Button Bottom Left -->
         <button
           class="absolute bottom-3 left-3 flex items-center justify-center opacity-60 hover:opacity-100 transition
-                w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/20"
+                w-10 h-10 rounded-full backdrop-blur-sm"
+          [ngClass]="isDarkMode ? 'bg-black/40 border border-white/20' : 'bg-white/40 border border-black/20'"
           (click)="togglePreview(preview2); $event.stopPropagation();">
 
           <!-- Play Icon Modern -->
           <svg *ngIf="preview2.paused"
             xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 text-white"
+            class="w-5 h-5"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
             viewBox="0 0 24 24"
             fill="currentColor">
             <path d="M5 3l14 9-14 9V3z"/>
@@ -105,7 +113,8 @@
           <!-- Pause Icon Modern -->
           <svg *ngIf="!preview2.paused"
             xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 text-white"
+            class="w-5 h-5"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
             viewBox="0 0 24 24"
             fill="currentColor">
             <path d="M9 5h2v14H9zM13 5h2v14h-2z"/>
@@ -117,8 +126,8 @@
     </div>
   </div>
 
-  <div class="h-screen">
-    <div class="mt-30 h-[50vh]">
+  <div class="h-screen shadow-lg shadow-amber-50 ">
+    <div class="h-screen bg-black">
            a
   </div>
 </div>

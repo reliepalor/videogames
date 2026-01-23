@@ -42,7 +42,7 @@ export class AdminOrdersService {
     return this.http.post(`${this.apiUrl}/admin/orders/${orderId}/approve`, { items });
   }
 
-  rejectOrder(orderId: number) {
-    return this.http.post(`${this.apiUrl}/admin/orders/${orderId}/reject`, {});
+  rejectOrder(orderId: number, reason?: string) {
+    return this.http.post(`${this.apiUrl}/admin/orders/${orderId}/reject`, { reason: reason || '' });
   }
 }

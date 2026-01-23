@@ -14,6 +14,7 @@ export interface CartItem {
   id?: number;
   sourceCartItemId?: number;
   cartItemId: number;
+  videoGameId: number;
   title?: string;
   price?: number;
   quantity: number;
@@ -50,7 +51,7 @@ export class CartService {
     return this.http.put(`${this.api}/update/${cartItemId}`, { quantity })
   }
 
-  removeItem(cartItemId: number) {
-    return this.http.delete(`${this.api}/remove/${cartItemId}`)
+  removeItem(gameId: number) {
+    return this.http.delete(`${this.api}/remove/${gameId}`)
   }
 }

@@ -1,18 +1,27 @@
-// src/app/user/orders/user-orders.component.ts
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { UserOrdersService, UserOrder } from 'src/app/core/services/user-orders.service';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewEncapsulation, signal } from '@angular/core';
+import { UserOrdersService, UserOrder, UserOrderItem } from 'src/app/core/services/user-orders.service';
+import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { ReviewService } from '../../../core/services/review.service';
 import { CommonModule } from '@angular/common';
 import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 import { FormsModule } from '@angular/forms';
+import { ReviewFormComponent } from '../../reviews/review-form';
+import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
   selector: 'app-user-orders',
-  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
+  imports: [CommonModule, FormsModule, SkeletonBoxComponent, ReviewFormComponent],
   templateUrl: './user-orders.html',
+  styleUrls: ['./user-orders.css'],
+  encapsulation: ViewEncapsulation.None,
 })
-export class UserOrdersComponent implements OnInit {
+export class UserOrdersComponent implements OnInit, OnDestroy {
   private userOrdersService = inject(UserOrdersService);
+  private themeService = inject(ThemeService);
+  private authService = inject(AuthService);
+  private reviewService = inject(ReviewService);
   private cdr = inject(ChangeDetectorRef);
 
   orders: UserOrder[] = [];
@@ -29,8 +38,23 @@ export class UserOrdersComponent implements OnInit {
   pageSize = 5; // Show 5 orders per page
   totalPages = 0;
 
+  // Review properties
+  reviewingItem: UserOrderItem | null = null;
+
+  isDarkMode = signal(false);
+  private themeSub?: Subscription;
+
   ngOnInit() {
+    this.isDarkMode.set(this.themeService.isDarkMode);
+    this.themeSub = this.themeService.isDarkMode$.subscribe(isDark => {
+      this.isDarkMode.set(isDark);
+    });
+
     this.loadOrders();
+  }
+
+  ngOnDestroy(): void {
+    this.themeSub?.unsubscribe();
   }
 
   loadOrders() {
@@ -131,5 +155,13 @@ export class UserOrdersComponent implements OnInit {
 
   onStatusFilterChange() {
     this.currentPage = 1; // Reset to first page when filtering
+  }
+
+  startReview(item: UserOrderItem) {
+    this.reviewingItem = item;
+  }
+
+  cancelReview() {
+    this.reviewingItem = null;
   }
 }

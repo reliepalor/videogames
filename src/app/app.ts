@@ -1,6 +1,7 @@
 import { Component, signal, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
+import { ThemeService } from './core/services/theme.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -10,26 +11,9 @@ import { isPlatformBrowser } from '@angular/common';
 export class App implements OnInit {
   protected readonly title = signal('VideoGame');
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private themeService: ThemeService) {}
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.loadTheme();
-    }
-  }
-
-  loadTheme(): void {
-    const saved = localStorage.getItem('theme');
-    const isDark = saved === 'dark';
-    const html = document.documentElement;
-    const body = document.body;
-
-    if (isDark) {
-      html.classList.add('dark');
-      body.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-      body.classList.remove('dark');
-    }
+    // ThemeService handles loading and applying theme
   }
 }

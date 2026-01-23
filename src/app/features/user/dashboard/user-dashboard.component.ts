@@ -1,6 +1,8 @@
-import { Component, HostListener, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, HostListener, OnInit, AfterViewInit, ViewChild, ElementRef, inject, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { RouterModule, Router} from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ThemeService } from '../../../core/services/theme.service';
+import { Subscription } from 'rxjs';
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
@@ -10,17 +12,34 @@ import { CommonModule } from '@angular/common';
     ::-webkit-scrollbar {
       display: none;
     }
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    * {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
   `]
 })
-export class UserDashboardComponent implements OnInit, AfterViewInit {
+export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('backgroundVideo', { static: true }) backgroundVideo!: ElementRef<HTMLVideoElement>;
 
-  slices = Array(12).fill(0);     // 12 layered “slices”
+  private themeService = inject(ThemeService);
+  private cdr = inject(ChangeDetectorRef);
+  private themeSubscription?: Subscription;
+
+  isDarkMode = false;
+  videoSrc = '/assets/videos/dark.mp4';
+
+  slices = Array(12).fill(0);     // 12 layered "slices"
   sliceTransforms: string[] = []; // generated transforms
 
   ngOnInit() {
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      isDark => {
+        this.isDarkMode = isDark;
+        this.videoSrc = isDark ? '/assets/videos/dark.mp4' : '/assets/videos/whitee.mp4';
+        this.cdr.markForCheck();
+      }
+    );
+
     this.generateSphereLayers();
     this.staggerIn();
   }
@@ -28,13 +47,30 @@ export class UserDashboardComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     // Ensure the video plays, handling browser autoplay policies
     const video = this.backgroundVideo.nativeElement;
-    video.play().catch(error => {
-      console.log('Autoplay blocked, video will play on user interaction');
-      // Optionally, add a click listener to play on first click
-      document.addEventListener('click', () => {
-        video.play();
-      }, { once: true });
+
+    // Wait for video to be ready
+    video.addEventListener('loadeddata', () => {
+      video.play().catch(error => {
+        console.log('Autoplay blocked, attempting to play on user interaction');
+        // Add a one-time click listener to play the video
+        const playOnClick = () => {
+          video.play().catch(err => console.log('Failed to play video:', err));
+          document.removeEventListener('click', playOnClick);
+        };
+        document.addEventListener('click', playOnClick, { once: true });
+      });
     });
+
+    // Fallback: try playing after a short delay
+    setTimeout(() => {
+      if (video.paused) {
+        video.play().catch(() => {});
+      }
+    }, 1000);
+  }
+
+  ngOnDestroy() {
+    this.themeSubscription?.unsubscribe();
   }
 
   // Creates the vertical stacked layers that form the sphere
@@ -50,24 +86,41 @@ export class UserDashboardComponent implements OnInit, AfterViewInit {
 
   // Fade in like Apple section animations
   staggerIn() {
-    setTimeout(() => document.getElementById('heroText')!.style.opacity = '1', 100);
-    setTimeout(() => document.getElementById('heroText')!.style.transform = 'translateY(0)', 100);
+    setTimeout(() => {
+      const heroText = document.getElementById('heroText');
+      if (heroText) {
+        heroText.style.opacity = '1';
+        heroText.style.transform = 'translateY(0)';
+      }
+    }, 100);
 
-    setTimeout(() => document.getElementById('sphereWrapper')!.style.opacity = '1', 400);
-    setTimeout(() => document.getElementById('sphereWrapper')!.style.transform = 'translateY(0)', 400);
+    setTimeout(() => {
+      const sphereWrapper = document.getElementById('sphereWrapper');
+      if (sphereWrapper) {
+        sphereWrapper.style.opacity = '1';
+        sphereWrapper.style.transform = 'translateY(0)';
+      }
+    }, 400);
 
-    setTimeout(() => document.getElementById('heroButtons')!.style.opacity = '1', 700);
-    setTimeout(() => document.getElementById('heroButtons')!.style.transform = 'translateY(0)', 700);
+    setTimeout(() => {
+      const heroButtons = document.getElementById('heroButtons');
+      if (heroButtons) {
+        heroButtons.style.opacity = '1';
+        heroButtons.style.transform = 'translateY(0)';
+      }
+    }, 700);
   }
 
   // Mouse-controlled rotation
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    const sphere = document.getElementById('sphere')!;
-    const x = (event.clientX / window.innerWidth - 0.5) * 30;
-    const y = (event.clientY / window.innerHeight - 0.5) * -30;
+    const sphere = document.getElementById('sphere');
+    if (sphere) {
+      const x = (event.clientX / window.innerWidth - 0.5) * 30;
+      const y = (event.clientY / window.innerHeight - 0.5) * -30;
 
-    sphere.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+      sphere.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+    }
   }
 
   togglePreview(video: HTMLVideoElement) {

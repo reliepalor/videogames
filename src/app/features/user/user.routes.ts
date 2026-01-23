@@ -22,9 +22,26 @@ export const userRoutes: Routes = [
   },
   {
     path: 'games',
-    loadComponent: () =>
-      import('./videogames/games-list')
-        .then(m => m.GamesListComponent)
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./videogames/games-list')
+            .then(m => m.GamesListComponent)
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./videogames/game-details/game-details.component')
+            .then(m => m.GameDetailsComponent)
+      },
+      {
+        path: ':id/reviews',
+        loadComponent: () =>
+          import('./videogames/game-details/game-details.component')
+            .then(m => m.GameDetailsComponent)
+      }
+    ]
   },
   {
     path: 'cart',

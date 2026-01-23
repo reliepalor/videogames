@@ -1,11 +1,23 @@
-import { Component, inject, OnInit, Output, EventEmitter, HostListener, ElementRef, Renderer2 } from '@angular/core';
+import {
+  Component,
+  inject,
+  OnInit,
+  OnDestroy,
+  Output,
+  EventEmitter,
+  HostListener,
+  ElementRef,
+  ChangeDetectorRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { Observable, of, Subscription } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
-import { User } from '../../../core/models/user.model';
-import { Observable, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { ThemeService } from '../../../core/services/theme.service';
+import { Profile } from '../../../core/models/UserProfile.model';
 
 @Component({
   selector: 'app-user-navbar',
@@ -13,79 +25,98 @@ import { catchError } from 'rxjs/operators';
   imports: [CommonModule, RouterModule],
   templateUrl: './user-navbar.component.html',
 })
-export class UserNavbarComponent implements OnInit {
+export class UserNavbarComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private userService = inject(UserService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
   private elementRef = inject(ElementRef);
-  private renderer = inject(Renderer2);
+  private cdr = inject(ChangeDetectorRef);
 
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
-  user$!: Observable<User | null>;
-  isDropdownOpen = false;
+  user$!: Observable<Profile | null>;
   isDarkMode = false;
 
+  /** desktop avatar dropdown */
+  isDropdownOpen = false;
+
+  /** mobile hamburger dropdown */
+  isMobileMenuOpen = false;
+
+  private themeSubscription?: Subscription;
+
+  // ---------------- INIT ----------------
   ngOnInit(): void {
-    this.loadTheme();
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
+      isDark => {
+        this.isDarkMode = isDark;
+        this.cdr.markForCheck();
+      }
+    );
 
     if (this.authService.isLoggedIn()) {
-      this.user$ = this.userService.getProfile().pipe(
-        catchError(() => of({ username: 'User', email: '' } as User))
+      this.user$ = this.userService.Profile.pipe(
+        catchError(() =>
+          of({
+            username: '',
+            email: '',
+            profilePicture: undefined,
+          } as Profile)
+        )
       );
     } else {
       this.user$ = of(null);
     }
   }
 
+  ngOnDestroy(): void {
+    this.themeSubscription?.unsubscribe();
+  }
+
+  // ---------------- THEME ----------------
   toggleTheme(): void {
-    this.isDarkMode = !this.isDarkMode;
-    localStorage.setItem('theme', this.isDarkMode ? 'dark' : 'light');
-    this.applyTheme();
+    this.themeService.toggleTheme();
   }
 
-  loadTheme(): void {
-    const saved = localStorage.getItem('theme');
-    this.isDarkMode = saved === 'dark';
-    this.applyTheme();
-  }
-
-  applyTheme(): void {
-    const html = document.documentElement;
-    const body = document.body;
-
-    if (this.isDarkMode) {
-      html.classList.add('dark');
-      body.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-      body.classList.remove('dark');
-    }
-  }
-
+  // ---------------- MENUS ----------------
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
-  closeDropdown(): void {
+  toggleMobileMenu(): void {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeAllMenus(): void {
     this.isDropdownOpen = false;
+    this.isMobileMenuOpen = false;
   }
 
-  toggleSidebar(): void {
-    // For user, perhaps no sidebar or different
-    this.sidebarToggled.emit(false);
-  }
-
+  // ---------------- AUTH ----------------
   logout(): void {
     this.authService.logout();
-    this.closeDropdown();
+    this.closeAllMenus();
     this.router.navigate(['/login']);
   }
 
+  // ---------------- HELPERS ----------------
+  getInitials(name?: string): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+
+  // ---------------- CLICK OUTSIDE ----------------
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     if (!this.elementRef.nativeElement.contains(event.target)) {
-      this.isDropdownOpen = false;
+      this.closeAllMenus();
     }
   }
 }

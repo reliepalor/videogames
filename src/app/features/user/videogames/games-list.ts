@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
 import { VideoGameService } from '../../../core/services/videogame.service'
 import { CartService } from '../../../core/services/cart.service'
+import { ThemeService } from '../../../core/services/theme.service'
 import { VideoGame } from '../../../core/models/videogame.model'
 import { SkeletonBoxComponent } from '../../../shared/skeleton/skeleton-box.component'
 import { environment } from 'src/environments/environment';
@@ -15,7 +16,10 @@ import {
   combineLatest,
   map,
   Subscription,
+  Subject,
+  of,
 } from 'rxjs'
+import { takeUntil, finalize, catchError } from 'rxjs/operators';
 
 @Component({
   standalone: true,
@@ -29,26 +33,23 @@ export class GamesListComponent implements OnInit, OnDestroy {
 
   private videoGameService = inject(VideoGameService)
   private cartService = inject(CartService)
+  private themeService = inject(ThemeService)
   private router = inject(Router)
   private ngZone = inject(NgZone)
   private cdr = inject(ChangeDetectorRef)
 
   viewMode: 'table' | 'card' = 'card'
+  isDarkMode = false
 
   private reload$ = new BehaviorSubject<void>(undefined)
 
-  games$: Observable<VideoGame[]> = combineLatest([
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd),
-      filter(() => this.router.url === '/games'),
-      startWith(null)
-    ),
-    this.reload$,
-  ]).pipe(
+  games$: Observable<VideoGame[]> = this.reload$.pipe(
+    startWith(null),
     switchMap(() => this.videoGameService.getAll())
   )
 
   private navigationSub?: Subscription;
+  private destroy$ = new Subject<void>();
 
   searchTerm$ = new BehaviorSubject<string>('')
 
@@ -97,6 +98,11 @@ export class GamesListComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.themeService.isDarkMode$.pipe(takeUntil(this.destroy$)).subscribe(isDark => {
+      this.isDarkMode = isDark;
+      this.cdr.detectChanges();
+    });
+
     const toastStr = localStorage.getItem('toast')
     if (toastStr) {
       const toast = JSON.parse(toastStr)
@@ -139,5 +145,7 @@ export class GamesListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.navigationSub?.unsubscribe();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

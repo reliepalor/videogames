@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, NgZone, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, NgZone, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartService, CartItem } from 'src/app/core/services/cart.service';
 import { OrderService } from 'src/app/core/services/order.service';
 import { VideoGameService } from 'src/app/core/services/videogame.service';
+import { ThemeService } from 'src/app/core/services/theme.service';
+import { Subscription } from 'rxjs';
 
 interface CartItemWithSelection extends CartItem {
   selected: boolean;
@@ -17,8 +19,9 @@ interface CartItemWithSelection extends CartItem {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './cart.html',
+  styleUrls: ['./cart.css'],
 })
-export class CartComponent implements OnInit {
+export class CartComponent implements OnInit, OnDestroy {
   cartItems: CartItemWithSelection[] = [];
   filteredItems: CartItemWithSelection[] = [];
 
@@ -27,6 +30,10 @@ export class CartComponent implements OnInit {
   loading = false;
   errorMsg = '';
   showSuccessModal = false;
+  showRemoveSuccessModal = false;
+
+  isDarkMode = signal(false);
+  private themeSub?: Subscription;
 
   private ngZone = inject(NgZone);
   private cdr = inject(ChangeDetectorRef);
@@ -35,26 +42,34 @@ export class CartComponent implements OnInit {
     private cartService: CartService,
     private orderService: OrderService,
     private videoGameService: VideoGameService,
-    private router: Router
+    private router: Router,
+    private themeService: ThemeService
   ) {}
 
   ngOnInit(): void {
+    this.isDarkMode.set(this.themeService.isDarkMode);
+    this.themeSub = this.themeService.isDarkMode$.subscribe(isDark => {
+      this.isDarkMode.set(isDark);
+    });
+
     this.loadCart();
 
     this.cartService.cart$.subscribe({
       next: cart => {
-        if (cart) {
-          this.videoGameService.getAll().subscribe({
-            next: games => {
-              const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
-              this.mapCartItems(cart.items, gameMap);
-            },
-            error: err => {
-              console.error('Failed to load games:', err);
-              this.mapCartItems(cart.items, new Map()); // Map without images
-            }
-          });
-        }
+        this.ngZone.run(() => {
+          if (cart) {
+            this.videoGameService.getAll().subscribe({
+              next: games => {
+                const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
+                this.mapCartItems(cart.items, gameMap);
+              },
+              error: err => {
+                console.error('Failed to load games:', err);
+                this.mapCartItems(cart.items, new Map()); // Map without images
+              }
+            });
+          }
+        });
       },
       error: err => {
         console.error('Cart subscription error:', err);
@@ -62,19 +77,25 @@ export class CartComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.themeSub?.unsubscribe();
+  }
+
   /* ================= LOAD CART ================= */
   loadCart(): void {
     this.cartService.getCart().subscribe({
       next: res => {
-        this.videoGameService.getAll().subscribe({
-          next: games => {
-            const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
-            this.mapCartItems(res.items, gameMap);
-          },
-          error: err => {
-            console.error('Failed to load games:', err);
-            this.mapCartItems(res.items, new Map()); // Map without images
-          }
+        this.ngZone.run(() => {
+          this.videoGameService.getAll().subscribe({
+            next: games => {
+              const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
+              this.mapCartItems(res.items, gameMap);
+            },
+            error: err => {
+              console.error('Failed to load games:', err);
+              this.mapCartItems(res.items, new Map()); // Map without images
+            }
+          });
         });
       },
       error: err => {
@@ -90,8 +111,9 @@ export class CartComponent implements OnInit {
       selected: false,
       subtotal: (i.price || 0) * i.quantity,
       imageUrl: gameMap.get(i.title || '') || '/assets/no-image.png'
-    }));
+    })).sort((a, b) => b.cartItemId - a.cartItemId);
     this.filteredItems = [...this.cartItems];
+    this.cdr.detectChanges();
   }
 
   /* ================= FILTER ================= */
@@ -126,8 +148,18 @@ export class CartComponent implements OnInit {
 
   /* ================= REMOVE ================= */
   removeItem(item: CartItemWithSelection): void {
-    this.cartService.removeItem(item.cartItemId).subscribe({
-      next: () => this.loadCart(),
+    this.cartService.removeItem(item.videoGameId).subscribe({
+      next: () => {
+        this.ngZone.run(() => {
+          this.showRemoveSuccessModal = true;
+          this.cdr.detectChanges();
+          setTimeout(() => this.ngZone.run(() => {
+            this.showRemoveSuccessModal = false;
+            this.cdr.detectChanges();
+          }), 2000);
+          this.loadCart();
+        });
+      },
       error: err => {
         console.error('Failed to remove item:', err);
         this.errorMsg = 'Failed to remove item.';

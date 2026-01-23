@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http'
+                                                                                   import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { environment } from 'src/environments/environment'
 import { Observable, map, switchMap } from 'rxjs'
@@ -13,6 +13,7 @@ export interface OrderItem {
   subtotal?: number;
   productKey?: string;
   imageUrl?: string;
+  videoGameId?: number;
 }
 
 export interface Order {
@@ -40,13 +41,17 @@ export class OrderService {
       switchMap(orders => {
         return this.videoGameService.getAll().pipe(
           map(games => {
-            const gameMap = new Map(games.map(g => [g.title, g.imageUrl]));
+            const gameMap = new Map(games.map(g => [g.title, { imageUrl: g.imageUrl, id: g.id }]));
             return orders.map(order => ({
               ...order,
-              items: order.items.map(item => ({
-                ...item,
-                imageUrl: gameMap.get(item.gameTitle) || '/assets/no-image.png'
-              }))
+              items: order.items.map(item => {
+                const gameData = gameMap.get(item.gameTitle);
+                return {
+                  ...item,
+                  imageUrl: gameData?.imageUrl || '/assets/no-image.png',
+                  videoGameId: gameData?.id
+                };
+              })
             }));
           })
         );

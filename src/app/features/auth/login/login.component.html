@@ -8,13 +8,16 @@
       <!-- Logo / Icon -->
       <div class="flex justify-center mb-6">
         <div class="w-10 h-10 rounded-full border-2 border-purple-400 flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg"
-               class="w-5 h-5 text-purple-400"
-               fill="none"
-               viewBox="0 0 24 24"
-               stroke="currentColor">
-            <path stroke-linecap="round" stroke-width="2"
-                  d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+          <svg 
+            class="w-7 h-7 text-purple-600 flex-shrink-0"
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M6 12h2m4-4v2m0 4v2m4-4h2M7 17l2-2h6l2 2M5 7h14a2 2 0 0 1 2 2v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V9a2 2 0 0 1 2-2z"
+            />
           </svg>
         </div>
       </div>
@@ -24,8 +27,21 @@
         Welcome back
       </h2>
 
+      <button
+        type="button"
+        (click)="loginWithGoogle()"
+        [disabled]="isLoading"
+        class="w-full flex items-center justify-center gap-3
+              border border-gray-300 rounded-full py-3
+              text-sm font-medium text-gray-800
+              hover:bg-gray-50 transition cursor-pointer"
+      >
+        <img src="https://www.svgrepo.com/show/475656/google-color.svg"
+            class="w-5 h-5" />
+        Continue with Google
+      </button>
       <!-- Divider -->
-      <div class="my-6 h-10 rounded-full bg-gray-100"></div>
+      <div class="my-6 h-[1px] rounded-full bg-gray-300"></div>
 
       <p class="text-center text-sm text-gray-400 mb-4">or</p>
 
@@ -62,6 +78,8 @@
         <p *ngIf="errorMessage" class="text-sm text-red-600 text-center">
           {{ errorMessage }}
         </p>
+        
+
 
         <!-- BUTTON -->
         <button
@@ -70,10 +88,12 @@
           class="w-full rounded-full bg-gradient-to-r from-[#0f1027] to-[#191a3a]
                  text-white py-3 text-sm font-medium
                  hover:opacity-90 transition
-                 disabled:opacity-50"
+                 disabled:opacity-50 cursor-pointer"
         >
           {{ isLoading ? 'Signing in…' : 'Continue' }}
         </button>
+
+        
 
       </form>
 

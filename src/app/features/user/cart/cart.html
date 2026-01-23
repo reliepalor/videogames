@@ -1,79 +1,95 @@
-<style>
-  @layer utilities {
-    @keyframes fade-in {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .animate-fade-in {
-      animation: fade-in 0.3s ease-out;
-    }
-  }
-</style>
-
-<div class="max-w-6xl mx-auto p-6 animate-fade">
+<div class="max-w-6xl mx-auto px-6 py-10 mt-10 transition-colors"
+      [ngClass]="isDarkMode() ? 'text-gray-100' : 'bg-white text-gray-900'">
 
   <!-- HEADER -->
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-semibold">Shopping Cart</h1>
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-semibold tracking-tight"
+         [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+      Shopping Cart
+    </h1>
 
     <input
       type="text"
       [(ngModel)]="search"
       (input)="filterItems()"
-      placeholder="Search items..."
-      class="px-4 py-2 rounded-xl border w-64"
+      placeholder="Search"
+      class="w-64 px-4 py-2.5 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
+      [ngClass]="isDarkMode() ? 'border-white/10 bg-[#121216] text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400'"
     />
   </div>
 
-  <!-- Checkout Error -->
-  <div *ngIf="errorMsg" class="px-4 py-3 mb-4 rounded-xl bg-red-100 text-red-700 font-medium">
+  <!-- ERROR -->
+  <div *ngIf="errorMsg"
+       class="mb-6 px-5 py-3 rounded-xl text-sm font-medium"
+       [ngClass]="isDarkMode() ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-600'">
     {{ errorMsg }}
   </div>
 
-  <!-- CART LIST -->
+  <!-- CART CONTENT -->
   <div *ngIf="filteredItems.length; else empty">
 
     <!-- SELECT ALL -->
-    <div class="flex items-center gap-3 mb-4">
-      <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()" />
-      <span class="text-sm text-gray-600">Select all</span>
+    <div class="flex items-center gap-3 mb-6">
+      <input
+        type="checkbox"
+        class="ios-checkbox cursor-pointer"
+        [ngClass]="isDarkMode() ? 'border-white/20' : 'border-gray-400'"
+        [(ngModel)]="selectAll"
+        (change)="toggleSelectAll()"
+      />
+      <span class="text-sm"
+            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+        Select all items
+      </span>
     </div>
 
     <!-- ITEMS -->
     <div class="space-y-4">
       <div
         *ngFor="let item of filteredItems; trackBy: trackByFn"
-        class="flex items-center justify-between bg-white rounded-2xl p-5 shadow-sm border"
+        class="flex items-center justify-between rounded-2xl px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+        [ngClass]="isDarkMode() ? 'bg-[#121216] border-white/10 shadow-none' : 'bg-white border-gray-200'"
       >
-        <div class="flex items-center gap-4">
-          <input type="checkbox" [(ngModel)]="item.selected" (change)="toggleItem()" />
 
-          <img [src]="item.imageUrl" alt="{{ item.title }}" class="w-16 h-16 object-cover rounded" />
+        <!-- LEFT -->
+        <div class="flex items-center gap-5">
+          <input
+            type="checkbox"
+            class="ios-checkbox cursor-pointer"
+            [ngClass]="isDarkMode() ? 'border-white/20' : 'border-gray-400'"
+            [(ngModel)]="item.selected"
+            (change)="toggleItem()"
+          />
+
+          <img
+            [src]="item.imageUrl"
+            class="w-14 h-14 rounded-xl object-cover"
+            [ngClass]="isDarkMode() ? 'bg-black' : 'bg-gray-100'"
+          />
 
           <div>
-            <h3 class="font-medium text-lg">{{ item.title }}</h3>
-            <p class="text-sm text-gray-500">₱{{ item.price | number:'1.2-2' }}</p>
+            <h3 class="text-sm font-medium"
+                [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+              {{ item.title }}
+            </h3>
+            <p class="text-xs"
+               [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+              ₱{{ item.price | number:'1.2-2' }}
+            </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-4">
-          <!-- QTY 
-          <input
-            type="number"
-            min="1"
-            [(ngModel)]="item.quantity"
-            (change)="updateQuantity(item, item.quantity)"
-            class="w-20 px-3 py-1 border rounded-lg"
-          />-->
-
-          <span class="font-semibold w-24 text-right">
+        <!-- RIGHT -->
+        <div class="flex items-center gap-6">
+          <span class="text-sm font-semibold w-24 text-right"
+                [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
             ₱{{ item.subtotal | number:'1.2-2' }}
           </span>
 
-          <!-- DELETE -->
           <button
             (click)="removeItem(item)"
-            class="text-red-500 hover:text-red-700 text-sm"
+            class="text-xs transition hover:text-red-500"
+            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
           >
             Remove
           </button>
@@ -82,16 +98,18 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="mt-8 flex justify-between items-center border-t pt-6">
-      <div class="text-xl font-semibold">
+    <div class="mt-10 flex items-center justify-between border-t pt-6"
+         [ngClass]="isDarkMode() ? 'border-white/10' : 'border-gray-200'">
+      <div class="text-xl font-semibold"
+           [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
         Total: ₱{{ total | number:'1.2-2' }}
       </div>
 
       <button
         (click)="checkout()"
         [disabled]="!total || loading"
-        class="px-8 py-3 bg-violet-900 text-white cursor-pointer
-               disabled:opacity-40 hover:bg-purple-950 transition"
+        class="px-8 py-3 rounded-full text-white text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
+        [ngClass]="isDarkMode() ? 'bg-violet-500 hover:bg-violet-400' : 'bg-violet-600 hover:bg-violet-700'"
       >
         Checkout
       </button>
@@ -101,17 +119,46 @@
 
   <!-- EMPTY -->
   <ng-template #empty>
-    <div class="text-center text-gray-500 py-20">
-      Your cart is empty 🛒
+    <div class="py-24 text-center text-sm"
+         [ngClass]="isDarkMode() ? 'text-gray-500' : 'text-gray-400'">
+      Your cart is empty
     </div>
   </ng-template>
 
   <!-- SUCCESS MODAL -->
-  <div *ngIf="showSuccessModal" class="fixed inset-0 backdrop-blur-md bg-opacity-20 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg p-6 max-w-sm mx-4 text-center shadow-lg animate-fade-in">
-      <div class="text-green-500 text-4xl mb-4">✓</div>
-      <h2 class="text-xl font-semibold mb-2">Checkout Successful!</h2>
-      <p class="text-gray-600">Your order has been placed successfully.</p>
+  <div *ngIf="showSuccessModal"
+       class="fixed inset-0 bg-black/30 backdrop-blur-sm
+              flex items-center justify-center z-50">
+    <div class="rounded-2xl p-8 w-80 text-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] animate-fade-in"
+         [ngClass]="isDarkMode() ? 'bg-[#121216]' : 'bg-white'">
+      <div class="text-violet-600 dark:text-violet-400 text-4xl mb-4">✓</div>
+      <h2 class="text-lg font-semibold mb-1"
+          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+        Checkout Complete
+      </h2>
+      <p class="text-sm"
+         [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+        Your order was placed successfully.
+      </p>
     </div>
   </div>
+
+  <!-- REMOVE SUCCESS MODAL -->
+  <div *ngIf="showRemoveSuccessModal"
+       class="fixed inset-0 bg-black/30 backdrop-blur-sm
+              flex items-center justify-center z-50">
+    <div class="rounded-2xl p-6 w-72 text-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] animate-fade-in"
+         [ngClass]="isDarkMode() ? 'bg-[#121216]' : 'bg-white'">
+      <div class="text-green-600 dark:text-green-400 text-3xl mb-3">✓</div>
+      <h2 class="text-lg font-semibold mb-1"
+          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+        Item Removed
+      </h2>
+      <p class="text-sm"
+         [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+        Cart item removed successfully.
+      </p>
+    </div>
+  </div>
+
 </div>

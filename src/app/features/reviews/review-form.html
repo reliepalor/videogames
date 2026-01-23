@@ -1,0 +1,41 @@
+<div class="mt-10 bg-white border border-gray-200 rounded-xl p-6">
+
+  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+    Write a Review
+  </h3>
+
+  <div class="mb-4">
+    <label class="text-sm text-gray-600">Rating</label>
+    <div class="mt-1 flex gap-1">
+      <button
+        *ngFor="let star of [1,2,3,4,5]"
+        (click)="rating = star"
+        class="text-2xl transition"
+        [class.text-purple-400]="star <= rating"
+        [class.text-gray-300]="star > rating">
+        ★
+      </button>
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <label class="text-sm text-gray-600">Comment</label>
+    <textarea
+      [(ngModel)]="comment"
+      rows="4"
+      class="text-black mt-1 w-full border rounded-lg px-3 py-2"
+      placeholder="Share your experience..."></textarea>
+  </div>
+
+  <button
+    (click)="submit()"
+    [disabled]="submitting"
+    class="bg-purple-600 text-white px-5 py-2 rounded-lg
+           hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+    {{ submitting ? 'Submitting...' : 'Submit Review' }}
+  </button>
+
+  <p *ngIf="success" class="text-green-600 text-sm mt-3">
+    {{ success }}
+  </p>
+</div>

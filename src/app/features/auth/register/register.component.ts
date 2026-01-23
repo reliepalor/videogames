@@ -1,9 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { ToastrService } from 'ngx-toastr';
+import { signInWithPopup } from 'firebase/auth';
+import { firebaseAuth, googleProvider } from '../../../core/firebase/firebase';
 
 import { AuthService, RegisterRequest } from '../../../core/services/auth.service';
 
@@ -19,6 +21,7 @@ export class RegisterComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
+  private cdr = inject(ChangeDetectorRef);
 
   isLoading = false;
 
@@ -57,17 +60,47 @@ export class RegisterComponent {
       });
   }
 
+  loginWithGoogle(): void {
+    this.isLoading = true;
+    
+    signInWithPopup(firebaseAuth, googleProvider)
+      .then((result) => {
+        return result.user.getIdToken();
+      })
+      .then((idToken) => {
+        this.authService.loginWithGoogle(idToken).subscribe({
+          next: () => {
+            this.toastr.success('Signed in with Google!', 'Success');
+            const redirect = this.authService.getRedirectUrlAfterLogin();
+            this.isLoading = false;
+            this.router.navigate([redirect]);
+          },
+          error: (err) => {
+            console.error('Google sign-in error:', err);
+            this.toastr.error('Google sign-in failed', 'Error');
+            this.isLoading = false;
+          }
+        });
+      })
+      .catch((error) => {
+        console.error('Firebase sign-in error:', error);
+        this.toastr.error('Google sign-in failed', 'Error');
+        this.isLoading = false;
+      });
+  }
+
   private handleError(err: any): void {
     const status = err?.status;
 
     if (status === 409) {
       this.toastr.error('Email already registered', 'Already Exists');
-    } 
+    }
     else if (status === 400) {
       this.toastr.error('Invalid registration data', 'Invalid');
-    } 
+    }
     else {
       this.toastr.error('Registration failed. Try again.', 'Error');
     }
+
   }
 }
