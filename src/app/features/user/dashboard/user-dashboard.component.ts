@@ -35,7 +35,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     this.themeSubscription = this.themeService.isDarkMode$.subscribe(
       isDark => {
         this.isDarkMode = isDark;
-        this.videoSrc = isDark ? '/assets/videos/dark.mp4' : '/assets/videos/whitee.mp4';
+        this.videoSrc = '/assets/videos/dark.mp4';
         this.cdr.markForCheck();
       }
     );

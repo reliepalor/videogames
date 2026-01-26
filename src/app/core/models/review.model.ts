@@ -3,8 +3,7 @@ export interface Review{
     rating: number;
     comment: string;
     createdAt: string;
-    Username: string;
-    Email: string;
+    username: string;
 }
 export interface GameReviewsResponse{
     videoGameId: number;

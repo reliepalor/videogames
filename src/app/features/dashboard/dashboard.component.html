@@ -1,40 +1,90 @@
-<div class="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-6">
+<div
+  class="max-w-7xl mx-auto px-6 py-14
+         grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-  <!-- LEFT SECTION (Charts + Table) -->
-  <div class="lg:col-span-9 space-y-6">
+  <!-- LEFT SECTION -->
+  <div class="lg:col-span-9 space-y-10">
 
-    <!-- TOP CARDS -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+    <!-- METRIC CARDS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-        <p class="text-xs text-gray-500">Total Revenue</p>
-        <p class="mt-2 text-xl text-purple-700">
+      <!-- Total Revenue -->
+      <div
+        class="bg-white border border-gray-200
+               rounded-2xl p-6
+               transition-all duration-300
+               hover:shadow-md">
+
+        <p class="text-xs text-gray-500 uppercase tracking-wide">
+          Total Revenue
+        </p>
+
+        <p class="mt-3 text-2xl font-semibold text-purple-600">
           ₱{{ totalRevenue$ | async | number:'1.2-2' }}
+        </p>
+
+        <p class="mt-2 text-sm text-gray-500">
+          Combined earnings from all completed sales.
         </p>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-        <p class="text-xs text-gray-500">Total Items</p>
-        <p class="mt-2 text-xl text-gray-800">{{ totalNumbers$ | async }}</p>
+      <!-- Total Items -->
+      <div
+        class="bg-white border border-gray-200
+               rounded-2xl p-6
+               transition-all duration-300
+               hover:shadow-md">
+
+        <p class="text-xs text-gray-500 uppercase tracking-wide">
+          Total Items
+        </p>
+
+        <p class="mt-3 text-2xl font-semibold text-gray-900">
+          {{ totalNumbers$ | async }}
+        </p>
+
+        <p class="mt-2 text-sm text-gray-500">
+          Number of individual orders placed.
+        </p>
       </div>
 
-      <div class="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
-        <p class="text-xs text-gray-500">Games Sold</p>
-        <p class="mt-2 text-xl text-gray-800">{{ totalQuantity$ | async }}</p>
+      <!-- Games Sold -->
+      <div
+        class="bg-white border border-gray-200
+               rounded-2xl p-6
+               transition-all duration-300
+               hover:shadow-md">
+
+        <p class="text-xs text-gray-500 uppercase tracking-wide">
+          Games Sold
+        </p>
+
+        <p class="mt-3 text-2xl font-semibold text-gray-900">
+          {{ totalQuantity$ | async }}
+        </p>
+
+        <p class="mt-2 text-sm text-gray-500">
+          Total game units sold across all orders.
+        </p>
       </div>
 
     </div>
 
     <!-- LINE CHART -->
-    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-      <div class="flex items-center justify-between mb-4">
-        <p class="text-xs text-gray-500">Sales Statistics</p>
-        <button class="px-3 py-1 text-xs bg-gray-100 rounded-lg text-gray-600 hover:bg-gray-200 transition">
-          This Year
-        </button>
+    <div
+      class="bg-white border border-gray-200
+             rounded-3xl p-8">
+
+      <div class="mb-6">
+        <p class="text-sm font-medium text-gray-800">
+          Sales Statistics
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          Track your revenue growth over time.
+        </p>
       </div>
 
-      <div class="relative h-[300px]">
+      <div class="relative h-[320px]">
         <canvas
           *ngIf="lineChartData$ | async as lineData"
           baseChart
@@ -46,47 +96,81 @@
     </div>
 
     <!-- SALES TABLE -->
-    <div class="relative z-0 mt-10">
+    <div class="relative">
 
       <div
         *ngIf="sales$ | async as sales; else loading"
-        class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden relative
-              -mr-40 lg:-mr-52 xl:-mr-64 z-0">
+        class="bg-white border border-gray-200
+               rounded-3xl shadow-sm overflow-hidden
+               -mr-40 lg:-mr-52 xl:-mr-64">
+
+        <div class="px-6 py-4 border-b border-gray-200">
+          <p class="text-sm font-medium text-gray-800">
+            Sales Breakdown by Game
+          </p>
+          <p class="text-sm text-gray-500 mt-1">
+            Detailed summary of items sold and revenue per game.
+          </p>
+        </div>
 
         <table class="w-full text-sm">
           <thead class="bg-gray-50 text-gray-500">
             <tr>
-              <th class="px-6 py-3 text-left">Game</th>
-              <th class="px-6 py-3 text-right">Items</th>
-              <th class="px-6 py-3 text-right">Quantity</th>
-              <th class="px-6 py-3 text-right">Revenue</th>
+              <th class="px-6 py-4 text-left font-medium">Game</th>
+              <th class="px-6 py-4 text-right font-medium">Orders</th>
+              <th class="px-6 py-4 text-right font-medium">Units Sold</th>
+              <th class="px-6 py-4 text-right font-medium">Revenue</th>
             </tr>
           </thead>
 
           <tbody>
-            <tr *ngFor="let g of sales" class="border-t border-gray-200 hover:bg-purple-50 transition">
-              <td class="px-6 py-3 text-gray-700">{{ g.title }}</td>
-              <td class="px-6 py-3 text-right">{{ g.totalNumbers }}</td>
-              <td class="px-6 py-3 text-right">{{ g.totalQuantity }}</td>
-              <td class="px-6 py-3 text-right text-purple-600">₱{{ g.totalRevenue | number:'1.2-2' }}</td>
+            <tr
+              *ngFor="let g of sales"
+              class="border-t border-gray-200
+                     hover:bg-purple-50 transition">
+
+              <td class="px-6 py-4 text-gray-800">
+                {{ g.title }}
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                {{ g.totalNumbers }}
+              </td>
+
+              <td class="px-6 py-4 text-right">
+                {{ g.totalQuantity }}
+              </td>
+
+              <td class="px-6 py-4 text-right font-medium text-purple-600">
+                ₱{{ g.totalRevenue | number:'1.2-2' }}
+              </td>
             </tr>
           </tbody>
         </table>
 
       </div>
-
     </div>
 
   </div>
 
-  <!-- RIGHT SIDEBAR ALWAYS ON TOP -->
-  <div class="lg:col-span-3 self-start relative z-50">
-    <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full">
+  <!-- RIGHT SIDEBAR (NOT STICKY) -->
+  <div class="lg:col-span-3 self-start">
 
-      <p class="text-xs text-gray-500 mb-4">Recent Month</p>
+    <div
+      class="bg-white border border-gray-200
+             rounded-3xl p-6 shadow-sm">
 
-      <!-- Doughnut Chart -->
-      <div class="relative w-48 h-48 mx-auto">
+      <div class="mb-5">
+        <p class="text-sm font-medium text-gray-800">
+          Recent Month Distribution
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          Percentage share of sales per game for the current month.
+        </p>
+      </div>
+
+      <!-- DOUGHNUT CHART -->
+      <div class="relative w-52 h-52 mx-auto">
         <canvas
           *ngIf="donutChartData$ | async as donutData"
           baseChart
@@ -94,30 +178,42 @@
           [options]="donutChartOptions"
           [type]="donutChartType">
         </canvas>
-        <div class="absolute inset-0 flex items-center justify-center text-gray-800 text-lg">
+
+        <div
+          class="absolute inset-0 flex items-center justify-center
+                 text-lg font-semibold text-gray-900">
           {{ donutCenterText$ | async }}
         </div>
       </div>
 
-      <!-- Stats List -->
+      <!-- LEGEND -->
       <div class="mt-8 space-y-4">
+        <div
+          *ngFor="let game of displayedGames$ | async; let i = index"
+          class="flex items-center justify-between text-sm">
 
-        <div *ngFor="let game of displayedGames$ | async; let i = index"
-            class="flex items-center justify-between text-sm">
-          <div class="flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full" [style.background-color]="getColor(i)"></span>
-            <span class="text-gray-600">{{ game.title }}</span>
+          <div class="flex items-center gap-3">
+            <span
+              class="w-3 h-3 rounded-full"
+              [style.background-color]="getColor(i)">
+            </span>
+
+            <span class="text-gray-600">
+              {{ game.title }}
+            </span>
           </div>
-          <span class="text-gray-800">{{ game.percent }}%</span>
+
+          <span class="font-medium text-gray-800">
+            {{ game.percent }}%
+          </span>
         </div>
 
-        <!-- View More / View Less -->
-        <button *ngIf="((allGamesWithPercent$ | async) || []).length > 5"
-                (click)="toggleShowAll()"
-                class="text-xs text-purple-600 hover:text-purple-800">
+        <button
+          *ngIf="((allGamesWithPercent$ | async) || []).length > 5"
+          (click)="toggleShowAll()"
+          class="text-xs font-medium text-purple-600 hover:text-purple-800 transition">
           {{ (showAll$ | async) ? 'View Less' : 'View More' }}
         </button>
-
       </div>
 
     </div>
@@ -125,28 +221,22 @@
 
 </div>
 
+<!-- LOADING STATE -->
 <ng-template #loading>
-
-  <!-- Skeleton for sales table -->
-  <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden p-6">
+  <div
+    class="bg-white border border-gray-200
+           rounded-3xl p-6">
 
     <div class="space-y-4">
-
-      <!-- Repeat skeleton rows -->
       <div *ngFor="let i of [1,2,3,4,5]">
         <div class="grid grid-cols-4 gap-4">
-
           <app-skeleton-box width="100%" height="20px"></app-skeleton-box>
           <app-skeleton-box width="50%" height="20px"></app-skeleton-box>
           <app-skeleton-box width="40%" height="20px"></app-skeleton-box>
           <app-skeleton-box width="60%" height="20px"></app-skeleton-box>
-
         </div>
       </div>
-
     </div>
 
   </div>
-
 </ng-template>
-

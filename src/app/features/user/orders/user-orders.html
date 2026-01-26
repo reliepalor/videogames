@@ -193,7 +193,7 @@
            [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
         <h3 class="text-lg font-semibold mb-4"
             [ngClass]="isDarkMode() ? 'text-white' : 'text-gray-900'">Review {{ reviewingItem.gameTitle }}</h3>
-        <app-review-form *ngIf="reviewingItem.videoGameId" [videoGameId]="reviewingItem.videoGameId" (reviewSubmitted)="cancelReview()"></app-review-form>
+        <app-review-form *ngIf="reviewingItem.videoGameId" [videoGameId]="reviewingItem.videoGameId" (reviewSubmitted)="onReviewSubmitted()"></app-review-form>
         <button (click)="cancelReview()" class="mt-4 px-4 py-2 rounded-lg transition text-white"
                 [ngClass]="isDarkMode() ? 'bg-gray-600 hover:bg-gray-700' : 'bg-gray-500 hover:bg-gray-600'">Cancel</button>
       </div>
@@ -228,5 +228,23 @@
     </div>
 
   </ng-template>
+
+  <!-- ================= SUCCESS TOAST ================= -->
+  <div
+    *ngIf="showSuccessModal"
+    class="fixed top-15 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+  >
+    <div class="bg-white dark:bg-black shadow-xl border border-gray-300 dark:border-purple-500/40 rounded-2xl px-6 py-3 backdrop-blur-xl min-w-[260px]"
+         [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
+
+      <p class="text-gray-900 dark:text-white font-semibold text-sm flex items-center justify-center gap-2">
+        <svg class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        {{ successMessage }}
+      </p>
+
+    </div>
+  </div>
 
 </div>

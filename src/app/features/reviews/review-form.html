@@ -1,41 +1,103 @@
-<div class="mt-10 bg-white border border-gray-200 rounded-xl p-6">
+<div
+  class="mt-12 backdrop-blur rounded-2xl p-7 transition-all duration-300"
+  [ngClass]="isDarkMode ? 'bg-gray-800/70 border-gray-700/60' : 'bg-white/80 border-gray-200/60'">
 
-  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+  <h3
+    class="text-lg font-semibold tracking-tight mb-6"
+    [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
     Write a Review
   </h3>
 
-  <div class="mb-4">
-    <label class="text-sm text-gray-600">Rating</label>
-    <div class="mt-1 flex gap-1">
+  <!-- Rating -->
+  <div class="mb-5">
+    <label class="text-sm"
+      [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-600'">
+      Rating
+    </label>
+
+    <div class="mt-2 flex gap-1">
       <button
         *ngFor="let star of [1,2,3,4,5]"
         (click)="rating = star"
-        class="text-2xl transition"
-        [class.text-purple-400]="star <= rating"
+        class="text-3xl transition-all duration-200 ease-out
+               hover:scale-110 focus:outline-none"
+        [class.text-purple-500]="star <= rating"
         [class.text-gray-300]="star > rating">
         ★
       </button>
     </div>
+  
+  
   </div>
+  <!-- Comment -->
+  <div class="mb-5">
+    <label class="text-sm"
+      [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-600'">
+      Comment
+    </label>
 
-  <div class="mb-4">
-    <label class="text-sm text-gray-600">Comment</label>
     <textarea
       [(ngModel)]="comment"
       rows="4"
-      class="text-black mt-1 w-full border rounded-lg px-3 py-2"
+      class="mt-2 w-full rounded-xl px-4 py-3
+             text-sm focus:ring-2 focus:ring-purple-500 focus:outline-none
+             transition-all duration-200"
+      [ngClass]="isDarkMode ? 'text-white bg-gray-700 border-gray-600/60' : 'text-gray-900 bg-white border-gray-400'"
       placeholder="Share your experience..."></textarea>
   </div>
 
+  <!-- Submit -->
   <button
     (click)="submit()"
     [disabled]="submitting"
-    class="bg-purple-600 text-white px-5 py-2 rounded-lg
-           hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
-    {{ submitting ? 'Submitting...' : 'Submit Review' }}
+    class="inline-flex items-center justify-center
+           bg-purple-600 text-white
+           px-6 py-2.5 rounded-xl
+           text-sm font-medium
+           transition-all duration-300 ease-out
+           hover:bg-purple-700 hover:shadow-lg
+           disabled:opacity-50 disabled:cursor-not-allowed">
+
+    <span *ngIf="!submitting">Submit Review</span>
+    <span *ngIf="submitting" class="animate-pulse">Submitting…</span>
   </button>
 
-  <p *ngIf="success" class="text-green-600 text-sm mt-3">
-    {{ success }}
-  </p>
+</div>
+
+<!-- ================= SUCCESS TOAST ================= -->
+<div
+  *ngIf="showSuccessModal"
+  class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+>
+  <div class="bg-white dark:bg-black shadow-xl border border-gray-300 dark:border-purple-500/40 rounded-2xl px-6 py-3 backdrop-blur-xl min-w-[260px]"
+       [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
+
+    <p class="text-gray-900 dark:text-white font-semibold text-sm flex items-center justify-center gap-2">
+      <svg class="w-5 h-5 text-green-500 dark:text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      {{ successMessage }}
+    </p>
+
+  </div>
+</div>
+
+<!-- Error Modal -->
+<div *ngIf="error" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" (click)="closeErrorModal()">
+  <div class="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm mx-4 shadow-2xl animate-scale-in" (click)="$event.stopPropagation()">
+    <div class="text-center">
+      <div class="text-red-500 mb-4 animate-pulse">
+        <svg class="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold mb-2"
+        [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">Error</h3>
+      <p class="text-sm mb-4"
+        [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-600'">{{ error }}</p>
+      <button (click)="closeErrorModal()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition transform hover:scale-105">
+        Close
+      </button>
+    </div>
+  </div>
 </div>

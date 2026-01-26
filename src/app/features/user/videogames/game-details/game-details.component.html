@@ -7,9 +7,11 @@
   </div>
 
   <!-- GAME DETAILS -->
-  <div *ngIf="!loading && game" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+  <div *ngIf="!loading && game" class="mt-10 rounded-xl shadow-lg overflow-hidden"
+    [ngClass]="isDarkMode ? 'bg-gray-800' : 'bg-white'">
     <!-- IMAGE -->
-    <div class="h-64 md:h-80 bg-gray-200 dark:bg-gray-700 relative">
+    <div class="h-64 md:h-80 relative"
+      [ngClass]="isDarkMode ? 'bg-gray-700' : 'bg-gray-200'">
       <img *ngIf="game.imageUrl" [src]="game.imageUrl" class="w-full h-full object-cover" alt="{{ game.title }}" />
       <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
         {{ game.platform }}
@@ -18,19 +20,47 @@
 
     <!-- CONTENT -->
     <div class="p-6 md:p-8">
-      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ game.title }}</h1>
-      <p class="text-gray-600 dark:text-gray-300 mb-4">Experience immersive gameplay and stunning graphics.</p>
+      <h1 class="text-3xl font-bold mb-2"
+        [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">{{ game.title }}</h1>
+      <p class="mb-4"
+        [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-600'">Experience immersive gameplay and stunning graphics.</p>
 
       <div class="flex items-center justify-between mb-6">
         <span class="text-2xl font-bold text-purple-600">₱{{ game.price | number:'1.2-2' }}</span>
-        <button class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition">
-          Add to Cart
-        </button>
+        <div class="flex gap-2">
+          <button (click)="addToCart(game)" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition cursor-pointer">
+            Add to Cart
+          </button>
+          <button (click)="buyNow(game)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
+            Buy Now
+          </button>
+        </div>
+      </div>
+
+      <!-- ================= SUCCESS TOAST ================= -->
+      <div
+        *ngIf="showSuccessModal"
+        class="fixed top-15 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+      >
+        <div class="bg-white dark:bg-black shadow-xl border border-gray-300 dark:border-purple-500/40 rounded-2xl px-6 py-3 backdrop-blur-xl min-w-[260px]"
+             [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
+
+          <p class="text-gray-900 dark:text-white font-semibold text-sm flex items-center justify-center gap-2">
+            <svg class="w-5 h-5 text-blue-500 dark:text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            {{ successMessage }}
+          </p>
+
+        </div>
       </div>
 
       <!-- REVIEWS SECTION -->
       <div *ngIf="showReviews">
-        <app-game-reviews [videoGameId]="gameId"></app-game-reviews>
+        <app-game-reviews 
+          [videoGameId]="gameId"
+          #reviews>
+        </app-game-reviews>
       </div>
 
       <button *ngIf="!showReviews" (click)="showReviews = true" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition mt-4">
@@ -38,7 +68,11 @@
       </button>
 
       <!-- REVIEW FORM (IF LOGGED IN AND HAS APPROVED PURCHASE) -->
-      <app-review-form *ngIf="isLoggedIn && hasApprovedPurchase" [videoGameId]="gameId"></app-review-form>
+      <app-review-form
+        *ngIf="isLoggedIn && hasApprovedPurchase"
+        [videoGameId]="gameId"
+        (reviewSubmitted) = "reviews?.load()">
+      </app-review-form>
     </div>
   </div>
 

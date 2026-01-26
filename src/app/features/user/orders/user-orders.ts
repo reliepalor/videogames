@@ -41,6 +41,11 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   // Review properties
   reviewingItem: UserOrderItem | null = null;
 
+  showSuccessModal = false;
+  successMessage = '';
+  successTimeout?: any;
+  isFadingOut = false;
+
   isDarkMode = signal(false);
   private themeSub?: Subscription;
 
@@ -161,7 +166,35 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
     this.reviewingItem = item;
   }
 
+  onReviewSubmitted() {
+    this.showSuccessMessage('Review submitted successfully!');
+    this.cancelReview();
+  }
+
   cancelReview() {
     this.reviewingItem = null;
+  }
+
+  showSuccessMessage(message: string): void {
+    this.successMessage = message;
+    this.showSuccessModal = true;
+    this.isFadingOut = false;
+    this.cdr.detectChanges();
+
+    // remove old timeout
+    if (this.successTimeout) clearTimeout(this.successTimeout);
+
+    // fade out animation start
+    this.successTimeout = setTimeout(() => {
+      this.isFadingOut = true;
+      this.cdr.detectChanges();
+
+      // remove modal after animation
+      setTimeout(() => {
+        this.showSuccessModal = false;
+        this.isFadingOut = false;
+        this.cdr.detectChanges();
+      }, 300);
+    }, 1800);
   }
 }
