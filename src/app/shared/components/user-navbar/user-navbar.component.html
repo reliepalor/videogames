@@ -1,6 +1,4 @@
-<style>
-  
-</style>
+<style></style>
 
 <!-- GLASS NAVBAR -->
 <nav
@@ -48,6 +46,41 @@
     <!-- RIGHT -->
     <div class="flex items-center gap-3">
 
+      <!-- 💬 MESSENGER ICON -->
+      <button
+        *ngIf="user$ | async"
+        (click)="guardedNavigate('/conversations')"
+        class="relative w-9 h-9 rounded-xl flex items-center justify-center
+               transition hover:scale-105"
+        [ngClass]="isDarkMode ? 'hover:bg-white/10' : 'hover:bg-black/10'">
+
+        <!-- ICON -->
+        <svg class="w-5 h-5"
+             fill="none"
+             stroke="currentColor"
+             viewBox="0 0 24 24"
+             stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 10h8m-8 4h5
+               M21 12c0 4.418-4.03 8-9 8
+               a9.77 9.77 0 01-4-.8L3 20l1.5-3.8
+               A7.94 7.94 0 013 12
+               c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+
+        <!-- UNREAD BADGE -->
+        <span
+          *ngIf="unreadCount > 0"
+          class="absolute -top-1 -right-1
+                 min-w-[18px] h-[18px]
+                 px-1 rounded-full
+                 bg-purple-600 text-white
+                 text-[10px] font-semibold
+                 flex items-center justify-center">
+          {{ unreadCount }}
+        </span>
+      </button>
+
       <!-- THEME TOGGLE -->
       <button
         (click)="toggleTheme()"
@@ -71,7 +104,7 @@
         </svg>
       </button>
 
-      <!-- DESKTOP USER (LOGGED IN ONLY) -->
+      <!-- USER DROPDOWN -->
       <div *ngIf="user$ | async as user; else desktopAuth"
            class="hidden md:block relative">
 
@@ -110,14 +143,12 @@
             {{ user.email }}
           </div>
 
-          <a routerLink="/profile"
-             (click)="closeAllMenus()"
+          <a routerLink="/profile" (click)="closeAllMenus()"
              class="block px-4 py-3 text-sm hover:bg-white/10 transition">
             Profile
           </a>
 
-          <a routerLink="/settings/password"
-             (click)="closeAllMenus()"
+          <a routerLink="/settings/password" (click)="closeAllMenus()"
              class="block px-4 py-3 text-sm hover:bg-white/10 transition">
             Security
           </a>
@@ -131,7 +162,7 @@
         </div>
       </div>
 
-      <!-- DESKTOP LOGIN / REGISTER -->
+      <!-- LOGIN / REGISTER -->
       <ng-template #desktopAuth>
         <div class="hidden md:flex items-center gap-2">
           <a routerLink="/login"
@@ -158,54 +189,3 @@
     </div>
   </div>
 </nav>
-
-<!-- MOBILE MENU -->
-<div *ngIf="isMobileMenuOpen"
-  class="fixed top-20 left-1/2 -translate-x-1/2
-         w-[92%] max-w-sm z-50
-         rounded-3xl backdrop-blur-xl
-         border shadow-2xl animate-slide-up transition-all"
-  [ngClass]="isDarkMode
-    ? 'bg-gray-900/90 border-white/10 text-white'
-    : 'bg-white/90 border-gray-200 text-gray-900'">
-
-  <!-- LOGGED IN -->
-  <ng-container *ngIf="user$ | async as user; else mobileAuth">
-
-    <div class="px-6 py-4 text-xs truncate"
-         [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-500'">
-      {{ user.email }}
-    </div>
-
-    <div class="flex flex-col"
-         [ngClass]="isDarkMode ? 'divide-y divide-white/10' : 'divide-y divide-gray-200'">
-
-      <a (click)="guardedNavigate('/profile')" class="px-6 py-4">Profile</a>
-      <a (click)="guardedNavigate('/settings/password')" class="px-6 py-4">Security</a>
-      <a (click)="guardedNavigate('/games')" class="px-6 py-4">Games</a>
-      <a (click)="guardedNavigate('/orders')" class="px-6 py-4">Orders</a>
-      <a (click)="guardedNavigate('/cart')" class="px-6 py-4">Cart</a>
-
-      <button
-        (click)="logout()"
-        class="px-6 py-4 text-left text-red-500 hover:bg-red-500/10">
-        Logout
-      </button>
-
-    </div>
-  </ng-container>
-
-  <!-- LOGGED OUT -->
-  <ng-template #mobileAuth>
-    <div class="flex flex-col gap-3 p-6">
-      <a routerLink="/login"
-         class="text-center px-4 py-3 rounded-xl bg-purple-500 text-white">
-        Login
-      </a>
-      <a routerLink="/register"
-         class="text-center px-4 py-3 rounded-xl border border-purple-500 text-purple-500">
-        Register
-      </a>
-    </div>
-  </ng-template>
-</div>

@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserService } from '../../../core/services/user.service';
-import { Profile } from '../../../core/models/UserProfile.model';
+import { Profile } from '../../../core/models/user/UserProfile.model';
 import { Observable } from 'rxjs';
 
 @Component({

@@ -4,8 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { timeout, map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { User } from '../models/user.model';
-import { Profile } from '../models/UserProfile.model';
+import { User } from '../models/user/user.model';
+import { Profile } from '../models/user/UserProfile.model';
 import { TokenService } from './token.service';
 
 @Injectable({

@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
-import { Profile } from '../../../core/models/UserProfile.model';
+import { Profile } from '../../../core/models/user/UserProfile.model';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
@@ -20,16 +20,7 @@ import { catchError } from 'rxjs/operators';
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './navbar.component.html',
-  styles: [`
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-up {
-      animation: fadeUp .25s ease-out;
-    }
-  `]
+  templateUrl: './navbar.component.html'
 })
 export class NavbarComponent implements OnInit {
 
@@ -45,6 +36,8 @@ export class NavbarComponent implements OnInit {
 
   user$!: Observable<Profile | null>;
   isDropdownOpen = false;
+
+  unreadCount = 3; // 🔴 MOCK — will be real SignalR later
 
   ngOnInit(): void {
     this.user$ = this.authService.isLoggedIn()

@@ -1,0 +1,61 @@
+<div class="max-w-5xl mx-auto px-6 py-8 flex flex-col h-[85vh]">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-xl font-semibold text-slate-800">
+      {{ subject }}
+    </h1>
+
+    <button
+      *ngIf="status === 'Open'"
+      (click)="closeConversation()"
+      class="rounded-xl border border-red-300 text-red-600 px-4 py-2 text-sm
+             hover:bg-red-50 transition"
+    >
+      Close Conversation
+    </button>
+  </div>
+
+  <!-- Messages -->
+  <div class="flex-1 overflow-y-auto space-y-4 mb-6 pr-2">
+    <div
+      *ngFor="let msg of messages"
+      class="flex"
+      [ngClass]="msg.isAdmin ? 'justify-end' : 'justify-start'"
+    >
+      <div
+        class="max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm"
+        [ngClass]="msg.isAdmin
+          ? 'bg-violet-600 text-white'
+          : 'bg-slate-100 text-slate-800'"
+      >
+        <p class="font-medium mb-1">
+          {{ msg.senderUsername }}
+        </p>
+        <p>{{ msg.message }}</p>
+        <p class="text-xs mt-2 opacity-70">
+          {{ msg.createdAt | date:'short' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div
+    *ngIf="status === 'Open'"
+    class="flex items-center gap-3 border-t border-slate-200 pt-4"
+  >
+    <input
+      [(ngModel)]="newMessage"
+      placeholder="Reply as admin…"
+      class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm
+             focus:ring-2 focus:ring-violet-500 outline-none"
+    />
+
+    <button
+      (click)="sendMessage()"
+      class="bg-violet-600 text-white rounded-xl px-5 py-3 text-sm
+             hover:bg-violet-700 transition"
+    >
+      Send
+    </button>
+  </div>
+</div>

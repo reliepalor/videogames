@@ -12,12 +12,11 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { UserService } from '../../../core/services/user.service';
 import { ThemeService } from '../../../core/services/theme.service';
-import { Profile } from '../../../core/models/UserProfile.model';
+import { Profile } from '../../../core/models/user/UserProfile.model';
 
 @Component({
   selector: 'app-user-navbar',
@@ -26,25 +25,13 @@ import { Profile } from '../../../core/models/UserProfile.model';
   templateUrl: './user-navbar.component.html',
   styles: [`
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .animate-fade-in {
@@ -76,6 +63,8 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
   isDropdownOpen = false;
   isMobileMenuOpen = false;
 
+  unreadCount = 2; // 🔴 MOCK for now (will be real-time later)
+
   private themeSubscription?: Subscription;
 
   /* ===================== LIFECYCLE ===================== */
@@ -86,8 +75,9 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
       this.cdr.markForCheck();
     });
 
-    // Show user profile if logged in, else null
-    this.user$ = this.authService.isLoggedIn() ? this.userService.Profile : of(null);
+    this.user$ = this.authService.isLoggedIn()
+      ? this.userService.Profile
+      : of(null);
   }
 
   ngOnDestroy(): void {
@@ -113,11 +103,9 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
     this.isMobileMenuOpen = false;
   }
 
-  /* ===================== NAVIGATION GUARD ===================== */
+  /* ===================== NAVIGATION ===================== */
   guardedNavigate(path: string): void {
-    if (!this.authService.isLoggedIn()) {
-      return;
-    }
+    if (!this.authService.isLoggedIn()) return;
 
     this.closeAllMenus();
     this.router.navigate([path]);

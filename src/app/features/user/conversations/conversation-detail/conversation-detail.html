@@ -1,0 +1,52 @@
+<!-- HEADER -->
+<div class="flex items-center gap-3 p-4 border-b mt-20">
+  <div class="relative">
+    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 text-white flex items-center justify-center">A</div>
+    <span
+      class="absolute bottom-0 right-0 w-3 h-3 rounded-full"
+      [class.bg-green-500]="isOnline"
+      [class.bg-gray-400]="!isOnline">
+    </span>
+  </div>
+
+  <div>
+    <div class="font-medium">Support Team</div>
+    <div class="text-xs text-gray-500">
+      {{ isTyping ? 'Typing…' : (isSeen ? 'Seen' : 'Delivered') }}
+    </div>
+  </div>
+</div>
+
+<!-- MESSAGES -->
+<div class="flex-1 overflow-y-auto p-4 space-y-2 bg-slate-50">
+  <div *ngFor="let m of messages"
+       class="animate-fade-in flex"
+       [class.justify-end]="!m.isAdmin">
+
+    <div
+      class="px-4 py-2 rounded-2xl max-w-[70%]"
+      [class.bg-violet-600]="!m.isAdmin"
+      [class.text-white]="!m.isAdmin"
+      [class.bg-white]="m.isAdmin">
+      {{ m.message }}
+    </div>
+  </div>
+</div>
+
+<!-- EMOJI PANEL -->
+<div *ngIf="showEmoji" class="flex gap-2 p-2 border-t">
+  <button *ngFor="let e of emojis" (click)="addEmoji(e)">{{ e }}</button>
+</div>
+
+<!-- COMPOSER -->
+<div class="flex items-center gap-2 p-3 border-t">
+  <button (click)="showEmoji = !showEmoji">😊</button>
+  <input
+    [(ngModel)]="newMessage"
+    (input)="typing()"
+    (keydown.enter)="send()"
+    class="flex-1 border rounded-xl px-4 py-2" />
+  <button (click)="send()" class="bg-violet-600 text-white px-4 py-2 rounded-xl">
+    Send
+  </button>
+</div>
