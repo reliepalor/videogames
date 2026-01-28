@@ -24,8 +24,41 @@ import { Profile } from '../../../core/models/UserProfile.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './user-navbar.component.html',
+  styles: [`
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .animate-slide-up {
+      animation: slideUp 0.3s cubic-bezier(.22,1,.36,1);
+    }
+  `]
 })
 export class UserNavbarComponent implements OnInit, OnDestroy {
+
+  /* ===================== SERVICES ===================== */
   private authService = inject(AuthService);
   private userService = inject(UserService);
   private themeService = inject(ThemeService);
@@ -33,53 +66,40 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
   private elementRef = inject(ElementRef);
   private cdr = inject(ChangeDetectorRef);
 
+  /* ===================== OUTPUTS ===================== */
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
+  /* ===================== STATE ===================== */
   user$!: Observable<Profile | null>;
   isDarkMode = false;
 
-  /** desktop avatar dropdown */
   isDropdownOpen = false;
-
-  /** mobile hamburger dropdown */
   isMobileMenuOpen = false;
 
   private themeSubscription?: Subscription;
 
-  // ---------------- INIT ----------------
+  /* ===================== LIFECYCLE ===================== */
   ngOnInit(): void {
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(
-      isDark => {
-        this.isDarkMode = isDark;
-        this.cdr.markForCheck();
-      }
-    );
 
-    if (this.authService.isLoggedIn()) {
-      this.user$ = this.userService.Profile.pipe(
-        catchError(() =>
-          of({
-            username: '',
-            email: '',
-            profilePicture: undefined,
-          } as Profile)
-        )
-      );
-    } else {
-      this.user$ = of(null);
-    }
+    this.themeSubscription = this.themeService.isDarkMode$.subscribe(isDark => {
+      this.isDarkMode = isDark;
+      this.cdr.markForCheck();
+    });
+
+    // Show user profile if logged in, else null
+    this.user$ = this.authService.isLoggedIn() ? this.userService.Profile : of(null);
   }
 
   ngOnDestroy(): void {
     this.themeSubscription?.unsubscribe();
   }
 
-  // ---------------- THEME ----------------
+  /* ===================== THEME ===================== */
   toggleTheme(): void {
     this.themeService.toggleTheme();
   }
 
-  // ---------------- MENUS ----------------
+  /* ===================== MENUS ===================== */
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
@@ -93,16 +113,28 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
     this.isMobileMenuOpen = false;
   }
 
-  // ---------------- AUTH ----------------
-  logout(): void {
-    this.authService.logout();
+  /* ===================== NAVIGATION GUARD ===================== */
+  guardedNavigate(path: string): void {
+    if (!this.authService.isLoggedIn()) {
+      return;
+    }
+
     this.closeAllMenus();
-    this.router.navigate(['/login']);
+    this.router.navigate([path]);
   }
 
-  // ---------------- HELPERS ----------------
+  /* ===================== AUTH ===================== */
+  logout(): void {
+    this.authService.logout();
+    this.user$ = of(null);
+    this.closeAllMenus();
+    this.router.navigate(['/user-dashboard']);
+  }
+
+  /* ===================== HELPERS ===================== */
   getInitials(name?: string): string {
     if (!name) return '?';
+
     return name
       .split(' ')
       .filter(Boolean)
@@ -112,9 +144,9 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
       .slice(0, 2);
   }
 
-  // ---------------- CLICK OUTSIDE ----------------
+  /* ===================== CLICK OUTSIDE ===================== */
   @HostListener('document:click', ['$event'])
-  onClickOutside(event: Event) {
+  onClickOutside(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.closeAllMenus();
     }

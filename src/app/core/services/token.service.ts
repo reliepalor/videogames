@@ -58,7 +58,7 @@ export class TokenService {
       return {
         userId: Number(payload.nameid),
         email: payload.email,
-        role: payload.role,
+        role: payload.role || payload.Role,
         username: payload.username,
         exp: payload.exp
       };

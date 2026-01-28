@@ -12,14 +12,14 @@ import { AuthLayoutComponent } from './layouts/auth-layout/auth-layout.component
 
 export const routes: Routes = [
 
-  // DEFAULT
+  /* ================= DEFAULT ================= */
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'user-dashboard',
     pathMatch: 'full'
   },
 
-  // AUTH (NO NAVBAR)
+  /* ================= AUTH (NO NAVBAR) ================= */
   {
     path: '',
     component: AuthLayoutComponent,
@@ -38,13 +38,21 @@ export const routes: Routes = [
     ]
   },
 
-  // MAIN APP (WITH NAVBAR)
+  /* ================= MAIN APP (WITH NAVBAR) ================= */
   {
     path: '',
     component: MainLayoutComponent,
-    canActivate: [authGuard],
     children: [
 
+      /* ---------- PUBLIC USER DASHBOARD ---------- */
+      {
+        path: 'user-dashboard',
+        loadComponent: () =>
+          import('./features/user/dashboard/user-dashboard.component')
+            .then(m => m.UserDashboardComponent)
+      },
+
+      /* ---------- ADMIN ---------- */
       {
         path: 'dashboard',
         canActivate: [AdminGuard],
@@ -52,13 +60,11 @@ export const routes: Routes = [
           import('./features/dashboard/dashboard.component')
             .then(m => m.AdminDashboardComponent)
       },
-
       {
         path: 'videogames',
         canActivate: [AdminGuard],
         children: videogameRoutes
       },
-
       {
         path: 'admin',
         canActivate: [AdminGuard],
@@ -66,13 +72,15 @@ export const routes: Routes = [
           import('./features/admin/admin.routes')
             .then(m => m.adminRoutes)
       },
+
+      /* ---------- USER (AUTH REQUIRED) ---------- */
       {
         path: '',
         canActivate: [userGuard],
         loadChildren: () =>
           import('./features/user/user.routes')
             .then(m => m.userRoutes)
-      },
+      }
 
     ]
   }

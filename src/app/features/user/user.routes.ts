@@ -15,11 +15,18 @@ export const userRoutes: Routes = [
         .then(m => m.ChangePasswordComponent)
   },
   {
+    path: 'welcomepage',
+    loadComponent: () =>
+      import('./dashboard/user-dashboard.component')
+        .then(m => m.UserDashboardComponent),
+  },
+  {
     path: 'user-dashboard',
     loadComponent: () =>
       import('./dashboard/user-dashboard.component')
-        .then(m => m.UserDashboardComponent)
+        .then(m => m.UserDashboardComponent),
   },
+
   {
     path: 'games',
     children: [

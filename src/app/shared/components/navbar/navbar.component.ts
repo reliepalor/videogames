@@ -21,6 +21,15 @@ import { catchError } from 'rxjs/operators';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './navbar.component.html',
+  styles: [`
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-up {
+      animation: fadeUp .25s ease-out;
+    }
+  `]
 })
 export class NavbarComponent implements OnInit {
 
@@ -29,28 +38,22 @@ export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private elementRef = inject(ElementRef);
 
-  // 🔁 Layout inputs
   @Input() isMinimized = false;
-
-  // 🔐 Role-based input (from MainLayout)
   @Input() isAdmin = false;
 
-  // 🔁 Sidebar toggle output
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
   user$!: Observable<Profile | null>;
   isDropdownOpen = false;
 
   ngOnInit(): void {
-    if (this.authService.isLoggedIn()) {
-      this.user$ = this.userService.Profile.pipe(
-        catchError(() =>
-          of({ username: 'User', email: '' } as Profile)
+    this.user$ = this.authService.isLoggedIn()
+      ? this.userService.Profile.pipe(
+          catchError(() =>
+            of({ username: 'User', email: '' } as Profile)
+          )
         )
-      );
-    } else {
-      this.user$ = of(null);
-    }
+      : of(null);
   }
 
   toggleSidebar(): void {
@@ -72,7 +75,6 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // Close dropdown when clicking outside
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
     if (!this.elementRef.nativeElement.contains(event.target)) {

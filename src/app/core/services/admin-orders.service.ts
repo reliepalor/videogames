@@ -25,6 +25,7 @@ export interface Order {
   createdAt: string;
   items: OrderItem[];
   showItems?: boolean;
+  expanded?: boolean;
 }
 
 @Injectable({

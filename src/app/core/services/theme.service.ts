@@ -31,15 +31,17 @@ export class ThemeService {
   }
 
   private applyTheme(isDark: boolean): void {
-    const html = document.documentElement;
-    const body = document.body;
+    if (isPlatformBrowser(this.platformId)) {
+      const html = document.documentElement;
+      const body = document.body;
 
-    if (isDark) {
-      html.classList.add('dark');
-      body.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-      body.classList.remove('dark');
+      if (isDark) {
+        html.classList.add('dark');
+        body.classList.add('dark');
+      } else {
+        html.classList.remove('dark');
+        body.classList.remove('dark');
+      }
     }
   }
 

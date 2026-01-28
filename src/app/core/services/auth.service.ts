@@ -80,7 +80,7 @@ export class AuthService {
 
   isAdmin(): boolean {
     const claims = this.tokenService.getClaims();
-    return claims?.role === 'Admin';
+    return claims?.role?.toLowerCase() === 'admin';
   }
   getRedirectUrlAfterLogin(): string {
     return this.isAdmin() ? '/dashboard' : '/user-dashboard';

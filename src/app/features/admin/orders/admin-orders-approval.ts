@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { AdminOrdersService, Order, OrderItemApproval } from 'src/app/core/services/admin-orders.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './admin-orders-approval.html'
 })
-export class AdminOrdersApprovalComponent implements OnInit {
+export class AdminOrdersApprovalComponent implements OnInit, OnDestroy {
   private adminOrdersService = inject(AdminOrdersService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -26,8 +26,17 @@ export class AdminOrdersApprovalComponent implements OnInit {
   rejectionReason = '';
   orderToReject: number | null = null;
 
+  private intervalId: any;
+
   ngOnInit() {
     this.loadPendingOrders();
+    this.intervalId = setInterval(() => this.loadPendingOrders(), 3000); // Refresh every 10 seconds
+  }
+
+  ngOnDestroy() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   }
 
   loadPendingOrders() {
@@ -38,14 +47,23 @@ export class AdminOrdersApprovalComponent implements OnInit {
       next: orders => {
         this.orders = orders.map(o => ({
           ...o,
-          showItems: false
-        })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+          showItems: false,
+          expanded: false
+        })).sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-        this.productKeyMap.clear();
+        // Don't clear the map to preserve existing keys
 
         orders.forEach(order => {
           order.items.forEach(item => {
-            this.productKeyMap.set(item.id, item.productKey || '');
+            if (!this.productKeyMap.has(item.id)) {
+              let key = item.productKey || '';
+              if (!key) {
+                key = [...Array(4)]
+                  .map(() => Math.random().toString(36).substring(2, 6).toUpperCase())
+                  .join('-');
+              }
+              this.productKeyMap.set(item.id, key);
+            }
           });
         });
 

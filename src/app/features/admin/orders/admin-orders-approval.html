@@ -60,15 +60,15 @@
   <!-- CARD VIEW -->
   <div *ngIf="viewMode === 'card'" class="space-y-8 animate-fade-in">
 
-    <div 
-      *ngFor="let order of orders"
+    <div
+      *ngFor="let order of orders; let i = index"
       class="bg-white border border-gray-200 rounded-3xl p-6 shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-[2px]"
     >
       
       <!-- User Info -->
       <div class="flex justify-between items-center mb-5">
         <span class="text-gray-500 text-sm">
-          {{ order.username }} • {{ order.email }}
+          Order #{{ i+1 }} • {{ order.username }} • {{ order.email }}
         </span>
       </div>
 
@@ -84,6 +84,7 @@
         </div>
       </div>
 
+
       <!-- Items Table -->
       <div class="rounded-2xl overflow-hidden border border-gray-200">
         <table class="w-full text-sm">
@@ -92,38 +93,32 @@
               <th class="py-3 px-4 text-left">Game Title</th>
               <th class="py-3 px-4 text-right">Unit Price</th>
               <th class="py-3 px-4 text-center">Product Key</th>
-              <th class="py-3 px-4 text-center">Generate</th>
             </tr>
           </thead>
           <tbody>
-            <tr 
-              *ngFor="let item of order.items"
+            <tr
+              *ngFor="let item of order.items.slice(0, order.expanded ? order.items.length : 2)"
               class="border-t border-gray-200 hover:bg-gray-50 transition-colors"
             >
               <td class="py-3 px-4">{{ item.gameTitle }}</td>
               <td class="py-3 px-4 text-right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
 
-              <td class="py-3 px-4 text-center">
-                <input
-                  type="text"
-                  [ngModel]="getProductKey(item.id)"
-                  (ngModelChange)="setProductKey(item.id, $event)"
-                  class="px-3 py-2 rounded-xl border border-gray-300 w-full max-w-xs focus:ring-4 focus:ring-purple-300 transition"
-                  placeholder="Enter key"
-                />
-              </td>
-
-              <td class="py-3 px-4 text-center">
-                <button
-                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 transition cursor-pointer"
-                  (click)="generateProductKey(item.id)"
-                >
-                  Generate
-                </button>
+              <td class="py-3 px-4 text-center font-mono text-sm">
+                {{ getProductKey(item.id) }}
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Show More Button -->
+      <div *ngIf="order.items.length > 2" class="mt-4 text-center">
+        <button
+          (click)="order.expanded = !order.expanded"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl text-gray-700 transition cursor-pointer"
+        >
+          {{ order.expanded ? 'Show Less' : 'Show All (' + order.items.length + ')' }}
+        </button>
       </div>
 
       <!-- Actions -->
@@ -154,6 +149,7 @@
       <table class="w-full text-sm">
         <thead class="bg-gray-100 text-gray-700">
           <tr>
+            <th class="p-4 text-left">Order #</th>
             <th class="p-4 text-left">Order ID</th>
             <th class="p-4 text-left">User</th>
             <th class="p-4 text-left">Created</th>
@@ -165,7 +161,8 @@
 
         <tbody>
 
-          <tr *ngFor="let order of orders" class="border-t border-gray-200 hover:bg-gray-50 transition">
+          <tr *ngFor="let order of orders; let i = index" class="border-t border-gray-200 hover:bg-gray-50 transition">
+            <td class="p-4 font-medium">{{ i+1 }}</td>
             <td class="p-4 font-medium">{{ order.id }}</td>
             <td class="p-4">
               {{ order.username }}<br>
@@ -201,8 +198,8 @@
           </tr>
 
           <!-- Expanded Items Section -->
-          <tr *ngFor="let order of orders" [hidden]="!order.showItems">
-            <td colspan="6" class="p-6 bg-gray-50">
+          <tr *ngFor="let order of orders; let i = index" [hidden]="!order.showItems">
+            <td colspan="7" class="p-6 bg-gray-50">
               <div class="space-y-4">
 
                 <div *ngFor="let item of order.items" class="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border">
@@ -212,19 +209,9 @@
                     <div class="text-gray-500 text-sm">₱{{ item.unitPrice | number:'1.2-2' }}</div>
                   </div>
 
-                  <input 
-                    [ngModel]="getProductKey(item.id)"
-                    (ngModelChange)="setProductKey(item.id, $event)"
-                    class="px-3 py-2 border border-gray-300 rounded-xl w-64 focus:ring-4 focus:ring-purple-300 transition"
-                    placeholder="Enter product key"
-                  />
-
-                  <button
-                    class="px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition"
-                    (click)="generateProductKey(item.id)"
-                  >
-                    Generate
-                  </button>
+                  <div class="font-mono text-sm bg-gray-100 px-3 py-2 rounded-xl">
+                    {{ getProductKey(item.id) }}
+                  </div>
 
                 </div>
 
