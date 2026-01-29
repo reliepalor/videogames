@@ -17,19 +17,8 @@ export const adminRoutes: Routes = [
   {
     path: 'conversations',
     canActivate: [AdminGuard],
-    children: [
-      {
-        path: '',
-        loadComponent: () =>
-          import('./conversations/admin-conversation-list/admin-conversation-list')
-            .then(m => m.AdminConversationListComponent)
-      },
-      {
-        path: ':id',
-        loadComponent: () => 
-          import('./conversations/admin-conversation-details/admin-conversation-detail')
-            .then(m => m.AdminConversationDetailComponent)
-      }
-    ]
+    loadComponent: () =>
+      import('./conversations/admin-conversations-page/admin-conversations-page')
+        .then(m => m.AdminConversationsPageComponent)
   }
 ];

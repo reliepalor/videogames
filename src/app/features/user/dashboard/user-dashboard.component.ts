@@ -15,7 +15,6 @@ import { RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ThemeService } from '../../../core/services/theme.service';
 import { Subscription } from 'rxjs';
-import { Aurora } from 'src/app/shared/components/background/aurora';
 
 @Component({
   standalone: true,
@@ -46,7 +45,6 @@ export class UserDashboardComponent
   private themeSubscription?: Subscription;
   private platformId = inject(PLATFORM_ID);
 
-  private aurora?: Aurora;
 
   isDarkMode = false;
   videoSrc = '/assets/videos/dark.mp4';
@@ -97,13 +95,7 @@ export class UserDashboardComponent
         if (video.paused) video.play().catch(() => {});
       }, 800);
 
-      // INIT AURORA
-      this.aurora = new Aurora(this.auroraContainer.nativeElement, {
-        colorStops: ['#de66ff', '#B19EEF', '#5227FF'],
-        amplitude: 0.8,
-        blend: 0.6,
-        speed: 2.5
-      });
+      
 
       // Trigger bento grid animation
       setTimeout(() => {
@@ -116,7 +108,6 @@ export class UserDashboardComponent
   ngOnDestroy() {
     this.themeSubscription?.unsubscribe();
     clearInterval(this.carouselInterval);
-    this.aurora?.destroy();
   }
 
   generateSphereLayers() {

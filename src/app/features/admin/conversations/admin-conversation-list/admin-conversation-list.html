@@ -1,38 +1,33 @@
 <div class="h-full flex flex-col border-r border-slate-200 bg-white">
 
-  <!-- HEADER -->
   <div class="p-4">
     <h2 class="font-semibold text-slate-800">Inbox</h2>
     <p class="text-xs text-slate-500 mt-1">
-      Active user conversations
+      Conversations with users
     </p>
   </div>
 
-  <!-- SEARCH -->
   <div class="px-3 pb-3">
     <input
       [(ngModel)]="search"
       placeholder="Search users"
       class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm
-             focus:ring-2 focus:ring-violet-500 outline-none
-             transition-all" />
+             focus:ring-2 focus:ring-violet-500 outline-none" />
   </div>
 
-  <!-- USERS -->
   <div class="flex-1 overflow-y-auto">
     <div
       *ngFor="let convo of filtered()"
       (click)="open(convo)"
-      class="px-4 py-3 cursor-pointer
-             flex items-center gap-3
-             hover:bg-slate-100
-             transition-all">
+      class="px-4 py-3 cursor-pointer flex items-center gap-3 transition"
+      [class.bg-violet-50]="isActive(convo)"
+      [class.hover:bg-slate-100]="!isActive(convo)"
+      [class.bg-violet-100]="isActive(convo)">
 
       <div
-        class="w-10 h-10 rounded-full
-               bg-gradient-to-br from-violet-500 to-indigo-500
-               flex items-center justify-center
-               text-white font-semibold">
+        class="w-10 h-10 rounded-full bg-gradient-to-br
+               from-violet-500 to-indigo-500
+               flex items-center justify-center text-white font-semibold">
         {{ convo.user.username[0] | uppercase }}
       </div>
 
@@ -40,15 +35,14 @@
         <div class="font-medium text-slate-800">
           {{ convo.user.username }}
         </div>
-        <div class="text-xs text-slate-500 truncate">
-          {{ convo.lastMessage || 'No messages yet' }}
+        <div class="text-xs text-slate-500">
+          {{ convo.lastMessage?.message || 'No messages yet' }}
         </div>
       </div>
     </div>
   </div>
 
-  <!-- FOOTER -->
   <div class="p-4 text-xs text-slate-400 text-center">
-    Select a user to start chatting.
+    Select a user to start chatting
   </div>
 </div>

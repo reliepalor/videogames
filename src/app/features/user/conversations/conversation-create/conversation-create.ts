@@ -10,7 +10,6 @@ import { ConversationService } from '../../../../core/services/user/conversation
   imports: [FormsModule]
 })
 export class ConversationCreateComponent {
-  subject = '';
   message = '';
   submitting = false;
 
@@ -20,13 +19,12 @@ export class ConversationCreateComponent {
   ) {}
 
   submit() {
-    if (!this.subject || !this.message) return;
+    if (!this.message) return;
 
     this.submitting = true;
 
     this.convoService.createConversation({
-      subject: this.subject,
-      message: this.message
+      Message: this.message
     }).subscribe(res => {
       this.router.navigate(['/user/conversations', res.conversationId]);
     });

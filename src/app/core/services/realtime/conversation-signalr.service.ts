@@ -1,161 +1,126 @@
 import { Injectable, inject } from '@angular/core';
-import { HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  HubConnection,
+  HubConnectionBuilder,
+  HubConnectionState
+} from '@microsoft/signalr';
+import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationSignalRService {
+
   private platformId = inject(PLATFORM_ID);
   private hub?: HubConnection;
-  private connectionState$ = new BehaviorSubject<HubConnectionState>(HubConnectionState.Disconnected);
+
+  private connected = false;
+  private connectPromise?: Promise<void>;
 
   message$ = new BehaviorSubject<any>(null);
   typing$ = new BehaviorSubject<boolean>(false);
-  onlineUsers$ = new BehaviorSubject<Set<string>>(new Set());
   seen$ = new BehaviorSubject<boolean>(false);
-
-  get connectionState(): Observable<HubConnectionState> {
-    return this.connectionState$.asObservable();
-  }
-
-  get isConnected(): boolean {
-    return this.hub?.state === HubConnectionState.Connected;
-  }
+  onlineUsers$ = new BehaviorSubject<Set<string>>(new Set());
+  conversationListUpdated$ = new BehaviorSubject<boolean>(false);
 
   async connect(): Promise<void> {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.hub && this.isConnected) return;
+    // Return existing promise if already connecting/connected
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
 
+    if (!isPlatformBrowser(this.platformId)) {
+      return Promise.resolve();
+    }
+    if (this.connected && this.hub) {
+      return Promise.resolve();
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      return Promise.resolve();
+    }
+
+    this.connectPromise = this.doConnect(token);
+    return this.connectPromise;
+  }
+
+  private async doConnect(token: string): Promise<void> {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn('No auth token found for SignalR connection');
-        return;
-      }
-
       this.hub = new HubConnectionBuilder()
         .withUrl('http://localhost:5019/hubs/conversations', {
           accessTokenFactory: () => token
         })
-        .withAutomaticReconnect({
-          nextRetryDelayInMilliseconds: (retryContext) => {
-            if (retryContext.elapsedMilliseconds < 60000) {
-              return Math.random() * 10000;
-            } else {
-              return null;
-            }
-          }
-        })
+        .withAutomaticReconnect()
         .build();
 
-      this.setupEventHandlers();
+      this.registerHandlers();
 
       await this.hub.start();
-      this.connectionState$.next(HubConnectionState.Connected);
-      console.log('SignalR connected successfully');
-    } catch (error) {
-      console.error('SignalR connection failed:', error);
-      this.connectionState$.next(HubConnectionState.Disconnected);
-      throw error;
+      this.connected = true;
+
+      console.log('[SignalR] Connected');
+    } catch (err) {
+      console.error('[SignalR] Connection failed:', err);
+      this.connectPromise = undefined;
+      throw err;
     }
   }
 
-  private setupEventHandlers(): void {
+  private registerHandlers(): void {
     if (!this.hub) return;
 
-    this.hub.onclose(() => {
-      this.connectionState$.next(HubConnectionState.Disconnected);
-      console.log('SignalR connection closed');
-    });
-
-    this.hub.onreconnecting(() => {
-      this.connectionState$.next(HubConnectionState.Reconnecting);
-      console.log('SignalR reconnecting...');
-    });
-
-    this.hub.onreconnected(() => {
-      this.connectionState$.next(HubConnectionState.Connected);
-      console.log('SignalR reconnected');
-    });
-
-    this.hub.on('ReceiveMessage', (message) => {
-      if (message) {
-        this.message$.next(message);
-      }
+    this.hub.on('ReceiveMessage', msg => {
+      console.log('[SignalR] ReceiveMessage event received:', msg);
+      this.message$.next(msg);
+      this.conversationListUpdated$.next(true);
     });
 
     this.hub.on('UserTyping', () => {
       this.typing$.next(true);
-      // Reset typing after 2 seconds
-      setTimeout(() => this.typing$.next(false), 2000);
+      setTimeout(() => this.typing$.next(false), 1500);
     });
 
     this.hub.on('MessagesSeen', () => {
       this.seen$.next(true);
     });
-
-    this.hub.on('UserOnline', (id: string) => {
-      if (id) {
-        const users = new Set(this.onlineUsers$.value);
-        users.add(id);
-        this.onlineUsers$.next(users);
-      }
-    });
-
-    this.hub.on('UserOffline', (id: string) => {
-      if (id) {
-        const users = new Set(this.onlineUsers$.value);
-        users.delete(id);
-        this.onlineUsers$.next(users);
-      }
-    });
   }
 
   async joinConversation(id: number): Promise<void> {
-    if (!this.isConnected || !id) return;
-
-    try {
-      await this.hub!.invoke('JoinConversation', id);
-    } catch (error) {
-      console.error('Failed to join conversation:', error);
+    if (!this.hub || this.hub.state !== HubConnectionState.Connected) {
+      console.warn('[SignalR] Cannot join conversation: not connected');
+      return;
     }
-  }
-
-  async typing(id: number): Promise<void> {
-    if (!this.isConnected || !id) return;
-
     try {
-      await this.hub!.invoke('Typing', id);
-    } catch (error) {
-      console.error('Failed to send typing indicator:', error);
-    }
-  }
-
-  async seen(id: number): Promise<void> {
-    if (!this.isConnected || !id) return;
-
-    try {
-      await this.hub!.invoke('Seen', id);
-    } catch (error) {
-      console.error('Failed to mark messages as seen:', error);
+      await this.hub.invoke('JoinConversation', id);
+      console.log('[SignalR] Joined conversation:', id);
+    } catch (err) {
+      console.error('[SignalR] Failed to join conversation:', err);
     }
   }
 
   async leaveConversation(id: number): Promise<void> {
-    if (!this.isConnected || !id) return;
+    if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
+    await this.hub.invoke('LeaveConversation', id);
+  }
 
-    try {
-      await this.hub!.invoke('LeaveConversation', id);
-    } catch (error) {
-      console.error('Failed to leave conversation:', error);
-    }
+  async typing(id: number): Promise<void> {
+    if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
+    await this.hub.invoke('Typing', id);
+  }
+
+  async seen(id: number): Promise<void> {
+    if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
+    await this.hub.invoke('Seen', id);
   }
 
   async disconnect(): Promise<void> {
     if (this.hub) {
       await this.hub.stop();
-      this.connectionState$.next(HubConnectionState.Disconnected);
+      this.hub = undefined;
+      this.connected = false;
+      this.connectPromise = undefined;
+      console.log('[SignalR] Disconnected');
     }
   }
 }

@@ -1,63 +1,41 @@
 <div class="h-full flex flex-col border-r border-slate-200 bg-white mt-20">
 
-  <!-- HEADER -->
   <div class="p-4">
     <h2 class="font-semibold text-slate-800">Messages</h2>
     <p class="text-xs text-slate-500 mt-1">
-      Chat directly with our support team
+      Chat with support
     </p>
   </div>
 
-  <!-- SEARCH -->
-  <div class="px-3 pb-3">
-    <input
-      [(ngModel)]="search"
-      placeholder="Search"
-      class="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm
-             focus:ring-2 focus:ring-violet-500 outline-none
-             transition-all duration-200" />
-  </div>
+  <div
+    (click)="open()"
+    class="mx-3 p-4 rounded-2xl cursor-pointer
+           border border-slate-200 hover:bg-slate-50
+           transition flex items-center gap-4"
+    [class.bg-violet-50]="activeConversationId"
+    [class.border-violet-200]="activeConversationId">
 
-  <!-- CONVERSATION CARDS -->
-  <div *ngFor="let convo of filtered; trackBy: trackByConversationId"
-       (click)="open(convo)"
-       class="mx-3 p-4 rounded-2xl cursor-pointer
-              border border-slate-200
-              hover:bg-slate-50 hover:shadow-sm
-              transition-all duration-200
-              flex items-center gap-4">
-
-    <!-- AVATAR -->
     <div
-      class="w-12 h-12 rounded-full
-             bg-gradient-to-br from-violet-500 to-indigo-500
+      class="w-12 h-12 rounded-full bg-gradient-to-br
+             from-violet-500 to-indigo-500
              flex items-center justify-center
              text-white font-semibold text-lg">
       A
     </div>
 
-    <!-- INFO -->
-    <div class="flex-1 min-w-0">
-      <div class="flex items-center justify-between">
-       <span class="font-medium text-slate-800">Support Team</span>
+    <div class="flex-1">
+      <div class="font-medium text-slate-800">
+        Support Team
+      </div>
+      <div class="text-sm text-slate-500">
+        <span *ngIf="!conversation">Click to start chatting</span>
+        <span *ngIf="conversation && !activeConversationId">Click to continue chatting</span>
+        <span *ngIf="activeConversationId">Active conversation</span>
+      </div>
+    </div>
+  </div>
 
-       <!-- UNREAD -->
-       <span
-         *ngIf="getUnreadCount(convo) > 0"
-         class="bg-violet-600 text-white text-[10px]
-                rounded-full px-2 py-[2px]">
-         {{ getUnreadCount(convo) }}
-       </span>
-     </div>
-
-     <p class="text-sm text-slate-500 truncate mt-1">
-       {{ getLastMessage(convo) }}
-     </p>
-   </div>
- </div>
-
-  <!-- FOOTER -->
   <div class="mt-auto p-4 text-xs text-slate-400 text-center">
-    Messages are encrypted and private.
+    Messages are private and secure
   </div>
 </div>

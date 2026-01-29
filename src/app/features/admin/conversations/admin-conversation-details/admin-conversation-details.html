@@ -1,61 +1,81 @@
-<div class="max-w-5xl mx-auto px-6 py-8 flex flex-col h-[85vh]">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-xl font-semibold text-slate-800">
-      {{ subject }}
-    </h1>
+<div class="flex flex-col h-full">
 
-    <button
-      *ngIf="status === 'Open'"
-      (click)="closeConversation()"
-      class="rounded-xl border border-red-300 text-red-600 px-4 py-2 text-sm
-             hover:bg-red-50 transition"
-    >
-      Close Conversation
-    </button>
+  <!-- Header -->
+  <div class="p-4 border-b flex items-center gap-3">
+    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500
+                text-white flex items-center justify-center">
+      A
+    </div>
+    <div>
+      <div class="font-medium">{{ subject || 'Conversation' }}</div>
+      <div class="text-xs text-gray-500">
+        <span *ngIf="status === 'Open'">Open</span>
+        <span *ngIf="status === 'Closed'" class="text-red-500">Closed</span>
+      </div>
+    </div>
+    <div class="ml-auto">
+      <button
+        *ngIf="status === 'Open'"
+        (click)="closeConversation()"
+        class="text-xs text-red-600 hover:text-red-800">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Typing indicator -->
+  <div class="px-4 py-2 bg-slate-50" *ngIf="isTyping">
+    <div class="flex items-center gap-1">
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+      <span class="typing-dot"></span>
+    </div>
   </div>
 
   <!-- Messages -->
-  <div class="flex-1 overflow-y-auto space-y-4 mb-6 pr-2">
+  <div class="flex-1 overflow-y-auto p-4 bg-slate-50 space-y-2 scrollbar-hide custom-scrollbar" #chatContainer>
     <div
       *ngFor="let msg of messages"
       class="flex"
-      [ngClass]="msg.isAdmin ? 'justify-end' : 'justify-start'"
-    >
+      [class.justify-end]="msg.isAdmin">
+
       <div
-        class="max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm"
-        [ngClass]="msg.isAdmin
-          ? 'bg-violet-600 text-white'
-          : 'bg-slate-100 text-slate-800'"
-      >
-        <p class="font-medium mb-1">
-          {{ msg.senderUsername }}
-        </p>
-        <p>{{ msg.message }}</p>
-        <p class="text-xs mt-2 opacity-70">
-          {{ msg.createdAt | date:'short' }}
-        </p>
+        class="px-4 py-2 rounded-2xl max-w-[70%] relative cursor-pointer hover:opacity-90 transition-opacity"
+        [class.bg-violet-600]="msg.isAdmin"
+        [class.text-white]="msg.isAdmin"
+        [class.bg-white]="!msg.isAdmin"
+        (click)="toggleTimestamp(msg)">
+        {{ msg.message }}
+        <!-- Timestamp tooltip -->
+        <div class="absolute -bottom-6 left-0 text-xs rounded px-2 py-1 whitespace-nowrap opacity-0 transition-opacity z-10"
+             [class.opacity-100]="selectedMessageId === msg.id"
+             [class.bg-gray-800]="msg.isAdmin"
+             [class.text-white]="msg.isAdmin"
+             [class.bg-gray-200]="!msg.isAdmin"
+             [class.text-gray-800]="!msg.isAdmin">
+          {{ formatTimestamp(msg.createdAt) }}
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Input -->
-  <div
-    *ngIf="status === 'Open'"
-    class="flex items-center gap-3 border-t border-slate-200 pt-4"
-  >
+  <div class="border-t p-3 flex items-center gap-2" *ngIf="status === 'Open'">
     <input
       [(ngModel)]="newMessage"
-      placeholder="Reply as admin…"
-      class="flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm
-             focus:ring-2 focus:ring-violet-500 outline-none"
-    />
-
+      (keydown.enter)="sendMessage()"
+      (input)="onTyping()"
+      placeholder="Reply as admin..."
+      class="flex-1 border rounded-xl px-4 py-2" />
     <button
       (click)="sendMessage()"
-      class="bg-violet-600 text-white rounded-xl px-5 py-3 text-sm
-             hover:bg-violet-700 transition"
-    >
+      class="bg-violet-600 text-white px-4 py-2 rounded-xl">
       Send
     </button>
+  </div>
+
+  <!-- Closed state message -->
+  <div class="border-t p-3 text-center text-gray-500 text-sm" *ngIf="status !== 'Open'">
+    This conversation is closed
   </div>
 </div>

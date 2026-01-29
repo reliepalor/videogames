@@ -25,9 +25,9 @@ export class ConversationService {
     );
   }
 
-  // 📂 My conversations
-  getMyConversations(): Observable<Conversations[]> {
-    return this.http.get<Conversations[]>(`${this.apiUrl}/my`);
+  // 📂 My conversation (single)
+  getMyConversations(): Observable<Conversations | null> {
+    return this.http.get<Conversations | null>(`${this.apiUrl}/my`);
   }
 
   // 💬 Get single conversation with messages
