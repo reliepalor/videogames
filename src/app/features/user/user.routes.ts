@@ -8,16 +8,14 @@ export const userRoutes: Routes = [
     path: 'profile',
     loadComponent: () =>
       import('./profile/profile.component')
-        .then(m => m.ProfileComponent),
-    canActivate: [authGuard]
+        .then(m => m.ProfileComponent)
   },
 
   {
     path: 'settings/password',
     loadComponent: () =>
       import('./settings/change-password.component')
-        .then(m => m.ChangePasswordComponent),
-    canActivate: [authGuard]
+        .then(m => m.ChangePasswordComponent)
   },
 
   /* ===================== DASHBOARD ===================== */
@@ -25,16 +23,14 @@ export const userRoutes: Routes = [
     path: 'welcomepage',
     loadComponent: () =>
       import('./dashboard/user-dashboard.component')
-        .then(m => m.UserDashboardComponent),
-    canActivate: [authGuard]
+        .then(m => m.UserDashboardComponent)
   },
 
   {
     path: 'user-dashboard',
     loadComponent: () =>
       import('./dashboard/user-dashboard.component')
-        .then(m => m.UserDashboardComponent),
-    canActivate: [authGuard]
+        .then(m => m.UserDashboardComponent)
   },
 
   /* ===================== GAMES ===================== */
@@ -67,33 +63,35 @@ export const userRoutes: Routes = [
     path: 'cart',
     loadComponent: () =>
       import('./cart/cart')
-        .then(m => m.CartComponent),
-    canActivate: [authGuard]
+        .then(m => m.CartComponent)
   },
 
   {
     path: 'checkout',
     loadComponent: () =>
       import('./checkout/checkout')
-        .then(m => m.CheckoutComponent),
-    canActivate: [authGuard]
+        .then(m => m.CheckoutComponent)
   },
 
   {
     path: 'orders',
     loadComponent: () =>
       import('./orders/user-orders')
-        .then(m => m.UserOrdersComponent),
-    canActivate: [authGuard]
+        .then(m => m.UserOrdersComponent)
   },
 
   /* ===================== 💬 MESSENGER CONVERSATIONS ===================== */
   {
     path: 'conversations',
     loadComponent: () =>
-      import('./conversations/conversations-page/conversations-page')
-        .then(m => m.ConversationsPageComponent),
-    canActivate: [authGuard]
+      import('./conversations/conversation-list/conversation-list')
+        .then(m => m.ConversationListComponent)
+  },
+  {
+    path: 'conversations/:id',
+    loadComponent: () =>
+      import('./conversations/conversation-detail/conversation-detail')
+        .then(m => m.ConversationDetail)
   }
 
 ];

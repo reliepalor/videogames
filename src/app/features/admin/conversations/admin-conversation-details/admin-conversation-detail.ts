@@ -22,6 +22,7 @@ export class AdminConversationDetailComponent implements OnInit, OnDestroy, OnCh
   newMessage = '';
   isTyping = false;
   selectedMessageId?: number;
+  reactionEmojis = ['👍', '❤️', '😂', '😮', '😭'];
 
   private subscriptions: Subscription[] = [];
   private lastMessageCount = 0;
@@ -52,6 +53,11 @@ export class AdminConversationDetailComponent implements OnInit, OnDestroy, OnCh
     }
   }
 
+  // TrackBy function for *ngFor to optimize change detection
+  trackByMessageId(index: number, item: ConversationMessage): number {
+    return item.id || index;
+  }
+
   toggleTimestamp(msg: ConversationMessage): void {
     if (this.selectedMessageId === msg.id) {
       this.selectedMessageId = undefined;
@@ -59,6 +65,29 @@ export class AdminConversationDetailComponent implements OnInit, OnDestroy, OnCh
       this.selectedMessageId = msg.id;
     }
     this.cdr.detectChanges();
+  }
+
+  toggleReactionPicker(msg: ConversationMessage): void {
+    this.messages.forEach(m => {
+      if (m !== msg) m.showReactions = false;
+    });
+    msg.showReactions = !msg.showReactions;
+  }
+
+  reactToMessage(msg: ConversationMessage, emoji: string): void {
+    console.log('[AdminConversation] Reacting to message:', msg.id, 'with emoji:', emoji);
+    
+    // Update locally first for immediate feedback
+    msg.reaction = emoji;
+    msg.showReactions = false;
+    
+    // Save to database
+    if (this.conversationId) {
+      this.adminService.addReaction(this.conversationId, msg.id, emoji).subscribe({
+        next: () => console.log('[AdminConversation] Reaction saved successfully'),
+        error: (err) => console.error('[AdminConversation] Failed to save reaction:', err)
+      });
+    }
   }
 
   formatTimestamp(dateStr: string): string {
@@ -189,14 +218,12 @@ export class AdminConversationDetailComponent implements OnInit, OnDestroy, OnCh
         this.status = res.status || '';
         const newMessages = (res.messages ?? []).filter((m: any) => m != null);
         
-        // Only update UI if message count changed (optimization)
-        if (newMessages.length !== this.lastMessageCount) {
-          this.messages = newMessages;
-          this.lastMessageCount = newMessages.length;
-          this.shouldScroll = true;
-          this.cdr.detectChanges();
-          setTimeout(() => this.doScroll(), 50);
-        }
+        // Always update UI to show latest messages
+        this.messages = newMessages;
+        this.lastMessageCount = newMessages.length;
+        this.shouldScroll = true;
+        this.cdr.detectChanges();
+        setTimeout(() => this.doScroll(), 50);
       },
       error: (error) => {
         console.error('Failed to load conversation:', error);

@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { Conversations, ConversationsStatus } from '../../models/user/conversation/conversation.model';
 import { ConversationMessage } from '../../models/user/conversation/conversation-message.model';
 import { CreateConversationDto } from '../../models/user/dto/conversation.dto';
-import { CreateConversationMessageDto } from '../../models/user/dto/conversation-message.dto';
+import { CreateConversationMessageDto, AddReactionDto } from '../../models/user/dto/conversation-message.dto';
 
 @Injectable({
   providedIn: 'root'
@@ -52,6 +52,18 @@ export class ConversationService {
   ): Observable<any> {
     return this.http.post(
       `${this.apiUrl}/${conversationId}/messages`,
+      dto
+    );
+  }
+
+  // 😃 Add/Update reaction to message
+  addReaction(
+    conversationId: number,
+    messageId: number,
+    dto: AddReactionDto
+  ): Observable<any> {
+    return this.http.post(
+      `${this.apiUrl}/${conversationId}/messages/${messageId}/reactions`,
       dto
     );
   }

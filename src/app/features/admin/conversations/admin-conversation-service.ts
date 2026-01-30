@@ -33,4 +33,11 @@ export class AdminConversationService {
   closeConversation(id: number): Observable<any> {
     return this.http.post(`${this.adminUrl}/${id}/close`, {});
   }
+
+  // 😃 Add/Update reaction to message
+  addReaction(conversationId: number, messageId: number, reaction: string): Observable<any> {
+    return this.http.post(`${this.convoUrl}/${conversationId}/messages/${messageId}/reactions`, {
+      reaction
+    });
+  }
 }

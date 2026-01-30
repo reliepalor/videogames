@@ -1,6 +1,7 @@
-import { Component, Input, OnChanges, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnInit, OnDestroy, ChangeDetectorRef, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit, AfterViewChecked, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { ConversationService } from '../../../../core/services/user/conversation.service';
 import { ConversationSignalRService } from '../../../../core/services/realtime/conversation-signalr.service';
@@ -14,16 +15,17 @@ import { ConversationMessage } from '../../../../core/models/user/conversation/c
 })
 export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterViewInit, AfterViewChecked {
 
-  @Input() conversationId?: number;
   @Output() messageSent = new EventEmitter<ConversationMessage>();
 
   @ViewChild('chatContainer') chatContainer!: ElementRef;
 
   messages: ConversationMessage[] = [];
   newMessage = '';
+  subject = '';
   isNewConversation = false;
   isTyping = false;
   selectedMessageId?: number;
+  conversationId?: number;
 
   private subs: Subscription[] = [];
   private shouldScroll = true;
@@ -34,8 +36,31 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
   constructor(
     private convo: ConversationService,
     private signalR: ConversationSignalRService,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
+
+  reactionEmojis = ['👍', '❤️', '😂', '😮', '😭'];
+
+  toggleReactionPicker(msg: ConversationMessage): void {
+    this.messages.forEach(m => {
+      if (m !== msg) m.showReactions = false;
+    });
+
+    msg.showReactions = !msg.showReactions;
+  }
+  reactToMessage(msg : ConversationMessage, emoji: string): void{
+    // Update locally first for immediate feedback
+    msg.reaction = emoji;
+    msg.showReactions = false;
+    
+    // Save to database
+    if (this.conversationId && this.conversationId !== -1) {
+      this.convo.addReaction(this.conversationId, msg.id, { reaction: emoji }).subscribe({
+        error: (err) => console.error('[ConversationDetail] Failed to save reaction:', err)
+      });
+    }
+  }
 
   // TrackBy function for *ngFor to optimize change detection
   trackByMessageId(index: number, item: ConversationMessage): number {
@@ -96,21 +121,14 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
   }
 
   private setupMessageSubscription(): void {
-    // Clean up old subscription if exists
-    const oldSub = this.subs.find(s => s instanceof Subscription);
-    if (oldSub) {
-      oldSub.unsubscribe();
-      this.subs = this.subs.filter(s => s !== oldSub);
-    }
+    // Clean up all old subscriptions
+    this.subs.forEach(s => s.unsubscribe());
+    this.subs = [];
 
     const msgSub = this.signalR.message$.subscribe({
       next: (msg) => {
-        console.log('[ConversationDetail] SignalR received:', msg);
         if (!msg) return;
-        if (msg.conversationId !== this.conversationId) {
-          console.log('[ConversationDetail] Message not for this conversation:', msg.conversationId, 'vs', this.conversationId);
-          return;
-        }
+        if (msg.conversationId !== this.conversationId) return;
         this.addMessage(msg);
       },
       error: (err) => console.error('[ConversationDetail] SignalR error:', err)
@@ -119,7 +137,6 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
 
     // Subscribe to typing indicator
     const typingSub = this.signalR.typing$.subscribe(isTyping => {
-      console.log('[ConversationDetail] Typing indicator changed:', isTyping);
       this.isTyping = isTyping;
       this.cdr.detectChanges();
     });
@@ -146,49 +163,57 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
     try {
       await this.signalR.connect();
       this.setupMessageSubscription();
+      this.subscribeToRouteParams();
     } catch (err) {
       console.error('[ConversationDetail] SignalR connect failed:', err);
       this.setupMessageSubscription();
+      this.subscribeToRouteParams();
     }
+  }
+
+  private subscribeToRouteParams(): void {
+    this.route.params.subscribe(async params => {
+      const id = params['id'];
+      if (id) {
+        this.conversationId = +id;
+        // Stop any existing refresh interval
+        this.stopRefreshInterval();
+        
+        try {
+          // Ensure SignalR is connected before joining
+          await this.signalR.connect();
+          // Join the conversation via SignalR
+          await this.signalR.joinConversation(this.conversationId);
+          // Re-setup SignalR subscription for the new conversation
+          this.setupMessageSubscription();
+          // Load the conversation messages
+          this.loadConversation();
+          // Start polling as fallback
+          this.startRefreshInterval();
+        } catch (err) {
+          console.error('[ConversationDetail] Failed to initialize SignalR:', err);
+          // Still try to load messages even if SignalR fails
+          this.loadConversation();
+          this.startRefreshInterval();
+        }
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['conversationId']) {
-      console.log('[ConversationDetail] Conversation changed to:', this.conversationId);
-      this.selectedMessageId = undefined;
-      
-      // Check if this is a new conversation request
-      if (this.conversationId === -1) {
-        this.isNewConversation = true;
-        this.messages = [];
-        this.shouldScroll = true;
-        this.stopRefreshInterval();
-        return;
-      }
-      
-      if (this.conversationId) {
-        this.stopRefreshInterval();
-        this.isNewConversation = false;
-        this.loadConversation();
-        this.signalR.joinConversation(this.conversationId);
-        // Reset messages when switching conversations
-        this.messages = [];
-        this.shouldScroll = true;
-        // Re-setup subscription for new conversation
-        this.setupMessageSubscription();
-        // Start polling as fallback
-        this.startRefreshInterval();
-      }
-    }
+    // No longer using @Input for conversationId, using route params instead
   }
 
   ngOnDestroy(): void {
-    console.log('[ConversationDetail] Destroying, cleaning up subscriptions');
     this.subs.forEach(s => s.unsubscribe());
     this.subs = [];
     this.stopRefreshInterval();
     if (this.typingTimeout) {
       clearTimeout(this.typingTimeout);
+    }
+    // Leave the conversation via SignalR
+    if (this.conversationId && this.conversationId !== -1) {
+      this.signalR.leaveConversation(this.conversationId);
     }
   }
 
@@ -197,17 +222,14 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
 
     this.convo.getConversation(this.conversationId).subscribe({
       next: (res) => {
-        console.log('[ConversationDetail] Loaded conversation:', res);
         const newMessages = (res.messages ?? []).filter(m => m != null);
         
-        // Only update UI if message count changed (optimization)
-        if (newMessages.length !== this.lastMessageCount) {
-          this.messages = newMessages;
-          this.lastMessageCount = newMessages.length;
-          this.shouldScroll = true;
-          this.cdr.detectChanges();
-          setTimeout(() => this.doScroll(), 50);
-        }
+        // Always update UI to show latest messages (remove optimization that was blocking updates)
+        this.messages = newMessages;
+        this.lastMessageCount = newMessages.length;
+        this.shouldScroll = true;
+        this.cdr.detectChanges();
+        setTimeout(() => this.doScroll(), 50);
       },
       error: (err) => console.error('[ConversationDetail] Failed to load conversation:', err)
     });
@@ -221,9 +243,8 @@ export class ConversationDetail implements OnInit, OnChanges, OnDestroy, AfterVi
 
     if (this.isNewConversation || this.conversationId === -1) {
       // Create a new conversation first, then send the message
-      this.convo.createConversation({ Message: messageToSend }).subscribe({
+      this.convo.createConversation({ Subject: this.subject, Message: messageToSend }).subscribe({
         next: async (res) => {
-          console.log('[ConversationDetail] New conversation created:', res);
           this.conversationId = res.conversationId;
           this.isNewConversation = false;
           // Join the conversation via SignalR

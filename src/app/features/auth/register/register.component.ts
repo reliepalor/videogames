@@ -61,6 +61,7 @@ export class RegisterComponent {
   }
 
   loginWithGoogle(): void {
+    this.cdr.detectChanges(); // Force change detection before setting loading
     this.isLoading = true;
     
     signInWithPopup(firebaseAuth, googleProvider)

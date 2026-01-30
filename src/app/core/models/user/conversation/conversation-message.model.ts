@@ -7,4 +7,8 @@ export interface ConversationMessage{
 
     senderUsername: string;
     senderEmail?: string;
+
+    reaction?: string;
+    showReactions?: boolean;
+
 }

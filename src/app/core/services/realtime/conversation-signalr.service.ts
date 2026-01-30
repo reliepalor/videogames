@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, NgZone } from '@angular/core';
 import {
   HubConnection,
   HubConnectionBuilder,
@@ -12,6 +12,7 @@ import { PLATFORM_ID } from '@angular/core';
 export class ConversationSignalRService {
 
   private platformId = inject(PLATFORM_ID);
+  private ngZone = inject(NgZone);
   private hub?: HubConnection;
 
   private connected = false;
@@ -71,26 +72,45 @@ export class ConversationSignalRService {
     if (!this.hub) return;
 
     this.hub.on('ReceiveMessage', msg => {
-      console.log('[SignalR] ReceiveMessage event received:', msg);
-      this.message$.next(msg);
-      this.conversationListUpdated$.next(true);
+      // Run inside NgZone to trigger Angular change detection
+      this.ngZone.run(() => {
+        console.log('[SignalR] ReceiveMessage event received:', msg);
+        this.message$.next(msg);
+        this.conversationListUpdated$.next(true);
+      });
     });
 
     this.hub.on('UserTyping', () => {
-      this.typing$.next(true);
-      setTimeout(() => this.typing$.next(false), 1500);
+      this.ngZone.run(() => {
+        this.typing$.next(true);
+        setTimeout(() => this.ngZone.run(() => this.typing$.next(false)), 1500);
+      });
     });
 
     this.hub.on('MessagesSeen', () => {
-      this.seen$.next(true);
+      this.ngZone.run(() => {
+        this.seen$.next(true);
+      });
     });
   }
 
   async joinConversation(id: number): Promise<void> {
+    // Wait for connection if connecting or not connected
+    if (this.hub?.state !== HubConnectionState.Connected) {
+      if (this.connectPromise) {
+        await this.connectPromise;
+      } else {
+        console.warn('[SignalR] Cannot join conversation: not connected');
+        return;
+      }
+    }
+
+    // Double-check state after waiting
     if (!this.hub || this.hub.state !== HubConnectionState.Connected) {
       console.warn('[SignalR] Cannot join conversation: not connected');
       return;
     }
+
     try {
       await this.hub.invoke('JoinConversation', id);
       console.log('[SignalR] Joined conversation:', id);
@@ -100,16 +120,40 @@ export class ConversationSignalRService {
   }
 
   async leaveConversation(id: number): Promise<void> {
+    // Wait for connection if connecting
+    if (this.hub?.state !== HubConnectionState.Connected) {
+      if (this.connectPromise) {
+        await this.connectPromise;
+      } else {
+        return;
+      }
+    }
     if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
     await this.hub.invoke('LeaveConversation', id);
   }
 
   async typing(id: number): Promise<void> {
+    // Wait for connection if connecting
+    if (this.hub?.state !== HubConnectionState.Connected) {
+      if (this.connectPromise) {
+        await this.connectPromise;
+      } else {
+        return;
+      }
+    }
     if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
     await this.hub.invoke('Typing', id);
   }
 
   async seen(id: number): Promise<void> {
+    // Wait for connection if connecting
+    if (this.hub?.state !== HubConnectionState.Connected) {
+      if (this.connectPromise) {
+        await this.connectPromise;
+      } else {
+        return;
+      }
+    }
     if (!this.hub || this.hub.state !== HubConnectionState.Connected) return;
     await this.hub.invoke('Seen', id);
   }
