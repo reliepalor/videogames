@@ -4,15 +4,13 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { CommonModule } from '@angular/common';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 import { FormsModule } from '@angular/forms';
-import { ReviewFormComponent } from '../../reviews/review-form';
 import { Subscription } from 'rxjs';
 
 @Component({
   standalone: true,
   selector: 'app-user-orders',
-  imports: [CommonModule, FormsModule, SkeletonBoxComponent, ReviewFormComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-orders.html',
   styleUrls: ['./user-orders.css'],
   encapsulation: ViewEncapsulation.None,

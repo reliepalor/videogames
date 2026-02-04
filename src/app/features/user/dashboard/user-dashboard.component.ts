@@ -25,36 +25,65 @@ import { Subscription } from 'rxjs';
     ::-webkit-scrollbar { display: none; }
     * { scrollbar-width: none; -ms-overflow-style: none; }
 
-    .animate-in {
-      opacity: 1 !important;
-      transform: translateY(0) scale(1) !important;
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px) scale(0.98);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      will-change: opacity, transform;
+    }
+
+    .reveal.animate-in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal {
+        transition: none;
+      }
+    }
+
+    .mask-image-gradient {
+      mask-image: linear-gradient(
+        to top,
+        rgba(0,0,0,1) 0%,
+        rgba(0,0,0,0.9) 40%,
+        rgba(0,0,0,0) 100%
+      );
     }
   `]
 })
 export class UserDashboardComponent
   implements OnInit, AfterViewInit, OnDestroy {
 
+  /* ================= VIEW REFERENCES ================= */
   @ViewChild('backgroundVideo', { static: true })
   backgroundVideo!: ElementRef<HTMLVideoElement>;
+
+  @ViewChild('scrollContainer', { static: true })
+  scrollContainer!: ElementRef<HTMLDivElement>;
 
   @ViewChild('auroraContainer', { static: false })
   auroraContainer!: ElementRef<HTMLDivElement>;
 
+  /* ================= SERVICES ================= */
   private themeService = inject(ThemeService);
   private cdr = inject(ChangeDetectorRef);
-  private themeSubscription?: Subscription;
   private platformId = inject(PLATFORM_ID);
 
+  private themeSubscription?: Subscription;
+  private carouselInterval!: any;
 
+  /* ================= STATE ================= */
   isDarkMode = false;
-  videoSrc = '/assets/videos/dark.mp4';
+  videoSrc = 'assets/videos/dark.mp4';
   isVisible = true;
 
-  /* ================== SPHERE ================== */
+  /* ================= SPHERE ================= */
   slices = Array(12).fill(0);
   sliceTransforms: string[] = [];
 
-  /* ================== CAROUSEL ================== */
+  /* ================= CAROUSEL ================= */
   cards = [
     { title: 'Fast Transactions', desc: 'Lightning-fast transaction processing with instant confirmations.', icon: 'zap', type: 'large' },
     { title: 'Secure Wallet', desc: 'Bank-level security with multi-signature protection.', icon: 'shield', type: 'wide' },
@@ -67,14 +96,16 @@ export class UserDashboardComponent
 
   offset = 0;
   cardWidth = 340;
-  carouselInterval!: any;
+
+  /* ================= LIFECYCLE ================= */
 
   ngOnInit() {
-    this.themeSubscription = this.themeService.isDarkMode$.subscribe(isDark => {
-      this.isDarkMode = isDark;
-      this.videoSrc = '/assets/videos/dark.mp4';
-      this.cdr.markForCheck();
-    });
+    this.themeSubscription = this.themeService.isDarkMode$
+      .subscribe(isDark => {
+        this.isDarkMode = isDark;
+        this.videoSrc = 'assets/videos/dark.mp4';
+        this.cdr.markForCheck();
+      });
 
     this.generateSphereLayers();
     this.staggerIn();
@@ -82,33 +113,84 @@ export class UserDashboardComponent
   }
 
   ngAfterViewInit() {
-    if (isPlatformBrowser(this.platformId)) {
-      const video = this.backgroundVideo.nativeElement;
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      video.addEventListener('loadeddata', () => {
+    /* ===== VIDEO AUTOPLAY SAFETY ===== */
+    const video = this.backgroundVideo?.nativeElement;
+    if (video) {
+      video.muted = true;
+      const tryPlay = () => {
         video.play().catch(() => {
-          document.addEventListener('click', () => video.play(), { once: true });
+          document.addEventListener(
+            'click',
+            () => video.play().catch(() => {}),
+            { once: true }
+          );
         });
-      });
+      };
+
+      video.addEventListener('loadeddata', tryPlay);
+      video.addEventListener('canplay', tryPlay);
+      requestAnimationFrame(tryPlay);
 
       setTimeout(() => {
-        if (video.paused) video.play().catch(() => {});
+        if (video.paused) {
+          tryPlay();
+        }
       }, 800);
-
-      
-
-      // Trigger bento grid animation
-      setTimeout(() => {
-        this.isVisible = true;
-        this.cdr.markForCheck();
-      }, 500);
     }
+
+    /* ===== SCROLL REVEAL ===== */
+    const rootEl = this.scrollContainer?.nativeElement ?? null;
+    const root =
+      rootEl && rootEl.scrollHeight > rootEl.clientHeight + 1 ? rootEl : null;
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, root, rootMargin: '0px 0px -10% 0px' }
+    );
+
+    const revealElements = Array.from(
+      document.querySelectorAll<HTMLElement>('.reveal')
+    );
+
+    // Animate anything already in view on load (after first paint).
+    const rootHeight = root?.clientHeight ?? window.innerHeight;
+    const rootTop = root?.getBoundingClientRect().top ?? 0;
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        revealElements.forEach(el => {
+          const rect = el.getBoundingClientRect();
+          const top = rect.top - rootTop;
+          const bottom = top + rect.height;
+          if (bottom > 0 && top < rootHeight) {
+            el.classList.add('animate-in');
+          }
+        });
+      }, 50);
+    });
+
+    revealElements.forEach(el => observer.observe(el));
+
+    /* ===== INITIAL VISIBILITY ===== */
+    setTimeout(() => {
+      this.isVisible = true;
+      this.cdr.markForCheck();
+    }, 500);
   }
 
   ngOnDestroy() {
     this.themeSubscription?.unsubscribe();
     clearInterval(this.carouselInterval);
   }
+
+  /* ================= LOGIC ================= */
 
   generateSphereLayers() {
     const layers = 12;
@@ -127,12 +209,11 @@ export class UserDashboardComponent
   }
 
   fadeIn(id: string) {
-    if (isPlatformBrowser(this.platformId)) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.style.opacity = '1';
-      el.style.transform = 'translateY(0)';
-    }
+    if (!isPlatformBrowser(this.platformId)) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
   }
 
   startCarousel() {
@@ -146,14 +227,14 @@ export class UserDashboardComponent
 
   @HostListener('mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    if (isPlatformBrowser(this.platformId)) {
-      const sphere = document.getElementById('sphere');
-      if (!sphere) return;
+    if (!isPlatformBrowser(this.platformId)) return;
 
-      const x = (event.clientX / window.innerWidth - 0.5) * 30;
-      const y = (event.clientY / window.innerHeight - 0.5) * -30;
-      sphere.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-    }
+    const sphere = document.getElementById('sphere');
+    if (!sphere) return;
+
+    const x = (event.clientX / window.innerWidth - 0.5) * 30;
+    const y = (event.clientY / window.innerHeight - 0.5) * -30;
+    sphere.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
   }
 
   togglePreview(video: HTMLVideoElement) {

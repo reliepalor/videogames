@@ -35,21 +35,60 @@
         + Add Game
       </button>
 
-      <button
-        (click)="toggleView('table')"
-        class="px-3 py-2 rounded-lg border cursor-pointer"
-        [class.bg-black]="viewMode === 'table'"
-        [class.text-white]="viewMode === 'table'">
-        📋
-      </button>
+        <div class="flex items-center gap-2">
 
-      <button
-        (click)="toggleView('card')"
-        class="px-3 py-2 rounded-lg border cursor-pointer"
-        [class.bg-black]="viewMode === 'card'"
-        [class.text-white]="viewMode === 'card'">
-        🧩
-      </button>
+          <!-- TABLE VIEW -->
+          <button
+            (click)="toggleView('table')"
+            class="group flex items-center justify-center
+                  w-10 h-10 rounded-xl border transition
+                  hover:bg-gray-900 hover:border-gray-300
+                  focus:outline-none focus:ring-4 focus:ring-purple-500/20 cursor-pointer"
+            [ngClass]="viewMode === 'table'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-500 border-gray-200'"
+            title="Table view"
+          >
+            <svg
+              class="w-5 h-5 transition-transform group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M3 6h18M3 12h18M3 18h18M6 6v12M12 6v12M18 6v12" />
+            </svg>
+          </button>
+
+          <!-- CARD VIEW -->
+          <button
+            (click)="toggleView('card')"
+            class="group flex items-center justify-center
+                  w-10 h-10 rounded-xl border transition
+                  hover:bg-gray-100 hover:border-gray-300
+                  focus:outline-none focus:ring-4 focus:ring-purple-500/20 cursor-pointer"
+            [ngClass]="viewMode === 'card'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-500 border-gray-200'"
+            title="Card view"
+          >
+            <svg
+              class="w-5 h-5 transition-transform group-hover:scale-110"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              viewBox="0 0 24 24"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1.5" />
+              <rect x="14" y="3" width="7" height="7" rx="1.5" />
+              <rect x="3" y="14" width="7" height="7" rx="1.5" />
+              <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+          </button>
+
+        </div>
+
 
     </div>
   </div>
@@ -105,31 +144,76 @@
   </div>
 
 
-  <!-- ================= CARD VIEW ================= -->
-  <div *ngIf="viewMode === 'card'"
-       class="animate-fade grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- ================= COMPACT CARD VIEW ================= -->
+    <div *ngIf="viewMode === 'card'"
+        class="animate-fade grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-    <div *ngFor="let game of games"
-         class="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all overflow-hidden">
+      <div *ngFor="let game of games"
+          class="group rounded-xl border border-gray-200 bg-white
+                  hover:border-gray-300 hover:shadow-sm
+                  transition overflow-hidden cursor-pointer">
 
-      <div class="h-48 bg-gray-100">
-        <img *ngIf="game.imageUrl" [src]="game.imageUrl" class="w-full h-full object-cover" />
-      </div>
+        <!-- IMAGE -->
+        <div class="relative h-36 bg-gray-100 overflow-hidden">
+          <img
+            *ngIf="game.imageUrl"
+            [src]="game.imageUrl"
+            class="w-full h-full object-cover
+                  transition-transform duration-300
+                  group-hover:scale-105"
+          />
 
-      <div class="p-5">
-        <h3 class="text-lg font-semibold text-gray-900">{{ game.title }}</h3>
-        <p class="text-sm text-gray-500">{{ game.platform }}</p>
-        <p class="mt-2 font-semibold text-gray-900">₱{{ game.price | number:'1.2-2' }}</p>
-
-        <div class="mt-4 flex justify-between items-center">
-          <button (click)="editGame(game.id)" class="text-sm text-blue-600 hover:underline">Edit</button>
-          <button (click)="confirmDelete(game.id)" class="text-sm text-red-600 hover:underline">Delete</button>
+          <!-- subtle bottom fade -->
+          <div class="absolute inset-x-0 bottom-0 h-16
+                      bg-gradient-to-t from-black/30 to-transparent">
+          </div>
         </div>
+
+        <!-- CONTENT -->
+        <div class="px-4 py-3 space-y-1">
+
+          <p class="text-[11px] uppercase tracking-wide text-gray-500">
+            {{ game.platform }}
+          </p>
+
+          <h3 class="text-sm font-semibold leading-tight text-gray-900 line-clamp-1">
+            {{ game.title }}
+          </h3>
+
+          <div class="flex items-center justify-between pt-2">
+
+            <span class="text-sm font-semibold text-gray-900">
+              ₱{{ game.price | number:'1.2-2' }}
+            </span>
+
+            <!-- ACTIONS -->
+            <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
+
+              <button
+                (click)="editGame(game.id)"
+                class="text-xs px-2 py-1 rounded-md
+                      border border-gray-200
+                      hover:bg-gray-100 transition cursor-pointer">
+                Edit
+              </button>
+
+              <button
+                (click)="confirmDelete(game.id)"
+                class="text-xs px-2 py-1 rounded-md
+                      border border-red-200 text-red-600
+                      hover:bg-red-50 transition cursor-pointer">
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
     </div>
 
-  </div>
 
 </div>
 

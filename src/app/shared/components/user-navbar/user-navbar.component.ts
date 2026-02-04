@@ -23,25 +23,7 @@ import { Profile } from '../../../core/models/user/UserProfile.model';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './user-navbar.component.html',
-  styles: [`
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .animate-fade-in {
-      animation: fadeIn 0.25s ease-out;
-    }
-
-    .animate-slide-up {
-      animation: slideUp 0.3s cubic-bezier(.22,1,.36,1);
-    }
-  `]
+  styleUrls: ['./user-navbar.component.css']
 })
 export class UserNavbarComponent implements OnInit, OnDestroy {
 
@@ -62,10 +44,13 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
 
   isDropdownOpen = false;
   isMobileMenuOpen = false;
+  isNavHidden = false;
 
   unreadCount = 2; // 🔴 MOCK for now (will be real-time later)
 
   private themeSubscription?: Subscription;
+  private lastScrollY = 0;
+  private scrollThreshold = 8;
 
   /* ===================== LIFECYCLE ===================== */
   ngOnInit(): void {
@@ -138,5 +123,32 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
     if (!this.elementRef.nativeElement.contains(event.target)) {
       this.closeAllMenus();
     }
+  }
+
+  /* ===================== SCROLL HIDE/SHOW ===================== */
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    const currentScroll = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const delta = currentScroll - this.lastScrollY;
+
+    if (Math.abs(delta) < this.scrollThreshold) {
+      return;
+    }
+
+    if (this.isMobileMenuOpen || this.isDropdownOpen) {
+      this.isNavHidden = false;
+      this.lastScrollY = currentScroll;
+      return;
+    }
+
+    if (currentScroll <= 0) {
+      this.isNavHidden = false;
+    } else if (delta > 0) {
+      this.isNavHidden = true;
+    } else {
+      this.isNavHidden = false;
+    }
+
+    this.lastScrollY = currentScroll;
   }
 }

@@ -52,14 +52,44 @@ export class GamesListComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   searchTerm$ = new BehaviorSubject<string>('')
+  filtersOpen = false
 
-  filteredGames$ = combineLatest([this.games$, this.searchTerm$]).pipe(
-    map(([games, term]) =>
-      games.filter(game =>
-        game.title?.toLowerCase().includes(term.toLowerCase()) ||
-        game.platform?.toLowerCase().includes(term.toLowerCase())
-      )
-    )
+  filters$ = new BehaviorSubject<{ platform: string; price: string }>({
+    platform: 'all',
+    price: 'any',
+  })
+
+  platforms$ = this.games$.pipe(
+    map(games => {
+      const platforms = games
+        .map(game => game.platform)
+        .filter((platform): platform is string => !!platform)
+      return Array.from(new Set(platforms)).sort()
+    })
+  )
+
+  filteredGames$ = combineLatest([this.games$, this.searchTerm$, this.filters$]).pipe(
+    map(([games, term, filters]) => {
+      const normalizedTerm = term.toLowerCase()
+      return games.filter(game => {
+        const matchesTerm =
+          game.title?.toLowerCase().includes(normalizedTerm) ||
+          game.platform?.toLowerCase().includes(normalizedTerm)
+
+        const matchesPlatform =
+          filters.platform === 'all' || game.platform === filters.platform
+
+        const matchesPrice = (() => {
+          if (filters.price === 'any') return true
+          if (filters.price === 'under-500') return game.price < 500
+          if (filters.price === '500-1000') return game.price >= 500 && game.price <= 1000
+          if (filters.price === 'over-1000') return game.price > 1000
+          return true
+        })()
+
+        return matchesTerm && matchesPlatform && matchesPrice
+      })
+    })
   )
 
   showSuccessModal = false
@@ -67,6 +97,24 @@ export class GamesListComponent implements OnInit, OnDestroy {
   successTimeout?: any
   isFadingOut = false
   loadingGames = new Set<number>()
+
+  toggleFilters(): void {
+    this.filtersOpen = !this.filtersOpen
+  }
+
+  setPlatform(platform: string): void {
+    const current = this.filters$.value
+    this.filters$.next({ ...current, platform })
+  }
+
+  setPrice(price: string): void {
+    const current = this.filters$.value
+    this.filters$.next({ ...current, price })
+  }
+
+  resetFilters(): void {
+    this.filters$.next({ platform: 'all', price: 'any' })
+  }
 
   showSuccessMessage(message: string): void {
     this.ngZone.run(() => {

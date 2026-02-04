@@ -1,0 +1,49 @@
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(.22,1,.36,1);
+}
+
+.nav-swipe {
+  will-change: transform, opacity, filter;
+  transition:
+    transform 900ms cubic-bezier(.22,1,.36,1),
+    opacity 700ms ease,
+    filter 900ms ease;
+}
+
+.nav-hidden {
+  opacity: 0;
+  transform: translateY(-20px) scale(0.97);
+  filter: blur(2px);
+  transition-duration: 900ms, 700ms, 900ms;
+}
+
+.nav-shown {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+  transition-duration: 520ms, 360ms, 520ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-swipe {
+    transition: none;
+  }
+  .nav-hidden,
+  .nav-shown {
+    transition: none;
+  }
+}

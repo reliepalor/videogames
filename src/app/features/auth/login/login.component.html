@@ -1,15 +1,15 @@
-<div class="min-h-screen flex bg-white">
+<div class="min-h-screen flex flex-col lg:flex-row bg-white">
 
   <!-- LEFT SIDE: LOGIN -->
-  <div class="w-[70%] flex items-center justify-center">
+  <div class="w-full lg:w-[70%] flex items-center justify-center px-4 sm:px-0 mt-10 sm:mt-0 lg:mt-0">
 
-    <div class="w-full max-w-sm px-8">
+    <div class="w-full max-w-sm px-6 sm:px-8">
 
       <!-- Logo / Icon -->
       <div class="flex justify-center mb-6">
         <div class="w-10 h-10 rounded-full border-2 border-purple-400 flex items-center justify-center">
           <svg 
-            class="w-7 h-7 text-purple-600 flex-shrink-0"
+            class="w-7 h-7 text-purple-600"
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="currentColor" 
@@ -27,22 +27,23 @@
         Welcome back
       </h2>
 
+      <!-- Google Login -->
       <button
         type="button"
         (click)="loginWithGoogle()"
         [disabled]="isLoading"
         class="w-full flex items-center justify-center gap-3
-              border border-gray-300 rounded-full py-3
-              text-sm font-medium text-gray-800
-              hover:bg-gray-50 transition cursor-pointer"
+               border border-gray-300 rounded-full py-3
+               text-sm font-medium text-gray-800
+               hover:bg-gray-50 transition"
       >
         <img src="https://www.svgrepo.com/show/475656/google-color.svg"
-            class="w-5 h-5" />
+             class="w-5 h-5" />
         Continue with Google
       </button>
-      <!-- Divider -->
-      <div class="my-6 h-[1px] rounded-full bg-gray-300"></div>
 
+      <!-- Divider -->
+      <div class="my-6 h-px rounded-full bg-gray-300"></div>
       <p class="text-center text-sm text-gray-400 mb-4">or</p>
 
       <!-- FORM -->
@@ -51,50 +52,38 @@
         (ngSubmit)="submit()"
         class="space-y-5"
       >
-
-        <!-- EMAIL -->
         <input
           type="email"
           formControlName="email"
           placeholder="Enter email or username"
           class="w-full rounded-xl border border-gray-300 px-4 py-3
                  text-gray-900 placeholder-gray-400
-                 focus:outline-none focus:ring-2 focus:ring-purple-500
-                 transition"
+                 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
 
-        <!-- PASSWORD -->
         <input
           type="password"
           formControlName="password"
           placeholder="Password"
           class="w-full rounded-xl border border-gray-300 px-4 py-3
                  text-gray-900 placeholder-gray-400
-                 focus:outline-none focus:ring-2 focus:ring-purple-500
-                 transition"
+                 focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
 
-        <!-- ERROR -->
         <p *ngIf="errorMessage" class="text-sm text-red-600 text-center">
           {{ errorMessage }}
         </p>
-        
 
-
-        <!-- BUTTON -->
         <button
           type="submit"
           [disabled]="isLoading"
           class="w-full rounded-full bg-gradient-to-r from-[#0f1027] to-[#191a3a]
                  text-white py-3 text-sm font-medium
                  hover:opacity-90 transition
-                 disabled:opacity-50 cursor-pointer"
+                 disabled:opacity-50"
         >
           {{ isLoading ? 'Signing in…' : 'Continue' }}
         </button>
-
-        
-
       </form>
 
       <!-- FOOTER -->
@@ -109,8 +98,8 @@
     </div>
   </div>
 
-  <!-- RIGHT SIDE: VIDEO -->
-  <div class="w-[30%] relative overflow-hidden">
+  <!-- RIGHT SIDE: VIDEO (hidden on mobile) -->
+  <div class="hidden lg:block lg:w-[30%] relative overflow-hidden">
 
     <video
       src="/assets/videos/mushroom.mp4"

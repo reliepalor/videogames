@@ -5,11 +5,15 @@
   class="fixed top-4 left-1/2 -translate-x-1/2 z-50
          w-[95%] max-w-7xl
          rounded-2xl backdrop-blur-xl
-         border shadow-lg
-         transition-all duration-300"
-  [ngClass]="isDarkMode
-    ? 'bg-white/10 border-white/20 text-white'
-    : 'bg-white/70 border-gray-200 text-gray-900'">
+         border shadow-lg nav-swipe"
+  [ngClass]="[
+    isDarkMode
+      ? 'bg-white/10 border-white/20 text-white'
+      : 'bg-white/70 border-gray-200 text-gray-900',
+    isNavHidden
+      ? 'nav-hidden opacity-0 pointer-events-none -translate-y-24 scale-95 blur-sm'
+      : 'nav-shown opacity-100 translate-y-0 scale-100 blur-0'
+  ]">
 
   <div class="flex items-center justify-between px-6 py-3">
 

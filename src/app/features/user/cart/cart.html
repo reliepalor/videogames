@@ -1,10 +1,9 @@
 <div class="max-w-6xl mx-auto px-6 py-10 mt-10 transition-colors"
-      [ngClass]="isDarkMode() ? 'text-gray-100' : 'bg-white text-gray-900'">
+     [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'">
 
   <!-- HEADER -->
-  <div class="flex items-center justify-between mb-8">
-    <h1 class="text-3xl font-semibold tracking-tight"
-         [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+  <div class="flex items-center justify-between mb-10">
+    <h1 class="text-3xl font-semibold tracking-tight">
       Shopping Cart
     </h1>
 
@@ -13,15 +12,20 @@
       [(ngModel)]="search"
       (input)="filterItems()"
       placeholder="Search"
-      class="w-64 px-4 py-2.5 rounded-full border text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/30"
-      [ngClass]="isDarkMode() ? 'border-white/10 bg-[#121216] text-gray-200 placeholder-gray-500' : 'border-gray-200 bg-gray-50 text-gray-800 placeholder-gray-400'"
+      class="w-64 px-4 py-2.5 rounded-full border text-sm
+             focus:outline-none focus:ring-2 focus:ring-purple-400/30 transition"
+      [ngClass]="isDarkMode()
+        ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500'
+        : 'border-gray-300 bg-gray-50 text-gray-800 placeholder-gray-400'"
     />
   </div>
 
   <!-- ERROR -->
   <div *ngIf="errorMsg"
-       class="mb-6 px-5 py-3 rounded-xl text-sm font-medium"
-       [ngClass]="isDarkMode() ? 'bg-red-500/10 text-red-400' : 'bg-red-50 text-red-600'">
+       class="mb-6 px-4 py-3 rounded-xl text-sm"
+       [ngClass]="isDarkMode()
+         ? 'bg-red-900/20 text-red-400'
+         : 'bg-red-100 text-red-700'">
     {{ errorMsg }}
   </div>
 
@@ -33,22 +37,23 @@
       <input
         type="checkbox"
         class="ios-checkbox cursor-pointer"
-        [ngClass]="isDarkMode() ? 'border-white/20' : 'border-gray-400'"
         [(ngModel)]="selectAll"
         (change)="toggleSelectAll()"
       />
-      <span class="text-sm"
-            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+      <span class="text-sm opacity-70">
         Select all items
       </span>
     </div>
 
     <!-- ITEMS -->
     <div class="space-y-4">
+
       <div
         *ngFor="let item of filteredItems; trackBy: trackByFn"
-        class="flex items-center justify-between rounded-2xl px-6 py-4 shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-        [ngClass]="isDarkMode() ? 'bg-[#121216] border-white/10 shadow-none' : 'bg-white border-gray-200'"
+        class="flex items-center justify-between rounded-2xl px-6 py-4 border transition"
+        [ngClass]="isDarkMode()
+          ? 'bg-gray-800 border-gray-700'
+          : 'bg-white border-gray-200'"
       >
 
         <!-- LEFT -->
@@ -56,7 +61,6 @@
           <input
             type="checkbox"
             class="ios-checkbox cursor-pointer"
-            [ngClass]="isDarkMode() ? 'border-white/20' : 'border-gray-400'"
             [(ngModel)]="item.selected"
             (change)="toggleItem()"
           />
@@ -68,12 +72,10 @@
           />
 
           <div>
-            <h3 class="text-sm font-medium"
-                [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+            <h3 class="text-sm font-medium">
               {{ item.title }}
             </h3>
-            <p class="text-xs"
-               [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+            <p class="text-xs opacity-70">
               ₱{{ item.price | number:'1.2-2' }}
             </p>
           </div>
@@ -81,15 +83,13 @@
 
         <!-- RIGHT -->
         <div class="flex items-center gap-6">
-          <span class="text-sm font-semibold w-24 text-right"
-                [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+          <span class="text-sm font-medium w-24 text-right">
             ₱{{ item.subtotal | number:'1.2-2' }}
           </span>
 
           <button
             (click)="removeItem(item)"
-            class="text-xs transition hover:text-red-500"
-            [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'"
+            class="text-xs opacity-60 hover:text-red-500 transition"
           >
             Remove
           </button>
@@ -98,18 +98,19 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="mt-10 flex items-center justify-between border-t pt-6"
-         [ngClass]="isDarkMode() ? 'border-white/10' : 'border-gray-200'">
-      <div class="text-xl font-semibold"
-           [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+    <div class="mt-12 flex items-center justify-between border-t pt-6"
+         [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
+
+      <div class="text-xl font-medium">
         Total: ₱{{ total | number:'1.2-2' }}
       </div>
 
       <button
         (click)="checkout()"
         [disabled]="!total || loading"
-        class="px-8 py-3 rounded-full text-white text-sm font-medium transition disabled:opacity-40 disabled:cursor-not-allowed"
-        [ngClass]="isDarkMode() ? 'bg-violet-500 hover:bg-violet-400' : 'bg-violet-600 hover:bg-violet-700'"
+        class="px-8 py-3 rounded-full text-white text-sm font-medium
+               bg-purple-600 hover:bg-purple-700
+               transition disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Checkout
       </button>
@@ -119,8 +120,7 @@
 
   <!-- EMPTY -->
   <ng-template #empty>
-    <div class="py-24 text-center text-sm"
-         [ngClass]="isDarkMode() ? 'text-gray-500' : 'text-gray-400'">
+    <div class="py-24 text-center text-sm opacity-60">
       Your cart is empty
     </div>
   </ng-template>
@@ -129,15 +129,13 @@
   <div *ngIf="showSuccessModal"
        class="fixed inset-0 bg-black/30 backdrop-blur-sm
               flex items-center justify-center z-50">
-    <div class="rounded-2xl p-8 w-80 text-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] animate-fade-in"
-         [ngClass]="isDarkMode() ? 'bg-[#121216]' : 'bg-white'">
-      <div class="text-violet-600 dark:text-violet-400 text-4xl mb-4">✓</div>
-      <h2 class="text-lg font-semibold mb-1"
-          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+    <div class="rounded-2xl p-8 w-80 text-center shadow-xl"
+         [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
+      <div class="text-purple-600 dark:text-purple-400 text-4xl mb-4">✓</div>
+      <h2 class="text-lg font-medium mb-1">
         Checkout Complete
       </h2>
-      <p class="text-sm"
-         [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+      <p class="text-sm opacity-70">
         Your order was placed successfully.
       </p>
     </div>
@@ -147,15 +145,13 @@
   <div *ngIf="showRemoveSuccessModal"
        class="fixed inset-0 bg-black/30 backdrop-blur-sm
               flex items-center justify-center z-50">
-    <div class="rounded-2xl p-6 w-72 text-center shadow-[0_20px_40px_rgba(0,0,0,0.15)] animate-fade-in"
-         [ngClass]="isDarkMode() ? 'bg-[#121216]' : 'bg-white'">
+    <div class="rounded-2xl p-6 w-72 text-center shadow-xl"
+         [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
       <div class="text-green-600 dark:text-green-400 text-3xl mb-3">✓</div>
-      <h2 class="text-lg font-semibold mb-1"
-          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+      <h2 class="text-lg font-medium mb-1">
         Item Removed
       </h2>
-      <p class="text-sm"
-         [ngClass]="isDarkMode() ? 'text-gray-400' : 'text-gray-500'">
+      <p class="text-sm opacity-70">
         Cart item removed successfully.
       </p>
     </div>
