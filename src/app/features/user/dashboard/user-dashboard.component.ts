@@ -1,243 +1,244 @@
 import {
-  Component,
-  HostListener,
-  OnInit,
   AfterViewInit,
-  ViewChild,
+  Component,
   ElementRef,
-  inject,
+  HostListener,
   OnDestroy,
-  ChangeDetectorRef,
-  Inject,
-  PLATFORM_ID
+  ViewChild,
+  ViewEncapsulation,
+  inject,
+  PLATFORM_ID,
 } from '@angular/core';
-import { RouterModule } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ThemeService } from '../../../core/services/theme.service';
-import { Subscription } from 'rxjs';
+import { RouterLink } from '@angular/router';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  BestSeller,
+  ReportsService,
+} from 'src/app/core/services/bestseller/reports.service';
+import { Observable, catchError, map, of, tap } from 'rxjs';
+import { environment } from 'src/environments/environment';
+
+type Particle = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  r: number;
+};
 
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
+  imports: [CommonModule, RouterLink],
   templateUrl: './user-dashboard.html',
-  imports: [RouterModule, CommonModule],
-  styles: [`
-    ::-webkit-scrollbar { display: none; }
-    * { scrollbar-width: none; -ms-overflow-style: none; }
-
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px) scale(0.98);
-      transition: opacity 0.7s ease, transform 0.7s ease;
-      will-change: opacity, transform;
-    }
-
-    .reveal.animate-in {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal {
-        transition: none;
-      }
-    }
-
-    .mask-image-gradient {
-      mask-image: linear-gradient(
-        to top,
-        rgba(0,0,0,1) 0%,
-        rgba(0,0,0,0.9) 40%,
-        rgba(0,0,0,0) 100%
-      );
-    }
-  `]
+  styleUrls: ['./user-dashboardd.css'],
+  encapsulation: ViewEncapsulation.None,
 })
-export class UserDashboardComponent
-  implements OnInit, AfterViewInit, OnDestroy {
+export class UserDashboardComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('particleCanvas', { static: false })
+  particleCanvas?: ElementRef<HTMLCanvasElement>;
 
-  /* ================= VIEW REFERENCES ================= */
-  @ViewChild('backgroundVideo', { static: true })
-  backgroundVideo!: ElementRef<HTMLVideoElement>;
+  cartCount = 0;
 
-  @ViewChild('scrollContainer', { static: true })
-  scrollContainer!: ElementRef<HTMLDivElement>;
-
-  @ViewChild('auroraContainer', { static: false })
-  auroraContainer!: ElementRef<HTMLDivElement>;
-
-  /* ================= SERVICES ================= */
-  private themeService = inject(ThemeService);
-  private cdr = inject(ChangeDetectorRef);
   private platformId = inject(PLATFORM_ID);
+  private reportsService = inject(ReportsService);
+  private gsapContext?: gsap.Context;
+  private navTrigger?: ScrollTrigger;
+  private particles: Particle[] = [];
+  private particleCtx?: CanvasRenderingContext2D;
+  private animationFrameId?: number;
+  private refreshTimeoutId?: number;
+  apiUrl = environment.apiUrl;
 
-  private themeSubscription?: Subscription;
-  private carouselInterval!: any;
+  bestSellers$: Observable<Array<BestSeller & { percent: number }> | null> =
+    this.reportsService.getBestSellers().pipe(
+    map((sales) => {
+      if (!sales || sales.length === 0) return null;
+      const total = sales.reduce((sum, item) => sum + item.totalRevenue, 0);
+      return [...sales]
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
+        .slice(0, 6)
+        .map((item) => ({
+          ...item,
+          percent: total ? parseFloat(((item.totalRevenue / total) * 100).toFixed(1)) : 0,
+        }));
+    }),
+    catchError(() => of(null)),
+    tap(() => {
+      if (isPlatformBrowser(this.platformId)) {
+        this.deferVisualRefresh();
+      }
+    })
+  );
 
-  /* ================= STATE ================= */
-  isDarkMode = false;
-  videoSrc = 'assets/videos/dark.mp4';
-  isVisible = true;
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
 
-  /* ================= SPHERE ================= */
-  slices = Array(12).fill(0);
-  sliceTransforms: string[] = [];
+    gsap.registerPlugin(ScrollTrigger);
 
-  /* ================= CAROUSEL ================= */
-  cards = [
-    { title: 'Fast Transactions', desc: 'Lightning-fast transaction processing with instant confirmations.', icon: 'zap', type: 'large' },
-    { title: 'Secure Wallet', desc: 'Bank-level security with multi-signature protection.', icon: 'shield', type: 'wide' },
-    { title: 'Buy & Sell Instantly', desc: 'Trade cryptocurrencies 24/7 with real-time market data.', icon: 'repeat', type: 'tall' },
-    { title: 'Multi-Currency Support', desc: 'Support for 100+ cryptocurrencies and fiat currencies.', icon: 'coins', type: 'normal' },
-    { title: 'AI Price Forecast', desc: 'Advanced AI algorithms predict market trends.', icon: 'activity', type: 'normal' },
-    { title: '24/7 Support', desc: 'Get help anytime with our dedicated support team.', icon: 'help', type: 'normal' },
-    { title: 'Low Fees', desc: 'Enjoy competitive fees on all transactions.', icon: 'dollar', type: 'wide' }
-  ];
+    this.setupNavTrigger();
+    this.setupAnimations();
+    this.setupParticles();
+    this.updateScrollProgress();
+    this.deferVisualRefresh();
+  }
 
-  offset = 0;
-  cardWidth = 340;
+  ngOnDestroy(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
 
-  /* ================= LIFECYCLE ================= */
+    this.navTrigger?.kill();
+    this.gsapContext?.revert();
 
-  ngOnInit() {
-    this.themeSubscription = this.themeService.isDarkMode$
-      .subscribe(isDark => {
-        this.isDarkMode = isDark;
-        this.videoSrc = 'assets/videos/dark.mp4';
-        this.cdr.markForCheck();
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+    if (this.refreshTimeoutId) {
+      clearTimeout(this.refreshTimeoutId);
+    }
+  }
+
+  onAddToCart(): void {
+    this.cartCount++;
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateScrollProgress();
+    }
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.resizeCanvas();
+    }
+  }
+
+  private setupNavTrigger(): void {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+
+    this.navTrigger = ScrollTrigger.create({
+      start: 'top -80',
+      onEnter: () => nav.classList.add('nav-solid'),
+      onLeaveBack: () => nav.classList.remove('nav-solid'),
+    });
+  }
+
+  private setupAnimations(): void {
+    this.gsapContext = gsap.context(() => {
+      gsap.from('#heroText span', {
+        opacity: 0,
+        y: 40,
+        rotateX: -90,
+        stagger: 0.08,
+        duration: 1.2,
+        ease: 'expo.out',
       });
 
-    this.generateSphereLayers();
-    this.staggerIn();
-    this.startCarousel();
+      gsap.utils.toArray<HTMLElement>('.product-card').forEach((card) => {
+        gsap.fromTo(
+          card,
+          { rotateY: 16, y: 30, opacity: 0 },
+          {
+            rotateY: 0,
+            y: 0,
+            opacity: 1,
+            duration: 0.8,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: card,
+              start: 'top 85%',
+              end: 'bottom 20%',
+              toggleActions: 'play reverse play reverse',
+            },
+          }
+        );
+      });
+    });
   }
 
-  ngAfterViewInit() {
-    if (!isPlatformBrowser(this.platformId)) return;
+  private updateScrollProgress(): void {
+    const progressBar = document.getElementById('scroll-progress');
+    if (!progressBar) return;
 
-    /* ===== VIDEO AUTOPLAY SAFETY ===== */
-    const video = this.backgroundVideo?.nativeElement;
-    if (video) {
-      video.muted = true;
-      const tryPlay = () => {
-        video.play().catch(() => {
-          document.addEventListener(
-            'click',
-            () => video.play().catch(() => {}),
-            { once: true }
-          );
-        });
-      };
+    const maxScroll = document.body.scrollHeight - innerHeight;
+    const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+    gsap.to(progressBar, { width: `${progress * 100}%`, duration: 0.1 });
+  }
 
-      video.addEventListener('loadeddata', tryPlay);
-      video.addEventListener('canplay', tryPlay);
-      requestAnimationFrame(tryPlay);
+  private setupParticles(): void {
+    const canvas = this.particleCanvas?.nativeElement;
+    if (!canvas) return;
 
-      setTimeout(() => {
-        if (video.paused) {
-          tryPlay();
-        }
-      }, 800);
+    this.particleCtx = canvas.getContext('2d') ?? undefined;
+    if (!this.particleCtx) return;
+
+    this.resizeCanvas();
+
+    if (this.particles.length === 0) {
+      this.particles = Array.from({ length: 30 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: Math.random() - 0.5,
+        vy: Math.random() - 0.5,
+        r: Math.random() * 3 + 1,
+      }));
     }
 
-    /* ===== SCROLL REVEAL ===== */
-    const rootEl = this.scrollContainer?.nativeElement ?? null;
-    const root =
-      rootEl && rootEl.scrollHeight > rootEl.clientHeight + 1 ? rootEl : null;
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-in');
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, root, rootMargin: '0px 0px -10% 0px' }
-    );
+    if (!this.animationFrameId) {
+      this.animateParticles();
+    }
+  }
 
-    const revealElements = Array.from(
-      document.querySelectorAll<HTMLElement>('.reveal')
-    );
+  private resizeCanvas(): void {
+    const canvas = this.particleCanvas?.nativeElement;
+    if (!canvas) return;
 
-    // Animate anything already in view on load (after first paint).
-    const rootHeight = root?.clientHeight ?? window.innerHeight;
-    const rootTop = root?.getBoundingClientRect().top ?? 0;
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+  }
+
+  private animateParticles(): void {
+    const ctx = this.particleCtx;
+    const canvas = this.particleCanvas?.nativeElement;
+    if (!ctx || !canvas) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (const p of this.particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fill();
+    }
+
+    this.animationFrameId = requestAnimationFrame(() => this.animateParticles());
+  }
+
+  private deferVisualRefresh(): void {
     requestAnimationFrame(() => {
-      setTimeout(() => {
-        revealElements.forEach(el => {
-          const rect = el.getBoundingClientRect();
-          const top = rect.top - rootTop;
-          const bottom = top + rect.height;
-          if (bottom > 0 && top < rootHeight) {
-            el.classList.add('animate-in');
-          }
-        });
-      }, 50);
+      this.resizeCanvas();
+      this.setupParticles();
+      ScrollTrigger.refresh();
     });
 
-    revealElements.forEach(el => observer.observe(el));
-
-    /* ===== INITIAL VISIBILITY ===== */
-    setTimeout(() => {
-      this.isVisible = true;
-      this.cdr.markForCheck();
-    }, 500);
-  }
-
-  ngOnDestroy() {
-    this.themeSubscription?.unsubscribe();
-    clearInterval(this.carouselInterval);
-  }
-
-  /* ================= LOGIC ================= */
-
-  generateSphereLayers() {
-    const layers = 12;
-    const depth = 60;
-
-    this.sliceTransforms = Array.from({ length: layers }).map((_, i) => {
-      const offset = i - layers / 2;
-      return `translateZ(${offset * (depth / layers)}px)`;
-    });
-  }
-
-  staggerIn() {
-    setTimeout(() => this.fadeIn('heroText'), 100);
-    setTimeout(() => this.fadeIn('sphereWrapper'), 400);
-    setTimeout(() => this.fadeIn('heroButtons'), 700);
-  }
-
-  fadeIn(id: string) {
-    if (!isPlatformBrowser(this.platformId)) return;
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.opacity = '1';
-    el.style.transform = 'translateY(0)';
-  }
-
-  startCarousel() {
-    this.carouselInterval = setInterval(() => {
-      this.offset -= this.cardWidth;
-      if (Math.abs(this.offset) >= this.cards.length * this.cardWidth) {
-        this.offset = 0;
-      }
-    }, 2200);
-  }
-
-  @HostListener('mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    const sphere = document.getElementById('sphere');
-    if (!sphere) return;
-
-    const x = (event.clientX / window.innerWidth - 0.5) * 30;
-    const y = (event.clientY / window.innerHeight - 0.5) * -30;
-    sphere.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
-  }
-
-  togglePreview(video: HTMLVideoElement) {
-    video.paused ? video.play() : video.pause();
+    this.refreshTimeoutId = window.setTimeout(() => {
+      this.resizeCanvas();
+      this.setupParticles();
+      ScrollTrigger.refresh();
+    }, 200);
   }
 }

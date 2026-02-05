@@ -1,242 +1,117 @@
-<div #scrollContainer class="relative min-h-screen w-full bg-black">
+<div class="scroll-smooth bg-black text-white antialiased">
+  <!-- Scroll Progress -->
+  <div
+    id="scroll-progress"
+    class="fixed top-0 left-0 h-[3px] z-50 bg-gradient-to-r from-blue-500 to-cyan-400 w-0"
+  ></div>
 
-  <!-- ================= HERO ================= -->
-  <section class="relative min-h-screen w-full overflow-hidden">
+  <!-- NAV -->
+  <header
+    id="navbar"
+    class="fixed top-0 w-full z-40 backdrop-blur-xl bg-white/10 border-b border-white/10 transition-all"
+  >
 
-    <!-- ================= HERO VIDEO BACKGROUND ================= -->
-    <video #backgroundVideo
-      class="absolute inset-0 w-full h-full object-cover z-0"
-      [src]="videoSrc"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto">
-    </video>
+  </header>
 
-    <!-- DARK OVERLAY -->
-    <div class="absolute inset-0 bg-black/40 z-0"></div>
+  <!-- HERO -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <canvas #particleCanvas id="particleCanvas" class="absolute inset-0"></canvas>
 
-    <!-- ================= HERO CONTENT ================= -->
-    <div class="relative z-10 px-10 pt-28 max-w-7xl mx-auto">
-
-    <h1 class="text-6xl font-bold leading-tight text-white">
-      Explore your games<br />
-      with <span class="text-purple-600">Outspace.</span>
-    </h1>
-
-    <p class="text-xl mt-6 max-w-xl text-gray-200">
-      Get access to unlimited games on Outspace resources and make your experience look real.
-    </p>
-
-    <button
-      class="mt-8 px-8 py-4 text-white rounded-2xl text-lg font-semibold transition"
-      [ngClass]="isDarkMode
-        ? 'bg-purple-500 hover:bg-purple-600'
-        : 'bg-blue-500 hover:bg-blue-600'">
-      Explore now
-    </button>
-
-    <!-- ================= GAME PREVIEWS ================= -->
-    <div class="mt-10 flex gap-6">
-
-      <!-- PREVIEW 1 -->
-      <div
-        class="relative w-80 h-48 bg-white/10 rounded-2xl
-               backdrop-blur-sm border border-white/20 p-3"
-        (mouseenter)="preview1.play()"
-        (mouseleave)="preview1.pause()">
-
-        <video #preview1
-          src="assets/videos/3dqwe.mp4"
-          class="w-full h-full object-cover rounded-xl"
-          muted loop preload="auto"></video>
-
-        <button
-          class="absolute bottom-3 left-3 w-10 h-10
-                 flex items-center justify-center rounded-full
-                 backdrop-blur-sm transition opacity-60 hover:opacity-100"
-          [ngClass]="isDarkMode
-            ? 'bg-black/40 border border-white/20'
-            : 'bg-white/40 border border-black/20'"
-          (click)="togglePreview(preview1); $event.stopPropagation();">
-
-          <svg *ngIf="preview1.paused"
-            class="w-5 h-5"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
-            viewBox="0 0 24 24"
-            fill="currentColor">
-            <path d="M5 3l14 9-14 9V3z"/>
-          </svg>
-        </button>
-      </div>
-
-      <!-- PREVIEW 2 -->
-      <div
-        class="relative w-80 h-48 rounded-2xl
-               backdrop-blur-sm p-3"
-        [ngClass]="isDarkMode
-          ? 'bg-white/10 border border-white/20'
-          : 'bg-black/10 border border-black/20'"
-        (mouseenter)="preview2.play()"
-        (mouseleave)="preview2.pause()">
-
-        <video #preview2
-          src="assets/videos/3d1.mp4"
-          class="w-full h-full object-cover rounded-xl"
-          muted loop preload="auto"></video>
-
-        <button
-          class="absolute bottom-3 left-3 w-10 h-10
-                 flex items-center justify-center rounded-full
-                 backdrop-blur-sm transition opacity-60 hover:opacity-100"
-          [ngClass]="isDarkMode
-            ? 'bg-black/40 border border-white/20'
-            : 'bg-white/40 border border-black/20'"
-          (click)="togglePreview(preview2); $event.stopPropagation();">
-
-          <svg *ngIf="preview2.paused"
-            class="w-5 h-5"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
-            viewBox="0 0 24 24"
-            fill="currentColor">
-            <path d="M5 3l14 9-14 9V3z"/>
-          </svg>
-
-          <svg *ngIf="!preview2.paused"
-            class="w-5 h-5"
-            [ngClass]="isDarkMode ? 'text-white' : 'text-black'"
-            viewBox="0 0 24 24"
-            fill="currentColor">
-            <path d="M9 5h2v14H9zM13 5h2v14h-2z"/>
-          </svg>
-        </button>
-      </div>
-
-    </div>
+    <div class="relative z-10 text-center max-w-3xl px-6">
+      <h1 id="heroText" class="text-5xl md:text-7xl font-semibold leading-tight">
+        <span class="block font-bold">Premium Digital Products.</span>
+        <span class="block font-bold">Instantly Delivered.</span>
+      </h1>
+      <p class="mt-6 text-white/70 text-lg">Genuine licenses. Secure checkout. Zero waiting.</p>
+      <button
+        class="mt-10 px-8 py-4 rounded-full bg-purple-600 hover:bg-purple-500 transition shadow-xl"
+        type="button"
+      >
+        Explore Products
+      </button>
     </div>
   </section>
 
-  <!-- ================= TYPOGRAPHY-FIRST LANDING ================= -->
-  <div class="bg-black text-white relative z-10">
+  <!-- PRODUCTS -->
+  <section id="products" class="py-32 max-w-7xl mx-auto px-6">
+    <h2 class="text-4xl font-semibold mb-16">Best Sellers</h2>
 
-    <!-- === BIG TYPOGRAPHY INTRO === -->
-    <section class="min-h-screen flex items-center justify-center px-6 py-12">
-      <div class="text-center space-y-6 reveal">
-
-        <h1 class="text-7xl font-extrabold leading-tight">
-          Discover <br>
-          Your Digital Universe
-        </h1>
-
-        <p class="text-xl text-gray-300 max-w-2xl mx-auto">
-          A new way to explore, purchase, and master the games you love — all in one place.
-        </p>
-
-        <button
-          class="mt-6 px-8 py-4 bg-purple-600 text-lg font-semibold rounded-full
-                hover:bg-purple-700 transition"
+    <ng-container *ngIf="bestSellers$ | async as bestSellers; else bestSellersLoading">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10" *ngIf="bestSellers?.length; else bestSellersLoading">
+        <div
+          class="product-card group border border-gray-800 cursor-pointer"
+          *ngFor="let game of bestSellers"
         >
-          Get Started
-        </button>
-
+          <div class="product-thumb">
+            <img
+              *ngIf="game.imagePath; else noImage"
+              [src]="apiUrl + game.imagePath"
+              [alt]="game.title"
+              loading="lazy"
+            />
+            <ng-template #noImage>
+              <div class="product-thumb--placeholder">No Image</div>
+            </ng-template>
+          </div>
+          <span class="badge">{{ game.totalQuantity }} sold</span>
+          <h3>{{ game.title }}</h3>
+          <!-- <p class="price">{{ game.totalQuantity }} sold</p> -->
+          <p class="price">PHP {{ game.totalRevenue | number:'1.0-0' }}</p>
+          <button class="add-to-cart cursor-pointer" type="button" (click)="onAddToCart()">Add to Cart</button>
+        </div>
       </div>
-    </section>
+    </ng-container>
 
-    <!-- === FEATURE BAND (FULL WIDTH) === -->
-    <section class="py-24 bg-gradient-to-b from-[#0d0b12] to-black reveal">
-      <div class="max-w-6xl mx-auto space-y-8 text-center">
-
-        <h2 class="text-5xl font-bold">
-          Built For Modern Gamers
-        </h2>
-
-        <p class="text-lg text-gray-400 max-w-3xl mx-auto">
-          Lightning-fast delivery, secure transactions, and curated recommendations — all backed by community insights.
-        </p>
-
+    <ng-template #bestSellersLoading>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div class="product-card skeleton-card" *ngFor="let _ of [1,2,3,4,5,6]">
+          <div class="skeleton badge-skeleton"></div>
+          <div class="skeleton title-skeleton"></div>
+          <div class="skeleton price-skeleton"></div>
+          <div class="skeleton button-skeleton"></div>
+        </div>
       </div>
-    </section>
+    </ng-template>
 
-    <!-- === ALTERNATING SECTIONS === -->
-    <section class="pt-24 pb-12 max-w-7xl mx-auto space-y-24">
+  </section>
 
-      <!-- ---------- SECTION 1 ---------- -->
-      <div class="grid md:grid-cols-2 gap-12 items-center reveal">
+  <!-- CTA -->
+  <section class="relative py-40 text-center overflow-hidden">
+    <div class="orb"></div>
+    <h2 class="text-5xl font-semibold">Get Your Games and Digital Products Today</h2>
+    <p class="mt-6 text-white/70">Instant license key. Zero risk.</p>
+    
+    <a
+      [routerLink]="['/games']"
+      class="bg-blue-400 px-4 py-2 rounded-2xl inline-block text-black font-medium"
+    >
+      Browse Games
+    </a>
+  </section>
 
-        <div class="space-y-4">
-          <h3 class="text-4xl font-bold">
-            Instant Access <br>
-            to Every Game
-          </h3>
-          <p class="text-lg text-gray-300">
-            No waiting. No limits. Play as soon as you checkout. Your digital library is ready instantly.
-          </p>
-        </div>
-
-        <div class="relative h-64 md:h-96 overflow-hidden rounded-3xl cursor-pointer transition-transform duration-500 ease-out hover:scale-[1.03]">
-          <img src="assets/images/bento1.png" class="w-full h-full rounded-3xl " />
-          <div class="absolute inset-0 bg-black/30 rounded-3xl"></div>
-        </div>
-
+  <!-- FOOTER -->
+  <footer class="border-t border-white/10 py-16 px-6">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-4 gap-10 text-sm text-white/70">
+      <div>
+        <h4 class="text-white mb-4">DigitalKey</h4>
+        <p>Premium software licenses at the best price.</p>
       </div>
-
-      <!-- ---------- SECTION 2 (REVERSED) ---------- -->
-      <div class="grid md:grid-cols-2 gap-12 items-center reveal">
-
-        <div class="order-2 md:order-1 relative h-64 md:h-96 overflow-hidden rounded-3xl cursor-pointer transition-transform duration-500 ease-out hover:scale-[1.03]">
-          <img src="assets/images/bento2.png" class="w-full h-full object-cover rounded-3xl " />
-          <div class="absolute inset-0 bg-black/30 rounded-3xl"></div>
-        </div>
-
-        <div class="order-1 md:order-2 space-y-4">
-          <h3 class="text-4xl font-bold">
-           Different games genre
-          </h3>
-          <p class="text-lg text-gray-300">
-            Non-Stop fun and surfing into different games.
-          </p>
-        </div>
-
+      <div>
+        <h4 class="text-white mb-4">Products</h4>
+        <p>Office</p>
+        <p>Adobe</p>
+        <p>Windows</p>
       </div>
-
-      <!-- ---------- SECTION 3 ---------- -->
-      <div class="grid md:grid-cols-2 gap-12 items-center reveal">
-
-        <div class="space-y-4">
-          <h3 class="text-4xl font-bold">
-            Curated by Players <br>
-            for Players
-          </h3>
-          <p class="text-lg text-gray-300">
-            Our recommendations are shaped by real user reviews and community-driven insights.
-          </p>
-        </div>
-
-        <div class="relative border border-gray-50 shadow-lg h-64 md:h-96 overflow-hidden rounded-3xl cursor-pointer transition-transform duration-500 ease-out hover:scale-[1.03]">
-          <!-- <img src="assets/images/curated-reviews.png" class="w-full h-full object-cover rounded-3xl]" /> -->
-
-          <div class="absolute inset-0 bg-black/30 rounded-3xl"></div>
-        </div>
-
+      <div>
+        <h4 class="text-white mb-4">Support</h4>
+        <p>Live Chat</p>
+        <p>Email</p>
       </div>
-
-    </section>
-
-    <!-- === LARGER FEATURE CTA === -->
-    <section class="py-24 bg-[#0c0910] text-center reveal">
-      <h2 class="text-5xl font-bold mb-6">
-        Find Your Next Favorite Game
-      </h2>
-      <p class="text-lg text-gray-400 mb-8">
-        Discover fresh recommendations tailored to your playstyle and platform.
-      </p>
-      <button class="px-10 py-4 bg-purple-600 text-lg font-semibold rounded-full hover:bg-purple-700 transition">
-        Browse Games
-      </button>
-    </section>
-
-  </div>
-
+      <div>
+        <h4 class="text-white mb-4">Social</h4>
+        <p>Facebook</p>
+        <p>Instagram</p>
+      </div>
+    </div>
+  </footer>
 </div>
-

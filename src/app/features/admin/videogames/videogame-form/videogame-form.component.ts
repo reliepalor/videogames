@@ -23,6 +23,16 @@ export class VideoGameFormComponent implements OnInit {
 
   selectedFile?: File;
   previewUrl?: string;
+  platformOptions = [
+    'PC',
+    'PlayStation 5',
+    'PlayStation 4',
+    'Xbox Series X|S',
+    'Xbox One',
+    'Nintendo Switch',
+    'Mobile',
+    'VR',
+  ];
 
   ngOnInit(): void {
     this.form = this.fb.group({

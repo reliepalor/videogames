@@ -26,14 +26,13 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   loading = false;
   errorMsg = '';
   searchTerm = '';
-  statusFilter: number | null = null; // 0: Pending, 1: Approved, 2: Rejected
+  statusFilter: number | null = null; 
 
-  // NEW: toggles between card and table view
+  // toggles between card and table view
   viewMode: 'card' | 'table' = 'card';
 
-  // Pagination properties
   currentPage = 1;
-  pageSize = 5; // Show 5 orders per page
+  pageSize = 5; 
   totalPages = 0;
 
   // Review properties

@@ -1,7 +1,7 @@
 <div class="min-h-screen flex flex-col lg:flex-row bg-white">
 
   <!-- LEFT SIDE: LOGIN -->
-  <div class="w-full lg:w-[70%] flex items-center justify-center px-4 sm:px-0 mt-10 sm:mt-0 lg:mt-0">
+  <div class="w-full lg:w-[50%] flex items-center justify-center px-4 sm:px-0 mt-10 sm:mt-0 lg:mt-0">
 
     <div class="w-full max-w-sm px-6 sm:px-8">
 
@@ -99,7 +99,7 @@
   </div>
 
   <!-- RIGHT SIDE: VIDEO (hidden on mobile) -->
-  <div class="hidden lg:block lg:w-[30%] relative overflow-hidden">
+  <div class="hidden lg:block lg:w-[40%] h-[80vh] mt-20 bg-transparent relative overflow-hidden">
 
     <video
       src="/assets/videos/mushroom.mp4"
@@ -107,11 +107,10 @@
       muted
       loop
       playsinline
-      class="absolute inset-0 w-full h-full object-cover"
+      class="absolute inset-0 w-full h-full object-cover rounded-4xl px-2"
     ></video>
 
-    <!-- Soft gradient overlay -->
-    <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+
 
   </div>
 
