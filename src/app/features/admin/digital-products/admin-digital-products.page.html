@@ -1,0 +1,62 @@
+<div class="p-6 space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-semibold">Digital Products</h1>
+
+    <div class="flex items-center gap-3">
+      <button
+        (click)="toggleIncludeInactive()"
+        class="px-3 py-2 text-sm border rounded"
+      >
+        {{ includeInactive ? 'Hide Archived' : 'Show Archived' }}
+      </button>
+
+      <button
+        (click)="openCreateModal()"
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Add Product
+      </button>
+    </div>
+  </div>
+
+  <!-- SUCCESS MESSAGE -->
+  <div
+    *ngIf="successMessage"
+    class="p-3 bg-green-100 text-green-800 rounded"
+  >
+    {{ successMessage }}
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="text-gray-500">
+    Loading products...
+  </div>
+
+  <!-- TABLE PLACEHOLDER -->
+  <div *ngIf="!loading && products.length === 0" class="text-gray-500">
+    No digital products found.
+  </div>
+
+  <!-- TABLE WILL GO HERE -->
+    <app-digital-product-table
+        [products]="products"
+        (edit)="openEditModal($event)"
+        (archive)="archiveProduct($event)"
+        (restore)="restoreProduct($event)"
+        >
+    </app-digital-product-table>
+
+
+  <!-- MODAL WILL GO HERE -->
+    <app-digital-product-form-modal
+        *ngIf="showProductModal"
+        [product]="selectedProduct"
+        (closed)="closeProductModal()"
+        (saved)="onProductSaved($event)"
+        >
+    </app-digital-product-form-modal>
+
+
+</div>

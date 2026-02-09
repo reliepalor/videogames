@@ -20,5 +20,11 @@ export const adminRoutes: Routes = [
     loadComponent: () =>
       import('./conversations/admin-conversations-page/admin-conversations-page')
         .then(m => m.AdminConversationsPageComponent)
+  },
+  {
+    path: 'digital-products',
+    loadComponent: () =>
+      import('./digital-products/admin-digital-products.page')
+        .then(m => m.AdminDigitalProductsPage)
   }
 ];

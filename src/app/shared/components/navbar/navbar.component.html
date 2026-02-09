@@ -157,6 +157,22 @@
       <span [class.hidden]="isMinimized">Orders</span>
     </a>
 
+        <!-- Digital products -->
+    <a
+      routerLink="/admin/digital-products"
+      routerLinkActive="bg-purple-500/10 text-purple-700"
+      class="flex items-center px-3 py-3 rounded-xl
+             font-medium text-gray-700 hover:bg-purple-500/10 transition"
+      [class.justify-center]="isMinimized"
+      [class.gap-3]="!isMinimized">
+
+      <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M7 8h10M7 12h6M7 16h10"/>
+      </svg>
+
+      <span [class.hidden]="isMinimized">Digital Products</span>
+    </a>
+
   </nav>
 
   <!-- USER PANEL (UNCHANGED) -->

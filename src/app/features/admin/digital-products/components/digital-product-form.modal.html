@@ -1,0 +1,119 @@
+<!-- OVERLAY -->
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+
+  <!-- MODAL -->
+  <div class="bg-white w-full max-w-2xl rounded-lg shadow-lg p-6 overflow-y-auto max-h-[90vh]">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold">
+        {{ product ? 'Edit Digital Product' : 'Add Digital Product' }}
+      </h2>
+
+      <button
+        (click)="close()"
+        class="text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- FORM -->
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-4">
+
+      <!-- IMAGE -->
+      <div class="flex gap-4 items-center">
+        <div class="w-24 h-24 border rounded flex items-center justify-center overflow-hidden">
+          <img
+            *ngIf="imagePreview"
+            [src]="imagePreview"
+            class="w-full h-full object-cover"
+          />
+          <span *ngIf="!imagePreview" class="text-xs text-gray-400">
+            No image
+          </span>
+        </div>
+
+        <input type="file" (change)="onImageSelected($event)" />
+      </div>
+
+      <!-- NAME -->
+      <input
+        formControlName="name"
+        placeholder="Product name"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <!-- BRAND / PLATFORM -->
+      <div class="grid grid-cols-2 gap-4">
+        <input
+          formControlName="brand"
+          placeholder="Brand"
+          class="border rounded px-3 py-2"
+        />
+
+        <input
+          formControlName="platform"
+          placeholder="Platform"
+          class="border rounded px-3 py-2"
+        />
+      </div>
+
+      <!-- TYPE / LICENSE -->
+      <div class="grid grid-cols-2 gap-4">
+        <select formControlName="productType" class="border rounded px-3 py-2">
+          <option *ngFor="let t of DigitalProductType | keyvalue" [value]="t.value">
+            {{ t.key }}
+          </option>
+        </select>
+
+        <select formControlName="licenseDuration" class="border rounded px-3 py-2">
+          <option *ngFor="let l of LicenseDuration | keyvalue" [value]="l.value">
+            {{ l.key }}
+          </option>
+        </select>
+      </div>
+
+      <!-- PRICE -->
+      <input
+        type="number"
+        formControlName="price"
+        placeholder="Price"
+        class="w-full border rounded px-3 py-2"
+      />
+
+      <!-- DESCRIPTION -->
+      <textarea
+        formControlName="description"
+        placeholder="Description"
+        class="w-full border rounded px-3 py-2"
+      ></textarea>
+
+      <!-- ACTIVE (EDIT ONLY) -->
+      <div *ngIf="product" class="flex items-center gap-2">
+        <input type="checkbox" formControlName="isActive" />
+        <label>Active</label>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="flex justify-end gap-3 pt-4">
+        <button
+          type="button"
+          (click)="close()"
+          class="px-4 py-2 border rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          [disabled]="loading"
+          class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+        >
+          {{ loading ? 'Saving...' : 'Save' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
