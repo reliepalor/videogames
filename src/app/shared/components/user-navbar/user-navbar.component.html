@@ -43,6 +43,7 @@
     <!-- DESKTOP LINKS -->
     <div class="hidden md:flex items-center gap-8 text-sm font-medium" *ngIf="user$ | async as user">
       <a (click)="guardedNavigate('/games')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Games</a>
+      <a (click)="guardedNavigate('/digital-products')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Digital Products</a>
       <a (click)="guardedNavigate('/orders')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Orders</a>
       <a (click)="guardedNavigate('/cart')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Cart</a>
     </div>
@@ -227,6 +228,7 @@
 
       <!-- Mobile Links -->
       <a (click)="guardedNavigate('/games')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Games</a>
+      <a (click)="guardedNavigate('/digital-products')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Digital Products</a>
       <a (click)="guardedNavigate('/orders')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Orders</a>
       <a (click)="guardedNavigate('/cart')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Cart</a>
       <a (click)="guardedNavigate('/conversations')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Messages</a>

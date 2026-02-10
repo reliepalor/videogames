@@ -1,0 +1,315 @@
+<style>
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .toast-enter {
+    animation: slideInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-overlay {
+    animation: modalFadeIn 0.2s ease-out;
+  }
+
+  .modal-content {
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .order-card {
+    animation: fadeIn 0.3s ease-out;
+  }
+</style>
+
+<!-- SUCCESS TOAST -->
+<div *ngIf="successMessage()" 
+     class="toast-enter fixed top-6 left-1/2 -translate-x-1/2 z-50">
+  <div class="bg-white rounded-xl shadow-2xl border border-gray-200 p-4 flex items-center gap-3 min-w-[320px]">
+    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+      <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <p class="text-sm font-medium text-gray-900">{{ successMessage() }}</p>
+  </div>
+</div>
+
+<!-- PURCHASE MODAL -->
+<div *ngIf="showPurchaseModal()" 
+     class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+     (click)="closePurchaseModal()">
+  
+  <div class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+       (click)="$event.stopPropagation()">
+    
+    <!-- HEADER -->
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 px-6 py-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-white">Confirm Purchase</h2>
+        <button
+          (click)="closePurchaseModal()"
+          class="text-white/70 hover:text-white transition p-1 hover:bg-white/10 rounded-lg">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="p-6 space-y-5">
+      
+      <!-- PRODUCT INFO -->
+      <div class="flex gap-4">
+        <div class="w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-200 flex-shrink-0">
+          <img
+            *ngIf="selectedProduct()?.imagePath"
+            [src]="selectedProduct()!.imagePath"
+            class="w-full h-full object-cover"
+            alt="Product" />
+          <div *ngIf="!selectedProduct()?.imagePath"
+               class="w-full h-full bg-gray-100 flex items-center justify-center">
+            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900">{{ selectedProduct()?.name }}</h3>
+          <p class="text-sm text-gray-500 mt-1">{{ selectedProduct()?.brand }}</p>
+          <p class="text-lg font-semibold text-purple-600 mt-2">
+            ₱{{ selectedProduct()?.price | number:'1.2-2' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- QUANTITY SELECTOR -->
+      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+        <span class="font-medium text-gray-700">Quantity</span>
+
+        <div class="flex items-center gap-3">
+          <button
+            (click)="decreaseQuantity()"
+            [disabled]="purchaseQuantity() === 1"
+            class="w-9 h-9 rounded-lg border-2 border-gray-300 flex items-center justify-center
+                   hover:border-purple-500 hover:bg-purple-50 transition
+                   disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-transparent">
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
+            </svg>
+          </button>
+
+          <span class="w-12 text-center font-semibold text-lg">{{ purchaseQuantity() }}</span>
+
+          <button
+            (click)="increaseQuantity()"
+            [disabled]="purchaseQuantity() === selectedProduct()?.availableKeys"
+            class="w-9 h-9 rounded-lg border-2 border-gray-300 flex items-center justify-center
+                   hover:border-purple-500 hover:bg-purple-50 transition
+                   disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:bg-transparent">
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- AVAILABILITY -->
+      <p class="text-sm text-gray-500 text-center">
+        {{ selectedProduct()?.availableKeys }} keys available
+      </p>
+
+      <!-- TOTAL -->
+      <div class="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
+        <span class="font-semibold text-gray-700">Total Price</span>
+        <span class="text-2xl font-bold text-purple-600">
+          ₱{{ totalPrice() | number:'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- ERROR MESSAGE -->
+      <div *ngIf="purchaseError()" 
+           class="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+        <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-red-800">{{ purchaseError() }}</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+      <button
+        (click)="closePurchaseModal()"
+        class="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+        Cancel
+      </button>
+
+      <button
+        (click)="confirmPurchase()"
+        [disabled]="purchaseLoading()"
+        class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg text-sm font-medium
+               hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed
+               transition shadow-sm hover:shadow flex items-center gap-2">
+        <svg *ngIf="purchaseLoading()" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>{{ purchaseLoading() ? 'Processing...' : 'Confirm Purchase' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="max-w-7xl mx-auto px-8 py-6 space-y-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-gray-900">My Orders</h1>
+      <p class="text-sm text-gray-500 mt-1">View and manage your digital product purchases</p>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="loading()" class="text-center py-12">
+    <div class="inline-flex items-center gap-3 text-gray-500">
+      <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      <span class="text-sm">Loading your orders...</span>
+    </div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div *ngIf="!loading() && orders().length === 0" 
+       class="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-12 text-center">
+    <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-1">No orders yet</h3>
+    <p class="text-sm text-gray-500">Your digital product orders will appear here.</p>
+  </div>
+
+  <!-- ORDERS GRID -->
+  <div *ngIf="!loading() && orders().length > 0" 
+       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    
+    <div *ngFor="let order of orders()" 
+         class="order-card bg-white border border-gray-200 rounded-xl p-5 hover:shadow-lg transition-all duration-300">
+      
+      <!-- ORDER HEADER -->
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900 truncate">
+            {{ order.digitalProductName }}
+          </h3>
+          <p class="text-sm text-gray-500 mt-1">
+            Qty: {{ order.quantity }}
+          </p>
+        </div>
+
+        <span
+          class="px-2.5 py-1 text-xs rounded-full font-medium flex-shrink-0 ml-2"
+          [ngClass]="{
+            'bg-green-100 text-green-700': order.status === 'Approved',
+            'bg-red-100 text-red-700': order.status === 'Rejected',
+            'bg-yellow-100 text-yellow-700': order.status === 'Pending'
+          }">
+          {{ order.status }}
+        </span>
+      </div>
+
+      <!-- PRICE -->
+      <div class="mb-4 pb-4 border-b border-gray-100">
+        <p class="text-sm text-gray-500">Total Price</p>
+        <p class="text-xl font-bold text-gray-900">
+          ₱{{ order.totalPrice | number:'1.2-2' }}
+        </p>
+      </div>
+
+      <!-- APPROVED - SHOW KEYS -->
+      <div *ngIf="order.status === 'Approved'" class="space-y-2">
+        <div class="flex items-center gap-2 mb-2">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+          </svg>
+          <h4 class="font-medium text-sm text-gray-700">Your Product Keys</h4>
+        </div>
+
+        <div
+          *ngFor="let item of order.items"
+          class="p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+          <p class="text-xs text-gray-500 mb-1">Product Key</p>
+          <p class="font-mono text-sm text-gray-900 break-all">
+            {{ item.productKey }}
+          </p>
+        </div>
+      </div>
+
+      <!-- PENDING -->
+      <div *ngIf="order.status === 'Pending'" 
+           class="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+        <svg class="w-5 h-5 text-yellow-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-yellow-800">
+          Your order is pending approval. You'll receive your keys once approved.
+        </p>
+      </div>
+
+      <!-- REJECTED -->
+      <div *ngIf="order.status === 'Rejected'" 
+           class="flex items-start gap-2 p-3 bg-red-50 rounded-lg border border-red-200">
+        <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p class="text-sm text-red-800">
+          This order was rejected. Please contact support if you have questions.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

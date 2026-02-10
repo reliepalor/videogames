@@ -6,6 +6,7 @@ import { DigitalProduct } from 'src/app/core/models/digital-products/digital-pro
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { DigitalProductType } from 'src/app/core/models/digital-products/enums/digital-product-type.enum';
 import { LicenseDuration } from 'src/app/core/models/digital-products/enums/license-duration.enum';
+
 @Component({
   standalone: true,
   selector: 'app-digital-product-form-modal',
@@ -21,6 +22,7 @@ export class DigitalProductFormModal implements OnInit {
 
   form!: FormGroup;
   loading = false;
+  isClosing = false;
 
   imagePreview: string | null = null;
   selectedImage?: File;
@@ -78,22 +80,47 @@ export class DigitalProductFormModal implements OnInit {
       // UPDATE
       this.digitalProductService
         .updateProduct(this.product.id, dto)
-        .subscribe(() => {
-          this.loading = false;
-          this.saved.emit('Product updated successfully.');
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.saved.emit('Product updated successfully.');
+            this.close();
+          },
+          error: () => {
+            this.loading = false;
+            // Handle error - you could emit an error event or show a toast
+          }
         });
     } else {
       // CREATE
       this.digitalProductService
         .createProduct(dto)
-        .subscribe(() => {
-          this.loading = false;
-          this.saved.emit('Product created successfully.');
+        .subscribe({
+          next: () => {
+            this.loading = false;
+            this.saved.emit('Product created successfully.');
+            this.close();
+          },
+          error: () => {
+            this.loading = false;
+            // Handle error - you could emit an error event or show a toast
+          }
         });
     }
   }
 
   close(): void {
-    this.closed.emit();
+    this.isClosing = true;
+    // Wait for animation to complete before emitting close
+    setTimeout(() => {
+      this.closed.emit();
+    }, 200); // Match the animation duration
+  }
+
+  onOverlayClick(event: MouseEvent): void {
+    // Close modal when clicking overlay (background)
+    if (event.target === event.currentTarget) {
+      this.close();
+    }
   }
 }

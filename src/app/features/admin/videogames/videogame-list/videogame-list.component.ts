@@ -5,6 +5,7 @@ import { VideoGameService } from '../../../../core/services/videogame.service'
 import { VideoGame } from '../../../../core/models/videogame.model'
 import { SkeletonBoxComponent } from '../../../../shared/skeleton/skeleton-box.component'
 import { environment } from 'src/environments/environment';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 
 import {
   Observable,
@@ -20,7 +21,7 @@ import {
 @Component({
   standalone: true,
   selector: 'app-videogame-list',
-  imports: [CommonModule, RouterModule, SkeletonBoxComponent],
+  imports: [CommonModule, RouterModule, SkeletonBoxComponent, ReactiveFormsModule],
   templateUrl: './videogame-list.component.html',
 })
 export class VideoGameListComponent implements OnInit, OnDestroy {
@@ -31,6 +32,7 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
   private router = inject(Router)
   private ngZone = inject(NgZone)
   private cdr = inject(ChangeDetectorRef)
+  private fb = inject(FormBuilder)
 
   /* ================= VIEW MODE ================= */
   viewMode: 'table' | 'card' = 'table'
@@ -41,6 +43,7 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
 
   /* ================= INIT ================= */
   ngOnInit(): void {
+    this.initEditForm()
     // Check for toast on component load
     const toastStr = localStorage.getItem('toast')
     if (toastStr) {
@@ -127,12 +130,13 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
   /* ================= DELETE MODAL ================= */
   showDeleteModal = false
   selectedGameId: number | null = null
-  isDeleteFadingOut = false
+  isDeleteClosing = false
 
   confirmDelete(id?: number): void {
     if (!id) return
     this.selectedGameId = id
     this.showDeleteModal = true
+    this.isDeleteClosing = false
   }
   closeSuccessModal() {
     this.isFadingOut = true;
@@ -144,10 +148,10 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
   }
 
   cancelDelete() {
-    this.isDeleteFadingOut = true;
+    this.isDeleteClosing = true;
     setTimeout(() => {
       this.showDeleteModal = false;
-      this.isDeleteFadingOut = false;
+      this.isDeleteClosing = false;
       this.cdr.detectChanges();
     }, 300);
   }
@@ -175,6 +179,147 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
       },
       error: () => {
         console.error('Delete failed')
+      },
+    })
+  }
+
+  /* ================= EDIT MODAL ================= */
+  showEditModal = false
+  isEditClosing = false
+  editLoading = false
+  editGameId: number | null = null
+  editForm!: FormGroup
+  selectedFile?: File
+  previewUrl?: string
+
+  platformOptions = [
+    'PC',
+    'PlayStation 5',
+    'PlayStation 4',
+    'Xbox Series X|S',
+    'Xbox One',
+    'Nintendo Switch',
+    'Mobile',
+    'VR',
+  ]
+
+  private initEditForm(): void {
+    this.editForm = this.fb.group({
+      title: ['', Validators.required],
+      platform: [''],
+      developer: [''],
+      publisher: [''],
+      price: [0, [Validators.min(0)]],
+      imageUrl: [''],
+    })
+  }
+
+  openEditModal(id?: number): void {
+    if (!id) return
+
+    this.editGameId = id
+    this.showEditModal = true
+    this.isEditClosing = false
+    this.editLoading = true
+    this.selectedFile = undefined
+    this.previewUrl = undefined
+
+    this.videoGameService.getById(id).subscribe({
+      next: (game) => {
+        this.editForm.patchValue({
+          ...game,
+          imageUrl: game.imageUrl ?? null,
+        })
+        this.editLoading = false
+      },
+      error: () => {
+        this.editLoading = false
+        this.closeEditModal()
+      },
+    })
+  }
+
+  openCreateModal(): void {
+    this.editGameId = null
+    this.showEditModal = true
+    this.isEditClosing = false
+    this.editLoading = false
+    this.selectedFile = undefined
+    this.previewUrl = undefined
+    this.editForm.reset({
+      title: '',
+      platform: '',
+      developer: '',
+      publisher: '',
+      price: 0,
+      imageUrl: '',
+    })
+  }
+
+  closeEditModal(): void {
+    this.isEditClosing = true
+    setTimeout(() => {
+      this.showEditModal = false
+      this.isEditClosing = false
+      this.editGameId = null
+      this.editLoading = false
+      this.selectedFile = undefined
+      this.previewUrl = undefined
+      this.editForm.reset({
+        title: '',
+        platform: '',
+        developer: '',
+        publisher: '',
+        price: 0,
+        imageUrl: '',
+      })
+      this.cdr.detectChanges()
+    }, 200)
+  }
+
+  onEditImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement
+    if (!input.files?.length) return
+
+    this.selectedFile = input.files[0]
+    const reader = new FileReader()
+    reader.onload = () => this.previewUrl = reader.result as string
+    reader.readAsDataURL(this.selectedFile)
+  }
+
+  submitEdit(): void {
+    if (this.editForm.invalid) return
+
+    const formValues = this.editForm.getRawValue()
+    const formData = new FormData()
+    formData.append('Title', formValues.title)
+    formData.append('Platform', formValues.platform ?? '')
+    formData.append('Developer', formValues.developer ?? '')
+    formData.append('Publisher', formValues.publisher ?? '')
+    formData.append('Price', formValues.price.toString())
+
+    if (this.selectedFile) {
+      formData.append('Image', this.selectedFile, this.selectedFile.name)
+    }
+
+    this.editLoading = true
+    const operation$ = this.editGameId
+      ? this.videoGameService.update(this.editGameId, formData)
+      : this.videoGameService.create(formData)
+
+    operation$.subscribe({
+      next: () => {
+        this.editLoading = false
+        this.closeEditModal()
+        const message = this.editGameId
+          ? 'Video game updated successfully'
+          : 'Video game created successfully'
+        this.showSuccessMessage(message)
+        this.reload$.next()
+      },
+      error: () => {
+        this.editLoading = false
+        console.error('Update failed')
       },
     })
   }

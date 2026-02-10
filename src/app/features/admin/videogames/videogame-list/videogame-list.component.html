@@ -7,6 +7,42 @@
   .animate-fade {
     animation: fade 0.25s ease-out;
   }
+
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes modalFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes modalSlideOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  }
+
+  .modal-overlay {
+    animation: modalFadeIn 0.2s ease-out;
+  }
+
+  .modal-overlay.closing {
+    animation: modalFadeOut 0.2s ease-out;
+  }
+
+  .modal-content {
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-content.closing {
+    animation: modalSlideOut 0.2s ease-out;
+  }
 </style>
 
 <!-- ================= MAIN WRAPPER ================= -->
@@ -30,7 +66,7 @@
         class="px-4 py-2 w-60 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
 
       <button
-        routerLink="/videogames/new"
+        (click)="openCreateModal()"
         class="rounded-full bg-black text-white px-5 py-2.5 text-sm font-medium hover:bg-gray-800 transition cursor-pointer">
         + Add Game
       </button>
@@ -128,7 +164,7 @@
 
           <td class="px-6 py-4 text-right">
             <div class="inline-flex gap-3">
-              <button (click)="editGame(game.id)" class="text-gray-400 hover:text-black cursor-pointer">✏️</button>
+              <button (click)="openEditModal(game.id)" class="text-gray-400 hover:text-black cursor-pointer">✏️</button>
               <button (click)="confirmDelete(game.id)" class="text-gray-400 hover:text-red-600 cursor-pointer">🗑️</button>
             </div>
           </td>
@@ -190,7 +226,7 @@
             <div class="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition">
 
               <button
-                (click)="editGame(game.id)"
+                (click)="openEditModal(game.id)"
                 class="text-xs px-2 py-1 rounded-md
                       border border-gray-200
                       hover:bg-gray-100 transition cursor-pointer">
@@ -217,6 +253,215 @@
 
 </div>
 
+
+<!-- ================= EDIT MODAL ================= -->
+<div
+  *ngIf="showEditModal"
+  class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  [class.closing]="isEditClosing"
+  (click)="closeEditModal()">
+
+  <div
+    class="modal-content bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden"
+    [class.closing]="isEditClosing"
+    (click)="$event.stopPropagation()">
+
+    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-5 border-b border-gray-300">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-800">
+          {{ editGameId ? 'Edit Video Game' : 'Add Video Game' }}
+        </h2>
+        <button
+          (click)="closeEditModal()"
+          class="text-black/70 hover:text-black cursor-pointer transition-colors p-1 hover:bg-white/10 rounded-lg"
+          type="button">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+      <form [formGroup]="editForm" (ngSubmit)="submitEdit()" class="space-y-5">
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Title <span class="text-red-500">*</span>
+          </label>
+          <input
+            formControlName="title"
+            type="text"
+            placeholder="e.g. The Legend of Zelda"
+            class="w-full rounded-xl border border-gray-300 px-4 py-2.5
+                   focus:outline-none focus:ring-2 focus:ring-black" />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Platform
+            </label>
+            <input
+              formControlName="platform"
+              type="text"
+              list="platform-options-edit"
+              placeholder="Select or type a platform"
+              class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5 pr-10
+                     focus:outline-none focus:ring-2 focus:ring-black" />
+            <datalist id="platform-options-edit">
+              <option *ngFor="let option of platformOptions" [value]="option"></option>
+            </datalist>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <input
+              formControlName="price"
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder="e.g. 59.99"
+              class="w-full rounded-xl border border-gray-300 px-4 py-2.5
+                     focus:outline-none focus:ring-2 focus:ring-black" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Developer
+            </label>
+            <input
+              formControlName="developer"
+              type="text"
+              placeholder="e.g. Nintendo"
+              class="w-full rounded-xl border border-gray-300 px-4 py-2.5
+                     focus:outline-none focus:ring-2 focus:ring-black" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Publisher
+            </label>
+            <input
+              formControlName="publisher"
+              type="text"
+              placeholder="e.g. Nintendo"
+              class="w-full rounded-xl border border-gray-300 px-4 py-2.5
+                     focus:outline-none focus:ring-2 focus:ring-black" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1 text-gray-700">Game Image</label>
+          <label
+            class="cursor-pointer flex items-center justify-center rounded-lg border-2 border-dashed border-gray-300
+                  px-4 py-5 text-center text-gray-500 hover:border-gray-400 hover:text-gray-700 transition
+                  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+          >
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Choose an image...</span>
+            <input
+              type="file"
+              accept="image/*"
+              (change)="onEditImageSelected($event)"
+              class="sr-only"
+            />
+          </label>
+        </div>
+
+        <img *ngIf="previewUrl"
+            [src]="previewUrl"
+            alt="Selected Image Preview"
+            class="h-40 rounded-xl object-cover border mt-2" />
+
+        <div *ngIf="!previewUrl && editForm.value.imageUrl" class="pt-2">
+          <img
+            [src]="editForm.value.imageUrl"
+            alt="Current Game Image"
+            class="h-40 w-full object-cover rounded-xl border mt-2" />
+        </div>
+
+      </form>
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+      <div class="flex items-center justify-end gap-3">
+        <button
+          type="button"
+          (click)="closeEditModal()"
+          class="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          (click)="submitEdit()"
+          [disabled]="editLoading || editForm.invalid"
+          class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm hover:shadow flex items-center gap-2">
+          <svg *ngIf="editLoading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>
+            {{ editLoading ? 'Saving...' : (editGameId ? 'Update Game' : 'Create Game') }}
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= DELETE CONFIRM MODAL ================= -->
+<div
+  *ngIf="showDeleteModal"
+  class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  [class.closing]="isDeleteClosing"
+  (click)="cancelDelete()">
+
+  <div
+    class="modal-content bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+    [class.closing]="isDeleteClosing"
+    (click)="$event.stopPropagation()">
+
+    <div class="p-6 flex flex-col items-center text-center">
+      <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </div>
+
+      <h3 class="text-xl font-semibold text-gray-900 mb-2">
+        Delete Video Game?
+      </h3>
+      <p class="text-sm text-gray-500">
+        This action cannot be undone.
+      </p>
+    </div>
+
+    <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t border-gray-200">
+      <button
+        type="button"
+        (click)="cancelDelete()"
+        class="px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+        Cancel
+      </button>
+
+      <button
+        type="button"
+        (click)="deleteConfirmed()"
+        class="px-4 py-2.5 rounded-lg text-sm font-medium text-white transition bg-red-600 hover:bg-red-700">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
 
 
 <!-- ================= SKELETON LOADING TEMPLATE ================= -->

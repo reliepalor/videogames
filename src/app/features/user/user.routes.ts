@@ -58,6 +58,14 @@ export const userRoutes: Routes = [
     ]
   },
 
+  /* ===================== DIGITAL PRODUCTS ===================== */
+  {
+    path: 'digital-products',
+    loadComponent: () =>
+      import('./digital-products/pages/digital-store.page')
+        .then(m => m.DigitalStorePage)
+  },
+
   /* ===================== CART / ORDERS ===================== */
   {
     path: 'cart',

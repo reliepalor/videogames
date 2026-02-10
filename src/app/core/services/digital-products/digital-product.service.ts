@@ -1,13 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { DigitalProduct } from '../../models/digital-products/digital-product.model';
 import { CreateDigitalProductDto } from '../../models/digital-products/create-digital-product.dto';
 import { UpdateDigitalProductDto } from '../../models/digital-products/update-digital-product.dto';
 
 import { environment } from 'src/environments/environment';
-import { inject } from '@angular/core';
 
 
 @Injectable({
@@ -17,6 +16,7 @@ import { inject } from '@angular/core';
 export class DigitalProductService{
 
     private readonly API_URL = 'http://localhost:5019/api';
+    private readonly BASE_URL = environment.apiUrl;
 
     constructor(private http: HttpClient) {}
 
@@ -26,6 +26,13 @@ export class DigitalProductService{
     getActiveProducts(): Observable<DigitalProduct[]> {
         return this.http.get<DigitalProduct[]>(
             `${this.API_URL}/digital-products`
+        ).pipe(
+            map(products =>
+                (products ?? []).map(product => ({
+                    ...product,
+                    imagePath: this.normalizeImagePath(product.imagePath)
+                }))
+            )
         );
     }
 
@@ -34,6 +41,11 @@ export class DigitalProductService{
     getProductById(id: number): Observable<DigitalProduct> {
         return this.http.get<DigitalProduct>(
             `${this.API_URL}/digital-products/${id}`
+        ).pipe(
+            map(product => ({
+                ...product,
+                imagePath: this.normalizeImagePath(product.imagePath)
+            }))
         );
     }
 
@@ -47,7 +59,21 @@ export class DigitalProductService{
         return this.http.get<DigitalProduct[]>(
         `${this.API_URL}/admin/digital-products`,
         { params }
+        ).pipe(
+            map(products =>
+                (products ?? []).map(product => ({
+                    ...product,
+                    imagePath: this.normalizeImagePath(product.imagePath)
+                }))
+            )
         );
+    }
+
+    private normalizeImagePath(path?: string | null): string | undefined {
+        if (!path) return undefined;
+        if (path.startsWith('http://') || path.startsWith('https://')) return path;
+        const normalized = path.startsWith('/') ? path : `/${path}`;
+        return `${this.BASE_URL}${normalized}`;
     }
 
     // create digital product

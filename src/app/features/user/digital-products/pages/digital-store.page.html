@@ -1,0 +1,564 @@
+<style>
+  @layer utilities {
+    @keyframes toast-in {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes toast-out {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to { opacity: 0; transform: translateY(20px) scale(0.95); }
+    }
+
+    .toast-enter { animation: toast-in 0.3s ease-out forwards; }
+    .toast-leave { animation: toast-out 0.3s ease-in forwards; }
+  }
+
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-fade-slow {
+    animation: fade 0.3s ease-out;
+  }
+
+  .filter-panel {
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    overflow: hidden;
+    pointer-events: none;
+    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .filter-panel.open {
+    max-height: 280px;
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+</style>
+
+<!-- ================= SKELETON LOADING ================= -->
+<ng-template #loadingSkeleton>
+  <div class="max-w-7xl mx-auto px-4 py-10">
+
+    <div class="flex justify-between mb-12">
+      <app-skeleton-box width="200px" height="40px"></app-skeleton-box>
+      <app-skeleton-box width="300px" height="45px" rounded="30px"></app-skeleton-box>
+    </div>
+
+    <div class="mb-8">
+      <app-skeleton-box width="150px" height="30px"></app-skeleton-box>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-14">
+      <div *ngFor="let x of [1,2,3,4,5,6,7,8]">
+        <app-skeleton-box width="100%" height="220px" rounded="16px"></app-skeleton-box>
+        <div class="mt-4 space-y-2">
+          <app-skeleton-box width="40%" height="12px"></app-skeleton-box>
+          <app-skeleton-box width="90%" height="16px"></app-skeleton-box>
+          <app-skeleton-box width="50%" height="16px"></app-skeleton-box>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ng-template>
+
+<!-- ==================== MAIN WRAPPER ==================== -->
+<div *ngIf="!productsLoading(); else loadingSkeleton"
+     class="mt-10 max-w-7xl mx-auto px-4 py-10 font-sans bg-white text-gray-900">
+
+  <!-- ================= HEADER ================= -->
+  <div class="flex flex-col gap-4 sm:gap-5 mb-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+      <h1 class="text-4xl font-semibold tracking-tight">
+        Digital Store
+      </h1>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-start gap-3 w-full">
+      <input
+        type="search"
+        placeholder="Search products..."
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchChange()"
+        class="rounded-full px-5 py-3 w-full md:w-80 border border-gray-300
+              focus:ring-2 focus:ring-black/10 transition outline-none"
+      />
+
+      <!-- ================= FILTER DROPDOWN WRAPPER ================= -->
+      <div class="w-full sm:w-60 relative">
+
+        <!-- TRIGGER BUTTON -->
+        <button
+          type="button"
+          class="w-full rounded-full px-5 py-3 text-sm font-medium
+                flex items-center justify-between gap-3
+                bg-white border border-gray-300
+                hover:border-gray-400 transition
+                focus:outline-none focus:ring-4 focus:ring-purple-500/20"
+          [attr.aria-expanded]="filtersOpen"
+          (click)="toggleFilters()"
+        >
+          <span class="text-gray-900">
+            Filters
+          </span>
+
+          <svg
+            class="w-4 h-4 text-gray-500 transition-transform duration-300"
+            [ngClass]="{ 'rotate-180': filtersOpen }"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path fill-rule="evenodd"
+              d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+              clip-rule="evenodd"
+            />
+          </svg>
+        </button>
+
+        <!-- ================= DROPDOWN PANEL ================= -->
+        <div
+          class="filter-panel
+                relative sm:absolute
+                sm:left-0 sm:top-full
+                mt-2 w-full z-30
+                rounded-2xl
+                bg-white/95 backdrop-blur-xl
+                border border-gray-200
+                shadow-[0_20px_40px_rgba(0,0,0,0.12)]
+                px-5 py-5"
+          [ngClass]="{ 'open': filtersOpen }"
+        >
+
+          <div class="space-y-5">
+
+            <!-- STATUS -->
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                Status
+              </p>
+
+              <div class="relative">
+                <select
+                  [(ngModel)]="filterStatus"
+                  (ngModelChange)="onFilterChange()"
+                  class="w-full appearance-none rounded-xl
+                        border border-gray-200
+                        bg-gray-50 px-4 py-3 pr-10
+                        text-sm text-gray-900
+                        shadow-sm
+                        transition
+                        focus:outline-none
+                        focus:border-purple-500
+                        focus:ring-2 focus:ring-purple-500/20"
+                >
+                  <option value="all">All products</option>
+                  <option value="available">In Stock</option>
+                  <option value="out-of-stock">Out of Stock</option>
+                </select>
+
+                <svg
+                  class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <!-- PRICE -->
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                Price
+              </p>
+
+              <div class="relative">
+                <select
+                  [(ngModel)]="filterPrice"
+                  (ngModelChange)="onFilterChange()"
+                  class="w-full appearance-none rounded-xl
+                        border border-gray-200
+                        bg-gray-50 px-4 py-3 pr-10
+                        text-sm text-gray-900
+                        shadow-sm
+                        transition
+                        focus:outline-none
+                        focus:border-purple-500
+                        focus:ring-4 focus:ring-purple-500/20"
+                >
+                  <option value="any">Any price</option>
+                  <option value="under-500">Under ₱500</option>
+                  <option value="500-1000">₱500 – ₱1,000</option>
+                  <option value="over-1000">Over ₱1,000</option>
+                </select>
+
+                <svg
+                  class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path fill-rule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= TAB NAVIGATION ================= -->
+  <div class="mb-8 border-b border-gray-200">
+    <div class="flex gap-8">
+      <button
+        (click)="activeTab.set('products')"
+        class="pb-3 text-sm font-medium transition-colors relative"
+        [class.text-gray-900]="activeTab() === 'products'"
+        [class.text-gray-500]="activeTab() !== 'products'"
+      >
+        Browse Products
+        <div *ngIf="activeTab() === 'products'"
+             class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
+      </button>
+
+      <button
+        (click)="activeTab.set('orders')"
+        class="pb-3 text-sm font-medium transition-colors relative"
+        [class.text-gray-900]="activeTab() === 'orders'"
+        [class.text-gray-500]="activeTab() !== 'orders'"
+      >
+        My Orders
+        <div *ngIf="activeTab() === 'orders'"
+             class="absolute bottom-0 left-0 right-0 h-0.5 bg-gray-900"></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= PRODUCTS TAB ================= -->
+  <div *ngIf="activeTab() === 'products'">
+
+    <!-- ERROR STATE -->
+    <div *ngIf="productsError()" class="text-center py-8 text-red-600 text-sm">
+      {{ productsError() }}
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!productsError() && filteredProducts().length === 0" class="text-center py-16 text-gray-500 text-sm">
+      No products found.
+    </div>
+
+    <!-- PRODUCTS GRID (NIKE STYLE) -->
+    <div *ngIf="filteredProducts().length > 0"
+         class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-14 animate-fade-slow">
+
+      <div
+        *ngFor="let product of filteredProducts()"
+        class="group cursor-pointer"
+        (click)="openPurchaseModal(product)"
+      >
+
+        <!-- IMAGE -->
+        <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden
+                    transition-transform duration-300 group-hover:-translate-y-1">
+          <img
+            *ngIf="product.imagePath"
+            [src]="product.imagePath"
+            class="w-full h-full object-cover"
+            alt="{{ product.name }}"
+          />
+          <div *ngIf="!product.imagePath"
+               class="w-full h-full flex items-center justify-center text-gray-300">
+            <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+
+          <!-- Stock badge -->
+          <div *ngIf="product.availableKeys === 0" class="absolute top-2 right-2">
+            <span class="px-2 py-1 text-xs rounded-full font-medium bg-red-100/90 text-red-700">
+              Out of stock
+            </span>
+          </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="mt-4 space-y-1">
+
+          <!-- META -->
+          <p class="text-xs text-gray-500 uppercase tracking-wide">
+            {{ product.brand || product.platform || 'Digital Product' }}
+          </p>
+
+          <!-- TITLE -->
+          <h3 class="text-sm font-medium leading-snug line-clamp-2">
+            {{ product.name }}
+          </h3>
+
+          <!-- PRICE -->
+          <p class="text-sm font-semibold">
+            ₱{{ product.price | number:'1.2-2' }}
+          </p>
+
+          <!-- CTA -->
+          <button
+            *ngIf="product.availableKeys > 0"
+            (click)="$event.stopPropagation(); openPurchaseModal(product)"
+            class="mt-3 text-sm font-medium text-gray-700
+                  opacity-0 group-hover:opacity-100
+                  transition-opacity duration-200 hover:text-black cursor-pointer"
+          >
+            Buy Now →
+          </button>
+
+          <p *ngIf="product.availableKeys === 0"
+             class="mt-3 text-sm text-gray-400">
+            Out of stock
+          </p>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ================= ORDERS TAB ================= -->
+  <div *ngIf="activeTab() === 'orders'">
+
+    <!-- LOADING STATE -->
+    <div *ngIf="ordersLoading()" class="text-center py-12 text-gray-500 text-sm">
+      Loading your orders...
+    </div>
+
+    <!-- ERROR STATE -->
+    <div *ngIf="ordersError()" class="text-center py-8 text-red-600 text-sm">
+      {{ ordersError() }}
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!ordersLoading() && !ordersError() && orders().length === 0" 
+         class="text-center py-16">
+      <p class="text-gray-500 text-sm mb-4">You have no orders yet.</p>
+      <button
+        (click)="activeTab.set('products')"
+        class="text-sm font-medium text-gray-700 hover:text-black cursor-pointer">
+        Browse Products →
+      </button>
+    </div>
+
+    <!-- ORDERS GRID -->
+    <div *ngIf="!ordersLoading() && orders().length > 0"
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-slow">
+
+      <div *ngFor="let order of orders()"
+           class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-sm transition">
+
+        <!-- ORDER HEADER -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex-1 min-w-0">
+            <h3 class="font-medium text-gray-900 truncate text-sm">
+              {{ order.digitalProductName }}
+            </h3>
+            <p class="text-xs text-gray-500 mt-1">
+              Qty: {{ order.quantity }}
+            </p>
+          </div>
+
+          <span
+            class="px-2 py-1 text-xs rounded-full font-medium flex-shrink-0 ml-2"
+            [ngClass]="{
+              'bg-green-100 text-green-700': order.status === 'Approved',
+              'bg-red-100 text-red-700': order.status === 'Rejected',
+              'bg-yellow-100 text-yellow-700': order.status === 'Pending'
+            }">
+            {{ order.status }}
+          </span>
+        </div>
+
+        <!-- PRICE -->
+        <div class="mb-4 pb-4 border-b border-gray-100">
+          <p class="text-xs text-gray-500">Total</p>
+          <p class="text-lg font-semibold text-gray-900">
+            ₱{{ order.totalPrice | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <!-- APPROVED - SHOW KEYS -->
+        <div *ngIf="order.status === 'Approved'" class="space-y-2">
+          <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+            Your Keys
+          </p>
+
+          <div
+            *ngFor="let item of order.items"
+            class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p class="font-mono text-xs text-gray-900 break-all">
+              {{ item.productKey }}
+            </p>
+          </div>
+        </div>
+
+        <!-- PENDING -->
+        <div *ngIf="order.status === 'Pending'" class="text-xs text-gray-600">
+          Order pending approval.
+        </div>
+
+        <!-- REJECTED -->
+        <div *ngIf="order.status === 'Rejected'" class="text-xs text-red-600">
+          Order rejected.
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- ================= PURCHASE MODAL ================= -->
+<div *ngIf="showPurchaseModal()"
+     class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+     (click)="closePurchaseModal()">
+
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+       (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-5">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-white">Purchase</h2>
+        <button
+          (click)="closePurchaseModal()"
+          class="text-white/70 hover:text-white transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="p-6 space-y-5">
+
+      <!-- PRODUCT INFO -->
+      <div class="flex gap-4">
+        <div class="w-20 h-20 rounded-xl overflow-hidden border border-gray-200 flex-shrink-0 bg-gray-50">
+          <img
+            *ngIf="selectedProduct()?.imagePath"
+            [src]="selectedProduct()!.imagePath"
+            class="w-full h-full object-cover"
+            alt="Product" />
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <h3 class="font-semibold text-gray-900 text-sm">{{ selectedProduct()?.name }}</h3>
+          <p class="text-xs text-gray-500 mt-1">{{ selectedProduct()?.brand }}</p>
+          <p class="text-lg font-semibold text-gray-900 mt-2">
+            ₱{{ selectedProduct()?.price | number:'1.2-2' }}
+          </p>
+        </div>
+      </div>
+
+      <!-- QUANTITY SELECTOR -->
+      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+        <span class="font-medium text-gray-700 text-sm">Quantity</span>
+
+        <div class="flex items-center gap-3">
+          <button
+            (click)="decreaseQuantity()"
+            [disabled]="purchaseQuantity() === 1"
+            class="w-8 h-8 rounded-lg border-2 border-gray-300 flex items-center justify-center
+                   hover:border-gray-900 transition
+                   disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
+            </svg>
+          </button>
+
+          <span class="w-10 text-center font-semibold">{{ purchaseQuantity() }}</span>
+
+          <button
+            (click)="increaseQuantity()"
+            [disabled]="purchaseQuantity() === selectedProduct()?.availableKeys"
+            class="w-8 h-8 rounded-lg border-2 border-gray-300 flex items-center justify-center
+                   hover:border-gray-900 transition
+                   disabled:opacity-30 disabled:cursor-not-allowed">
+            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- TOTAL -->
+      <div class="flex items-center justify-between p-4 bg-gray-900 text-white rounded-xl">
+        <span class="font-semibold text-sm">Total</span>
+        <span class="text-xl font-bold">
+          ₱{{ totalPrice() | number:'1.2-2' }}
+        </span>
+      </div>
+
+      <!-- ERROR MESSAGE -->
+      <div *ngIf="purchaseError()"
+           class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+        {{ purchaseError() }}
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t">
+      <button
+        (click)="closePurchaseModal()"
+        class="px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 transition">
+        Cancel
+      </button>
+
+      <button
+        (click)="confirmPurchase()"
+        [disabled]="purchaseLoading()"
+        class="px-5 py-2.5 bg-gray-900 text-white rounded-lg text-sm font-medium
+               hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed
+               transition flex items-center gap-2">
+        <svg *ngIf="purchaseLoading()" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span>{{ purchaseLoading() ? 'Processing...' : 'Confirm' }}</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= SUCCESS TOAST ================= -->
+<div
+  *ngIf="showSuccessModal"
+  class="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
+>
+  <div class="bg-white shadow-xl border border-gray-200 rounded-full px-6 py-3
+              backdrop-blur-xl min-w-[260px]"
+      [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
+
+    <p class="text-gray-900 font-medium text-sm flex items-center justify-center gap-2">
+      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      {{ successMessage }}
+    </p>
+
+  </div>
+</div>
