@@ -6,6 +6,7 @@ import { DigitalProduct } from 'src/app/core/models/digital-products/digital-pro
 import { DigitalProductType } from 'src/app/core/models/digital-products/enums/digital-product-type.enum';
 import { LicenseDuration } from 'src/app/core/models/digital-products/enums/license-duration.enum';
 
+
 // Import skeleton component - adjust path as needed
 import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
@@ -23,15 +24,16 @@ export class DigitalProductTable implements OnChanges {
   @Output() edit = new EventEmitter<DigitalProduct>();
   @Output() archive = new EventEmitter<DigitalProduct>();
   @Output() restore = new EventEmitter<DigitalProduct>();
+  @Output() manageKeys = new EventEmitter<DigitalProduct>();
 
-  /* ================= VIEW MODE ================= */
+  // view mode
   viewMode: 'table' | 'card' = 'table';
 
   toggleView(mode: 'table' | 'card'): void {
     this.viewMode = mode;
   }
 
-  /* ================= SEARCH ================= */
+  // search products
   searchTerm: string = '';
   filteredProducts: DigitalProduct[] = [];
 
@@ -88,4 +90,10 @@ export class DigitalProductTable implements OnChanges {
     const normalized = path.startsWith('/') ? path : `/${path}`;
     return `${this.API_URL}${normalized}`;
   }
+
+  // open manage keys modal (delegate to parent)
+  openManageKeys(product: DigitalProduct): void {
+    this.manageKeys.emit(product);
+  }
+
 }

@@ -1,110 +1,105 @@
-<div class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans min-h-screen transition-colors duration-300"
+<!-- SKELETON LOADING -->
+<ng-template #loadingSkeleton>
+  <div class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans min-h-screen">
+    <div class="mb-8">
+      <app-skeleton-box width="200px" height="36px"></app-skeleton-box>
+    </div>
+
+    <div class="mb-8">
+      <app-skeleton-box width="100%" height="64px" rounded="16px"></app-skeleton-box>
+    </div>
+
+    <div class="space-y-6">
+      <div *ngFor="let x of [1,2,3]">
+        <app-skeleton-box width="100%" height="180px" rounded="20px"></app-skeleton-box>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="!loading; else loadingSkeleton"
+     class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans min-h-screen transition-colors duration-300"
      [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'">
 
-  <!-- HEADER -->
-  <h1 class="text-3xl font-semibold tracking-tight mb-8">
-    My Orders
-  </h1>
+  <h1 class="text-3xl font-semibold tracking-tight mb-6">My Orders</h1>
 
-  <!-- ================= MODERN FILTER BAR ================= -->
+  <div class="inline-flex items-center rounded-xl border p-1 mb-6"
+       [ngClass]="isDarkMode() ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-100'">
+    <button
+      (click)="onOrderTypeChange('games')"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition"
+      [ngClass]="orderType === 'games'
+        ? 'bg-purple-600 text-white'
+        : (isDarkMode() ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-white')">
+      Games
+    </button>
+    <button
+      (click)="onOrderTypeChange('digital')"
+      class="px-4 py-2 rounded-lg text-sm font-medium transition"
+      [ngClass]="orderType === 'digital'
+        ? 'bg-purple-600 text-white'
+        : (isDarkMode() ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-white')">
+      Digital Products
+    </button>
+  </div>
+
   <div
-    class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8
-          rounded-2xl p-3 sm:p-2
-         backdrop-blur-md
-          transition"
+    class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8 rounded-2xl p-3 sm:p-2 backdrop-blur-md transition"
     [ngClass]="isDarkMode()
       ? 'bg-gray-900/60 border-white/10'
-      : 'bg-white/70 border-gray-200'"
-  >
+      : 'bg-white/70 border-gray-200'">
 
-    <!-- STATUS SELECT -->
     <div class="relative w-full sm:w-44">
-
       <div
-        class="relative rounded-xl
-              border bg-white/70 backdrop-blur-md
-              transition
-              focus-within:ring-1 focus-within:ring-purple-500/20"
+        class="relative rounded-xl border bg-white/70 backdrop-blur-md transition focus-within:ring-1 focus-within:ring-purple-500/20"
         [ngClass]="isDarkMode()
           ? 'border-gray-700 bg-gray-900/60'
-          : 'border-gray-200 bg-white/70'"
-      >
+          : 'border-gray-200 bg-white/70'">
 
         <select
           [(ngModel)]="statusFilter"
           (ngModelChange)="onStatusFilterChange()"
-          class="w-full appearance-none bg-transparent
-                px-4 py-3 pr-10 text-sm font-medium
-                outline-none cursor-pointer"
-          [ngClass]="isDarkMode()
-            ? 'text-gray-100'
-            : 'text-gray-900'"
-        >
-          <option [ngValue]="null">All statuses</option>
-          <option [ngValue]="0">Pending</option>
-          <option [ngValue]="1">Approved</option>
-          <option [ngValue]="2">Rejected</option>
+          class="w-full appearance-none bg-transparent px-4 py-3 pr-10 text-sm font-medium outline-none cursor-pointer"
+          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
+          <option [ngValue]="'all'">All statuses</option>
+          <option [ngValue]="'pending'">Pending</option>
+          <option [ngValue]="'approved'">Approved</option>
+          <option [ngValue]="'rejected'">Rejected</option>
         </select>
 
-        <!-- Chevron -->
         <svg
-          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-                w-4 h-4 opacity-60"
+          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-60"
           viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd"
             d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
             clip-rule="evenodd" />
         </svg>
       </div>
-
-
-      <!-- Chevron -->
-      <svg
-        class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2
-              w-4 h-4 opacity-60"
-        viewBox="0 0 20 20" fill="currentColor"
-      >
-        <path fill-rule="evenodd"
-          d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-          clip-rule="evenodd"
-        />
-      </svg>
     </div>
 
-    <!-- SEARCH -->
     <div class="relative flex-1">
-
       <input
         type="text"
-        placeholder="Search by game title…"
+        [placeholder]="activeSearchPlaceholder"
         [(ngModel)]="searchTerm"
         (ngModelChange)="onSearchChange()"
-        class="w-full rounded-xl px-11 py-3 text-sm
-              border outline-none transition
-              focus:ring-2 focus:ring-purple-500/20"
+        class="w-full rounded-xl px-11 py-3 text-sm border outline-none transition focus:ring-2 focus:ring-purple-500/20"
         [ngClass]="isDarkMode()
           ? 'bg-gray-800 text-gray-100 border-gray-700 placeholder-gray-400'
-          : 'bg-white text-gray-900 border-gray-300 placeholder-gray-400'"
-      />
+          : 'bg-white text-gray-900 border-gray-300 placeholder-gray-400'" />
 
-      <!-- Search icon -->
       <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2
-              w-4 h-4 opacity-60"
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-60"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
-      >
+        stroke-width="2">
         <circle cx="11" cy="11" r="8" />
         <path d="M21 21l-4.35-4.35" />
       </svg>
     </div>
-
   </div>
 
-
-  <!-- ERROR -->
   <div *ngIf="errorMsg"
        class="mb-6 px-4 py-3 rounded-xl text-sm"
        [ngClass]="isDarkMode()
@@ -113,132 +108,154 @@
     {{ errorMsg }}
   </div>
 
-  <!-- EMPTY -->
-  <div *ngIf="!loading && paginatedOrders.length === 0"
+  <div *ngIf="!loading && !hasOrdersInSelectedType"
        class="text-center text-sm opacity-60 py-12">
     No orders found.
   </div>
 
-  <!-- ORDERS -->
-  <div *ngFor="let order of paginatedOrders"
-       class="mb-8 rounded-2xl border transition"
-       [ngClass]="isDarkMode()
-         ? 'bg-gray-800 border-gray-700'
-         : 'bg-white border-gray-200'">
+  <ng-container *ngIf="orderType === 'games'">
+    <div *ngFor="let order of paginatedGameOrders"
+         class="mb-8 rounded-2xl border transition"
+         [ngClass]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
 
-    <!-- HEADER -->
-    <div class="px-6 pt-6 text-xs text-gray-500 dark:text-gray-400">
-      {{ order.createdAt | date:'medium' }}
-    </div>
-
-    <!-- SUMMARY -->
-    <div class="px-6 py-4 flex justify-between items-center">
-      <div>
-        <div class="text-xs text-gray-500">Total</div>
-        <div class="text-lg font-medium">
-          ₱{{ order.totalPrice | number:'1.2-2' }}
-        </div>
+      <div class="px-6 pt-6 text-xs text-gray-500 dark:text-gray-400">
+        {{ order.createdAt | date:'medium' }}
       </div>
 
-      <span
-        class="px-3 py-1 rounded-full text-xs font-medium"
-        [ngClass]="{
-          'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400': order.status === 0,
-          'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': order.status === 1,
-          'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': order.status === 2
-        }">
-        {{ getStatusLabel(order.status) }}
-      </span>
-    </div>
-
-    <!-- DESKTOP TABLE -->
-    <div class="hidden sm:block border-t"
-         [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
-
-      <table class="w-full text-sm">
-        <thead class="text-gray-500"
-               [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-gray-50'">
-          <tr>
-            <th class="p-4 text-left font-medium">Image</th>
-            <th class="p-4 text-left font-medium">Game</th>
-            <th class="p-4 text-right font-medium">Price</th>
-            <th class="p-4 text-center font-medium">Key</th>
-            <th class="p-4 text-center font-medium" *ngIf="order.status === 1">Review</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr *ngFor="let item of order.items"
-              class="border-t hover:bg-purple-50/40 dark:hover:bg-purple-900/10 transition"
-              [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
-
-            <td class="p-4">
-              <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
-            </td>
-
-            <td class="p-4">{{ item.gameTitle }}</td>
-
-            <td class="p-4 text-right">
-              ₱{{ item.unitPrice | number:'1.2-2' }}
-            </td>
-
-            <td class="p-4 text-center font-mono text-xs">
-              {{ item.productKey || '—' }}
-            </td>
-
-            <td class="p-4 text-center" *ngIf="order.status === 1">
-              <button
-                (click)="startReview(item)"
-                class="text-xs font-medium px-4 py-1.5 rounded-full
-                       bg-purple-600 text-white hover:bg-purple-700 transition">
-                Review
-              </button>
-            </td>
-
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- MOBILE ITEMS -->
-    <div class="sm:hidden p-4 space-y-4">
-      <div *ngFor="let item of order.items"
-           class="flex gap-3 items-center rounded-xl p-3 border"
-           [ngClass]="isDarkMode()
-             ? 'bg-gray-700 border-gray-600'
-             : 'bg-gray-50 border-gray-200'">
-
-        <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
-
-        <div class="flex-1">
-          <div class="font-medium">{{ item.gameTitle }}</div>
-          <div class="text-sm opacity-70">
-            ₱{{ item.unitPrice | number:'1.2-2' }}
-          </div>
-          <div class="text-xs font-mono opacity-60">
-            {{ item.productKey || '—' }}
-          </div>
+      <div class="px-6 py-4 flex justify-between items-center">
+        <div>
+          <div class="text-xs text-gray-500">Total</div>
+          <div class="text-lg font-medium">P{{ order.totalPrice | number:'1.2-2' }}</div>
         </div>
 
-        <button *ngIf="order.status === 1"
-                (click)="startReview(item)"
-                class="text-xs px-3 py-1 rounded-full bg-purple-600 text-white">
-          Review
-        </button>
+        <span
+          class="px-3 py-1 rounded-full text-xs font-medium"
+          [ngClass]="{
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400': order.status === 0,
+            'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': order.status === 1,
+            'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': order.status === 2
+          }">
+          {{ getStatusLabel(order.status) }}
+        </span>
+      </div>
+
+      <div class="hidden sm:block border-t"
+           [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
+        <table class="w-full text-sm">
+          <thead class="text-gray-500"
+                 [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-gray-50'">
+            <tr>
+              <th class="p-4 text-left font-medium">Image</th>
+              <th class="p-4 text-left font-medium">Game</th>
+              <th class="p-4 text-right font-medium">Price</th>
+              <th class="p-4 text-center font-medium">Key</th>
+              <th class="p-4 text-center font-medium" *ngIf="order.status === 1">Review</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of order.items"
+                class="border-t hover:bg-purple-50/40 dark:hover:bg-purple-900/10 transition"
+                [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
+              <td class="p-4">
+                <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
+              </td>
+              <td class="p-4">{{ item.gameTitle }}</td>
+              <td class="p-4 text-right">P{{ item.unitPrice | number:'1.2-2' }}</td>
+              <td class="p-4 text-center font-mono text-xs">{{ item.productKey || '-' }}</td>
+              <td class="p-4 text-center" *ngIf="order.status === 1">
+                <button
+                  (click)="startReview(item)"
+                  class="text-xs font-medium px-4 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition">
+                  Review
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sm:hidden p-4 space-y-4">
+        <div *ngFor="let item of order.items"
+             class="flex gap-3 items-center rounded-xl p-3 border"
+             [ngClass]="isDarkMode() ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'">
+          <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
+          <div class="flex-1">
+            <div class="font-medium">{{ item.gameTitle }}</div>
+            <div class="text-sm opacity-70">P{{ item.unitPrice | number:'1.2-2' }}</div>
+            <div class="text-xs font-mono opacity-60">{{ item.productKey || '-' }}</div>
+          </div>
+          <button *ngIf="order.status === 1"
+                  (click)="startReview(item)"
+                  class="text-xs px-3 py-1 rounded-full bg-purple-600 text-white">
+            Review
+          </button>
+        </div>
       </div>
     </div>
+  </ng-container>
 
-  </div>
+  <ng-container *ngIf="orderType === 'digital'">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div *ngFor="let order of paginatedDigitalOrders"
+           class="rounded-2xl border p-5 transition"
+           [ngClass]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
 
-  <!-- PAGINATION -->
-  <div class="flex justify-center items-center gap-2 mt-10">
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div class="flex items-start gap-3">
+            <img *ngIf="getOrderProductImageUrl(order)"
+                 [src]="getOrderProductImageUrl(order)"
+                 class="h-12 w-12 rounded-lg object-cover border"
+                 [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'"
+                 alt="Product image" />
+            <div *ngIf="!getOrderProductImageUrl(order)"
+                 class="h-12 w-12 rounded-lg flex items-center justify-center border"
+                 [ngClass]="isDarkMode() ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'">
+              <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
+              </svg>
+            </div>
+
+            <div>
+              <div class="font-medium">{{ order.digitalProductName }}</div>
+              <div class="text-xs opacity-70">Qty: {{ order.quantity }}</div>
+              <div class="text-xs opacity-70">{{ order.createdAt | date:'medium' }}</div>
+            </div>
+          </div>
+
+          <span class="px-3 py-1 rounded-full text-xs font-medium"
+                [ngClass]="{
+                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400': order.status === 'Pending',
+                  'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': order.status === 'Approved',
+                  'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': order.status === 'Rejected'
+                }">
+            {{ getDigitalStatusLabel(order.status) }}
+          </span>
+        </div>
+
+        <div class="mb-4">
+          <div class="text-xs opacity-70">Total</div>
+          <div class="text-lg font-medium">P{{ order.totalPrice | number:'1.2-2' }}</div>
+        </div>
+
+        <div *ngIf="order.status === 'Approved'" class="space-y-2">
+          <div *ngFor="let item of order.items"
+               class="rounded-lg px-3 py-2 border font-mono text-xs"
+               [ngClass]="isDarkMode() ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'">
+            {{ item.productKey || '-' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <div *ngIf="hasOrdersInSelectedType" class="flex justify-center items-center gap-2 mt-10">
     <button (click)="prevPage()"
             [disabled]="currentPage === 1"
             class="px-4 py-2 rounded-full text-sm border disabled:opacity-50"
-            [ngClass]="isDarkMode()
-              ? 'border-gray-700 hover:bg-gray-800'
-              : 'border-gray-300 hover:bg-gray-100'">
-      ← Prev
+            [ngClass]="isDarkMode() ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-100'">
+      Prev
     </button>
 
     <button *ngFor="let p of pages"
@@ -246,19 +263,15 @@
             class="px-4 py-2 rounded-full text-sm transition"
             [ngClass]="p === currentPage
               ? 'bg-purple-600 text-white'
-              : (isDarkMode()
-                  ? 'border border-gray-700 hover:bg-gray-800'
-                  : 'border border-gray-300 hover:bg-gray-100')">
+              : (isDarkMode() ? 'border border-gray-700 hover:bg-gray-800' : 'border border-gray-300 hover:bg-gray-100')">
       {{ p }}
     </button>
 
     <button (click)="nextPage()"
-            [disabled]="currentPage === totalPages"
+            [disabled]="currentPage === selectedTotalPages"
             class="px-4 py-2 rounded-full text-sm border disabled:opacity-50"
-            [ngClass]="isDarkMode()
-              ? 'border-gray-700 hover:bg-gray-800'
-              : 'border-gray-300 hover:bg-gray-100'">
-      Next →
+            [ngClass]="isDarkMode() ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-100'">
+      Next
     </button>
   </div>
 

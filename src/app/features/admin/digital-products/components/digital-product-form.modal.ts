@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { DigitalProduct } from 'src/app/core/models/digital-products/digital-product.model';
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
@@ -23,12 +24,21 @@ export class DigitalProductFormModal implements OnInit {
   form!: FormGroup;
   loading = false;
   isClosing = false;
+  submitError = '';
 
   imagePreview: string | null = null;
   selectedImage?: File;
 
-  DigitalProductType = DigitalProductType;
-  LicenseDuration = LicenseDuration;
+  productTypeOptions = [
+    { label: 'OneTime', value: DigitalProductType.OneTime },
+    { label: 'Subscription', value: DigitalProductType.Subscription }
+  ];
+  licenseDurationOptions = [
+    { label: 'None', value: LicenseDuration.None },
+    { label: 'Monthly', value: LicenseDuration.Monthly },
+    { label: 'Quarterly', value: LicenseDuration.Quarterly },
+    { label: 'Yearly', value: LicenseDuration.Yearly }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -70,9 +80,19 @@ export class DigitalProductFormModal implements OnInit {
     if (this.form.invalid || this.loading) return;
 
     this.loading = true;
+    this.submitError = '';
+    const formValue = this.form.getRawValue();
 
     const dto = {
-      ...this.form.value,
+      ...formValue,
+      name: String(formValue.name ?? '').trim(),
+      brand: String(formValue.brand ?? '').trim(),
+      platform: String(formValue.platform ?? '').trim(),
+      description: String(formValue.description ?? '').trim(),
+      productType: Number(formValue.productType) as DigitalProductType,
+      licenseDuration: Number(formValue.licenseDuration) as LicenseDuration,
+      price: Number(formValue.price),
+      isActive: Boolean(formValue.isActive),
       image: this.selectedImage
     };
 
@@ -86,9 +106,9 @@ export class DigitalProductFormModal implements OnInit {
             this.saved.emit('Product updated successfully.');
             this.close();
           },
-          error: () => {
+          error: (error) => {
             this.loading = false;
-            // Handle error - you could emit an error event or show a toast
+            this.submitError = this.extractApiErrorMessage(error);
           }
         });
     } else {
@@ -101,12 +121,35 @@ export class DigitalProductFormModal implements OnInit {
             this.saved.emit('Product created successfully.');
             this.close();
           },
-          error: () => {
+          error: (error) => {
             this.loading = false;
-            // Handle error - you could emit an error event or show a toast
+            this.submitError = this.extractApiErrorMessage(error);
           }
         });
     }
+  }
+
+  private extractApiErrorMessage(error?: HttpErrorResponse): string {
+    if (error?.error?.errors && typeof error.error.errors === 'object') {
+      const messages = Object.values(error.error.errors)
+        .flat()
+        .filter(Boolean)
+        .map(v => String(v));
+
+      if (messages.length > 0) {
+        return messages.join(' ');
+      }
+    }
+
+    if (typeof error?.error === 'string' && error.error.trim()) {
+      return error.error;
+    }
+
+    if (error?.error?.message) {
+      return String(error.error.message);
+    }
+
+    return 'Failed to save product. Please check required fields and try again.';
   }
 
   close(): void {

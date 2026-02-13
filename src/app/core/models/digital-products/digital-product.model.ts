@@ -7,7 +7,7 @@ export interface DigitalProduct{
   brand: string;
   platform: string;
 
-  productType: DigitalProduct;      
+  productType: DigitalProductType;      
   licenseDuration: LicenseDuration; 
   price: number;
   description?: string;

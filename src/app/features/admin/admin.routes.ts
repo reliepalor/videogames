@@ -26,5 +26,11 @@ export const adminRoutes: Routes = [
     loadComponent: () =>
       import('./digital-products/admin-digital-products.page')
         .then(m => m.AdminDigitalProductsPage)
+  },
+  {
+    path: 'digital-orders',
+    loadComponent: () =>
+      import('./digital-orders/pages/admin-digital-orders.page')
+        .then(m => m.AdminDigitalOrdersPage)
   }
 ];

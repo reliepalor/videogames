@@ -152,25 +152,67 @@
             </span>
           </td>
 
-          <td class="px-6 py-4 text-right">
-            <div class="inline-flex gap-3">
-              <button (click)="edit.emit(product)" 
-                      class="text-gray-400 hover:text-black cursor-pointer"
-                      title="Edit">
-                ✏️
+<td class="px-6 py-4 text-right">
+            <div class="inline-flex gap-2">
+              
+              <!-- Edit Button - Pencil Icon -->
+              <button 
+                (click)="edit.emit(product)" 
+                class="group relative p-2 rounded-lg border border-gray-200
+                       text-gray-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 
+                       transition-all duration-200 cursor-pointer"
+                title="Edit">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
               </button>
-              <button *ngIf="product.isActive"
-                      (click)="archive.emit(product)" 
-                      class="text-gray-400 hover:text-red-600 cursor-pointer"
-                      title="Archive">
-                🗑️
+
+              <!-- Archive Button - Trash Icon -->
+              <button 
+                *ngIf="product.isActive"
+                (click)="archive.emit(product)" 
+                class="group relative p-2 rounded-lg border border-gray-200
+                       text-gray-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 
+                       transition-all duration-200 cursor-pointer"
+                title="Archive">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M20 9l-1.5 12a2 2 0 01-2 1.5h-9A2 2 0 016 21L4.5 9M3 6h18M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
+                </svg>
               </button>
-              <button *ngIf="!product.isActive"
-                      (click)="restore.emit(product)" 
-                      class="text-gray-400 hover:text-green-600 cursor-pointer"
-                      title="Restore">
-                ♻️
+
+              <!-- Restore Button - Rotate Arrow Icon -->
+              <button 
+                *ngIf="!product.isActive"
+                (click)="restore.emit(product)" 
+                class="group relative p-2 rounded-lg border border-gray-200
+                       text-gray-600 hover:text-green-600 hover:border-green-200 hover:bg-green-50 
+                       transition-all duration-200 cursor-pointer"
+                title="Restore">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V6a2 2 0 00-2-2h-6a2 2 0 00-2 2v16l4-2 4 2z" />
+                </svg>
               </button>
+
+              <!-- Add Keys Button - Key Icon -->
+              <button
+                type="button"
+                title="Add Keys"
+                class="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg
+                       border border-purple-300 text-purple-950
+                       hover:bg-purple-50 hover:shadow-lg hover:scale-105
+                       transition-all duration-200 active:scale-95 cursor-pointer"
+                (click)="openManageKeys(product)"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" 
+                        d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="hidden sm:inline whitespace-nowrap">Add Keys</span>
+              </button>
+
             </div>
           </td>
 

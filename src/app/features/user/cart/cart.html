@@ -1,4 +1,26 @@
-<div class="max-w-6xl mx-auto px-6 py-10 mt-10 transition-colors"
+<!-- SKELETON LOADING -->
+<ng-template #loadingSkeleton>
+  <div class="max-w-6xl mx-auto px-6 py-10 mt-10">
+    <div class="flex items-center justify-between mb-10">
+      <app-skeleton-box width="200px" height="32px"></app-skeleton-box>
+      <app-skeleton-box width="240px" height="40px" rounded="999px"></app-skeleton-box>
+    </div>
+
+    <div class="space-y-4">
+      <div *ngFor="let x of [1,2,3]">
+        <app-skeleton-box width="100%" height="80px" rounded="18px"></app-skeleton-box>
+      </div>
+    </div>
+
+    <div class="mt-12 flex items-center justify-between">
+      <app-skeleton-box width="180px" height="28px"></app-skeleton-box>
+      <app-skeleton-box width="140px" height="44px" rounded="999px"></app-skeleton-box>
+    </div>
+  </div>
+</ng-template>
+
+<div *ngIf="!loadingCart; else loadingSkeleton"
+     class="max-w-6xl mx-auto px-6 py-10 mt-10 transition-colors"
      [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'">
 
   <!-- HEADER -->

@@ -1,11 +1,9 @@
 <div class="scroll-smooth bg-black text-white antialiased">
-  <!-- Scroll Progress -->
   <div
     id="scroll-progress"
     class="fixed top-0 left-0 h-[3px] z-50 bg-gradient-to-r from-blue-500 to-cyan-400 w-0"
   ></div>
 
-  <!-- NAV -->
   <header
     id="navbar"
     class="fixed top-0 w-full z-40 backdrop-blur-xl bg-white/10 border-b border-white/10 transition-all"
@@ -13,65 +11,394 @@
 
   </header>
 
-  <!-- HERO -->
-  <section class="relative min-h-screen flex items-center justify-center overflow-hidden">
-    <canvas #particleCanvas id="particleCanvas" class="absolute inset-0"></canvas>
+<!-- HERO -->
+  <section class="relative min-h-screen overflow-hidden bg-black">
+    <!-- Particle Canvas Background -->
+    <canvas #particleCanvas id="particleCanvas" class="absolute inset-0 opacity-30"></canvas>
 
-    <div class="relative z-10 text-center max-w-3xl px-6">
-      <h1 id="heroText" class="text-5xl md:text-7xl font-semibold leading-tight">
-        <span class="block font-bold">Premium Digital Products.</span>
-        <span class="block font-bold">Instantly Delivered.</span>
-      </h1>
-      <p class="mt-6 text-white/70 text-lg">Genuine licenses. Secure checkout. Zero waiting.</p>
-      <button
-        class="mt-10 px-8 py-4 rounded-full bg-purple-600 hover:bg-purple-500 transition shadow-xl"
-        type="button"
-      >
-        Explore Products
-      </button>
+    <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/80 pointer-events-none"></div>
+
+    <div class="relative z-10 min-h-screen flex flex-col">
+      
+      <div class="h-20"></div>
+
+      <div class="flex-1 grid lg:grid-cols-12 gap-8 max-w-[1600px] mx-auto px-6 lg:px-12 py-16">
+        
+        <div class="lg:col-span-7 flex flex-col justify-center space-y-8">
+          
+          <div class="inline-flex items-center gap-3 text-sm font-light text-zinc-400 tracking-wide">
+            <span class="w-8 h-[1px] bg-violet-500/60"></span>
+            <span>Premium Digital Marketplace</span>
+          </div>
+
+          <h1 id="heroText" class="space-y-2">
+            <span class="block text-[clamp(2.5rem,8vw,5.5rem)] font-light leading-[0.95] tracking-tight text-white">
+              Software that
+            </span>
+            <span class="block text-[clamp(2.5rem,8vw,5.5rem)] font-light leading-[0.95] tracking-tight text-white">
+              empowers
+            </span>
+            <span class="block text-[clamp(2.5rem,8vw,5.5rem)] font-semibold leading-[0.95] tracking-tight 
+                        bg-gradient-to-r from-violet-400 via-purple-300 to-violet-400 
+                        bg-clip-text text-transparent">
+              your creativity
+            </span>
+          </h1>
+
+          <!-- Subheadline -->
+          <p class="text-lg lg:text-xl font-light text-zinc-400 max-w-xl leading-relaxed">
+            Instant access to Microsoft Office, Adobe Creative Suite, Canva Pro, 
+            and premium games. Authentic licenses delivered in seconds.
+          </p>
+
+          <!-- CTA Group -->
+          <div class="flex flex-col sm:flex-row gap-4 pt-4">
+            <button
+              type="button"
+              class="group px-7 py-4 bg-white text-black text-sm font-medium rounded-full
+                    transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-white/20
+                    active:scale-100 flex items-center justify-center gap-2"
+            >
+              <span>Browse Products</span>
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" 
+                   fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              class="px-7 py-4 bg-transparent border border-zinc-700 text-white text-sm font-light rounded-full
+                    transition-all duration-300 hover:bg-zinc-900 hover:border-zinc-600
+                    active:scale-95"
+            >
+              How It Works
+            </button>
+          </div>
+
+          <!-- Trust Indicators -->
+          <div class="flex flex-wrap items-center gap-6 pt-8 text-xs text-zinc-500 font-light">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+              </svg>
+              <span>Verified licenses</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+              </svg>
+              <span>Secure checkout</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-violet-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+              </svg>
+              <span>Instant delivery</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Product Showcase (Spans 5 columns) -->
+        <div class="lg:col-span-5 flex items-center justify-center lg:justify-end">
+          
+          <!-- Floating Product Cards Stack -->
+          <div class="relative w-full max-w-md">
+            
+            <!-- Card 1 - Back -->
+            <div id="productCard1" 
+                 class="absolute top-0 right-0 w-64 h-80 rounded-2xl bg-gradient-to-br from-zinc-900/90 to-zinc-800/90 
+                       backdrop-blur-xl border border-zinc-700/50 shadow-2xl
+                       transform rotate-6 translate-x-8 translate-y-8 opacity-60
+                       transition-all duration-700 hover:opacity-80">
+              <div class="p-6 h-full flex flex-col justify-between">
+                <div class="flex items-start justify-between">
+                  <div class="w-12 h-12 rounded-2xl border flex items-center justify-center bg-gray-800 overflow-hidden">
+                    <img src="assets/images/ms.png" alt="games" class="w-full h-full object-cover">
+                  </div>
+                  <span class="text-xs font-light text-zinc-500">Office Suite</span>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-white mb-2">Microsoft 365</h3>
+                  <p class="text-sm text-zinc-400 font-light">Complete productivity suite</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 - Middle -->
+            <div id="productCard2"
+                 class="absolute top-0 right-0 w-64 h-80 rounded-2xl bg-gradient-to-br from-zinc-900/95 to-zinc-800/95 
+                       backdrop-blur-xl border border-zinc-700/50 shadow-2xl
+                       transform rotate-3 translate-x-4 translate-y-4 opacity-80
+                       transition-all duration-700 hover:opacity-100">
+              <div class="p-6 h-full flex flex-col justify-between">
+                <div class="flex items-start justify-between">
+                  <div class="w-12 h-12 rounded-2xl border flex items-center justify-center bg-gray-800 overflow-hidden">
+                    <img src="assets/images/creativity.png" alt="games" class="w-full h-full object-cover">
+                  </div>
+                  <span class="text-xs font-light text-zinc-500">Creative</span>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-white mb-2">Adobe Suite</h3>
+                  <p class="text-sm text-zinc-400 font-light">Professional creative tools</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 - Front (Main Focus) -->
+            <div id="productCard3"
+                 class="relative w-64 h-80 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-800 
+                       backdrop-blur-xl border border-zinc-700/50 shadow-2xl
+                       transform transition-all duration-700 hover:scale-105 hover:shadow-violet-500/20">
+              <div class="p-6 h-full flex flex-col justify-between">
+                <div class="flex items-start justify-between">
+                  <div class="w-12 h-12 rounded-2xl border flex items-center justify-center bg-gray-800 overflow-hidden">
+                    <img src="assets/images/games.png" alt="games" class="w-full h-full object-cover">
+                  </div>
+                  <span class="text-xs font-light text-zinc-500">Gaming</span>
+                </div>
+                <div>
+                  <h3 class="text-xl font-semibold text-white mb-2">Premium Games</h3>
+                  <p class="text-sm text-zinc-400 font-light">Latest AAA titles & classics</p>
+                </div>
+              </div>
+              
+              <!-- Subtle glow effect -->
+              <div class="absolute -inset-0.5 bg-gradient-to-r from-violet-600 to-purple-600 rounded-2xl opacity-0 
+                         group-hover:opacity-20 blur transition duration-700 -z-10"></div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Stats Bar -->
+      <div class="pb-12 px-6 lg:px-12">
+        <div class="max-w-[1600px] mx-auto">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 p-8 rounded-2xl bg-zinc-900/40 backdrop-blur-sm border border-zinc-800/50">
+            
+            <div class="text-center md:text-left">
+              <div class="text-3xl font-light text-white mb-1">500+</div>
+              <div class="text-sm text-zinc-500 font-light">Products Available</div>
+            </div>
+
+            <div class="text-center md:text-left">
+              <div class="text-3xl font-light text-white mb-1">50k+</div>
+              <div class="text-sm text-zinc-500 font-light">Happy Customers</div>
+            </div>
+
+            <div class="text-center md:text-left">
+              <div class="text-3xl font-light text-white mb-1">99.9%</div>
+              <div class="text-sm text-zinc-500 font-light">Uptime</div>
+            </div>
+
+            <div class="text-center md:text-left">
+              <div class="text-3xl font-light text-white mb-1">24/7</div>
+              <div class="text-sm text-zinc-500 font-light">Support</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
     </div>
+
   </section>
 
   <!-- PRODUCTS -->
-  <section id="products" class="py-32 max-w-7xl mx-auto px-6">
-    <h2 class="text-4xl font-semibold mb-16">Best Sellers</h2>
+  <section id="products" class="py-32 overflow-hidden bg-gradient-to-b from-zinc-950 to-black">
 
-    <ng-container *ngIf="bestSellers$ | async as bestSellers; else bestSellersLoading">
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10" *ngIf="bestSellers?.length; else bestSellersLoading">
+    <div class="max-w-6xl mx-auto px-6">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-16">
+        <div>
+          <h2 class="text-4xl md:text-5xl font-light tracking-tight text-zinc-100">
+            Best Sellers
+          </h2>
+          <p class="mt-2 text-sm text-zinc-500">Handpicked premium selections</p>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            id="scroll-left"
+            type="button"
+            aria-label="Scroll left"
+            class="w-11 h-11 rounded-full bg-zinc-900/50 backdrop-blur-sm
+                  border border-zinc-800/50 flex items-center justify-center
+                  text-zinc-400 transition-all duration-300 
+                  hover:bg-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200
+                  active:scale-95"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+
+          <button
+            id="scroll-right"
+            type="button"
+            aria-label="Scroll right"
+            class="w-11 h-11 rounded-full bg-zinc-900/50 backdrop-blur-sm
+                  border border-zinc-800/50 flex items-center justify-center
+                  text-zinc-400 transition-all duration-300 
+                  hover:bg-zinc-800/80 hover:border-zinc-700 hover:text-zinc-200
+                  active:scale-95"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Container -->
+    <div class="relative mx-auto w-[85%] max-w-[1400px] border border-gray-800/5 px-15 rounded-2xl">
+      <h2>Video Games</h2>
+
+
+      <ng-container *ngIf="bestSellers$ | async as bestSellers; else bestSellersLoading">
+
         <div
-          class="product-card group border border-gray-800 cursor-pointer"
-          *ngFor="let game of bestSellers"
+          *ngIf="bestSellers?.length; else bestSellersLoading"
+          id="products-scroll"
+          class="flex gap-5 overflow-x-auto overflow-y-hidden
+                scroll-smooth scrollbar-hide px-6 py-8
+                snap-x snap-mandatory cursor-grab active:cursor-grabbing"
         >
-          <div class="product-thumb">
-            <img
-              *ngIf="game.imagePath; else noImage"
-              [src]="apiUrl + game.imagePath"
-              [alt]="game.title"
-              loading="lazy"
-            />
-            <ng-template #noImage>
-              <div class="product-thumb--placeholder">No Image</div>
-            </ng-template>
-          </div>
-          <span class="badge">{{ game.totalQuantity }} sold</span>
-          <h3>{{ game.title }}</h3>
-          <!-- <p class="price">{{ game.totalQuantity }} sold</p> -->
-          <p class="price">PHP {{ game.totalRevenue | number:'1.0-0' }}</p>
-          <button class="add-to-cart cursor-pointer" type="button" (click)="onAddToCart()">Add to Cart</button>
-        </div>
-      </div>
-    </ng-container>
 
-    <ng-template #bestSellersLoading>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-10">
-        <div class="product-card skeleton-card" *ngFor="let _ of [1,2,3,4,5,6]">
-          <div class="skeleton badge-skeleton"></div>
-          <div class="skeleton title-skeleton"></div>
-          <div class="skeleton price-skeleton"></div>
-          <div class="skeleton button-skeleton"></div>
+          <div
+            *ngFor="let game of bestSellers"
+            (click)="onAddToCart()"
+            class="group relative w-[280px] flex-shrink-0
+                  rounded-xl bg-zinc-900/40 backdrop-blur-sm
+                  border border-zinc-800/40 overflow-hidden
+                  transition-all duration-500 ease-out
+                  hover:-translate-y-2 hover:shadow-xl
+                  hover:shadow-violet-950/20
+                  hover:border-zinc-700/60
+                  hover:bg-zinc-900/60
+                  snap-center cursor-pointer"
+          >
+
+            <!-- Subtle Purple Glow on Hover -->
+            <div class="absolute inset-0 opacity-0 group-hover:opacity-100
+                        transition-opacity duration-700
+                        bg-gradient-to-br from-violet-950/10 via-transparent to-violet-950/5">
+            </div>
+
+            <!-- Image -->
+            <div class="relative aspect-video overflow-hidden bg-zinc-900/60">
+
+              <img
+                *ngIf="getBestSellerImageUrl(game.imagePath); else noImage"
+                [src]="getBestSellerImageUrl(game.imagePath)"
+                [alt]="game.title"
+                loading="lazy"
+                class="w-full h-full object-cover
+                      transition-all duration-700 ease-out
+                      group-hover:scale-105 group-hover:brightness-110"
+              />
+
+              <ng-template #noImage>
+                <div class="w-full h-full grid place-items-center
+                            text-zinc-600 text-xs font-light uppercase tracking-widest">
+                  No Image
+                </div>
+              </ng-template>
+
+              <!-- Minimal Overlay -->
+              <div class="absolute inset-0 flex items-end justify-center
+                          bg-gradient-to-t from-black/70 via-black/20 to-transparent
+                          opacity-0 group-hover:opacity-100
+                          transition-opacity duration-500 pb-6">
+                <span class="text-xs font-light text-zinc-300 tracking-wide
+                            translate-y-2 group-hover:translate-y-0
+                            transition-transform duration-500">
+                  View Details
+                </span>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="relative p-5 z-10">
+
+              <!-- Badge -->
+              <span class="inline-flex items-center text-[11px] font-light
+                          px-2.5 py-1 border border-zinc-700/50
+                          rounded-full mb-3 text-zinc-400 tracking-wide">
+                <span class="w-1.5 h-1.5 rounded-full bg-violet-500/60 mr-2"></span>
+                {{ game.totalQuantity }} sold
+              </span>
+
+              <!-- Title -->
+              <h3 class="text-[15px] font-normal leading-snug line-clamp-2
+                        text-zinc-200 transition-colors duration-300
+                        group-hover:text-zinc-50">
+                {{ game.title }}
+              </h3>
+
+              <!-- Price -->
+              <p class="mt-3 text-lg font-light text-zinc-400
+                       group-hover:text-violet-400/80
+                       transition-colors duration-300">
+                PHP {{ game.totalRevenue | number:'1.0-0' }}
+              </p>
+
+              <!-- Button -->
+              <button
+                type="button"
+                class="mt-5 w-full py-2.5 rounded-lg
+                      bg-zinc-800/60 border border-zinc-700/40
+                      text-zinc-300 font-light text-sm
+                      flex items-center justify-center gap-2
+                      transition-all duration-300 ease-out
+                      hover:bg-zinc-700/60 hover:border-zinc-600/60
+                      hover:text-zinc-100
+                      hover:-translate-y-0.5
+                      active:translate-y-0
+                      cursor-pointer group/btn"
+              >
+                <span>Add to Cart</span>
+                <svg class="w-3.5 h-3.5 transition-transform duration-300 group-hover/btn:translate-x-0.5"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                </svg>
+              </button>
+
+            </div>
+          </div>
+
         </div>
-      </div>
-    </ng-template>
+      </ng-container>
+
+      <!-- Skeleton -->
+      <ng-template #bestSellersLoading>
+        <div class="flex gap-5 overflow-x-auto px-6 py-8">
+
+          <div
+            *ngFor="let _ of [1,2,3,4,5,6]"
+            class="w-[280px] flex-shrink-0
+                  rounded-xl bg-zinc-900/40 border border-zinc-800/40
+                  overflow-hidden"
+          >
+            <div class="aspect-video bg-zinc-900/60 animate-pulse"></div>
+
+            <div class="p-5 space-y-3">
+              <div class="h-5 w-16 bg-zinc-800/40 rounded-full animate-pulse"></div>
+              <div class="h-4 w-3/4 bg-zinc-800/40 rounded animate-pulse"></div>
+              <div class="h-5 w-1/2 bg-zinc-800/40 rounded animate-pulse"></div>
+              <div class="h-9 w-full bg-zinc-800/40 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+
+        </div>
+      </ng-template>
+
+    </div>
 
   </section>
 
@@ -83,7 +410,7 @@
     
     <a
       [routerLink]="['/games']"
-      class="bg-blue-400 px-4 py-2 rounded-2xl inline-block text-black font-medium"
+      class="bg-blue-400 px-4 py-2 rounded-2xl inline-block text-black font-medium mt-8 hover:bg-blue-300 transition-colors"
     >
       Browse Games
     </a>

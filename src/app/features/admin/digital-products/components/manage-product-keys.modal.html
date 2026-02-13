@@ -1,0 +1,220 @@
+<style>
+  @keyframes modalFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .modal-overlay {
+    animation: modalFadeIn 0.2s ease-out;
+  }
+
+  .modal-content {
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+</style>
+
+<div class="modal-overlay fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+     (click)="onClose()">
+  
+  <div class="modal-content bg-white rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="bg-purple-50 px-6 py-5 border-b border-gray-300">
+      <div class="flex items-center justify-between">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-xl font-semibold text-gray-800">
+            Manage Product Keys
+          </h2>
+          <p class="text-sm text-gray-700 mt-1 truncate">
+            {{ product.name }}
+          </p>
+        </div>
+        
+        <button
+          (click)="onClose()"
+          class="text-white/70 hover:text-white transition p-1 hover:bg-white/10 rounded-lg ml-4 flex-shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="p-6">
+
+      <!-- ADD KEY SECTION -->
+      <div class="mb-6">
+        <label class="block text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 cursor-pointer">
+          Add New Key
+        </label>
+        
+        <div class="flex gap-3">
+          <input
+            [(ngModel)]="newKey"
+            placeholder="Enter or generate product key"
+            class="flex-1 border border-gray-300 rounded-xl px-4 py-3 text-sm font-mono
+                   focus:ring-2 focus:ring-black/10 focus:border-gray-400 outline-none transition"
+          />
+          
+          <button
+            (click)="generateKey()"
+            class="px-4 py-3 border border-gray-300 rounded-xl text-sm font-medium
+                   hover:border-gray-400 transition flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Generate
+          </button>
+
+          <button
+            (click)="addKey()"
+            [disabled]="adding() || !newKey.trim()"
+            class="px-6 py-3 bg-gray-900 text-white rounded-xl text-sm font-medium
+                   hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed
+                   transition flex items-center gap-2 cursor-pointer">
+            <svg *ngIf="adding()" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>{{ adding() ? 'Adding...' : 'Add Key' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div class="border-t border-gray-200 mb-6"></div>
+
+      <!-- KEYS LIST HEADER -->
+      <div class="flex items-center justify-between mb-4">
+        <label class="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          Product Keys ({{ keys().length }})
+        </label>
+        
+        <div class="flex items-center gap-2 text-xs text-gray-500">
+          <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+            {{ availableKeysCount() }} Available
+          </span>
+          <span class="px-2 py-1 bg-red-100 text-red-700 rounded-full font-medium">
+            {{ usedKeysCount() }} Used
+          </span>
+        </div>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div *ngIf="loading()" class="text-center py-12 text-gray-500 text-sm">
+        Loading keys...
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div *ngIf="!loading() && keys().length === 0" 
+           class="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl">
+        <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+        </svg>
+        <p class="text-sm text-gray-500">No product keys yet</p>
+        <p class="text-xs text-gray-400 mt-1">Add your first key above</p>
+      </div>
+
+      <!-- KEYS LIST -->
+      <div *ngIf="!loading() && keys().length > 0"
+           class="space-y-2 max-h-96 overflow-y-auto pr-2">
+        
+        <div
+          *ngFor="let key of keys(); let i = index"
+          class="flex items-center gap-3 border border-gray-200 rounded-xl px-4 py-3.5
+                 hover:border-gray-300 transition group">
+          
+          <!-- KEY NUMBER -->
+          <div class="text-xs text-gray-400 font-medium w-6 flex-shrink-0">
+            {{ i + 1 }}
+          </div>
+
+          <!-- KEY VALUE -->
+          <div class="flex-1 min-w-0">
+            <p class="font-mono text-sm text-gray-900 truncate">
+              {{ isRevealed(key.id) ? key.productKey : maskKey(key.productKey) }}
+            </p>
+          </div>
+
+          <!-- STATUS BADGE -->
+          <span
+            class="px-2.5 py-1 text-xs rounded-full font-medium flex-shrink-0"
+            [ngClass]="key.isUsed 
+              ? 'bg-red-100 text-red-700' 
+              : 'bg-green-100 text-green-700'">
+            {{ key.isUsed ? 'Used' : 'Available' }}
+          </span>
+
+          <!-- VISIBILITY TOGGLE -->
+          <button
+            (click)="toggleKeyVisibility(key.id)"
+            class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg
+                   transition flex-shrink-0"
+            [title]="isRevealed(key.id) ? 'Hide key' : 'Show key'">
+            <svg *ngIf="!isRevealed(key.id)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <svg *ngIf="isRevealed(key.id)" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>
+          </button>
+
+          <!-- COPY BUTTON -->
+          <button
+            *ngIf="isRevealed(key.id)"
+            (click)="copyKey(key.productKey)"
+            class="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg
+                   transition flex-shrink-0 opacity-0 group-hover:opacity-100"
+            title="Copy key">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="bg-gray-50 px-6 py-4 border-t border-gray-200">
+      <div class="flex items-center justify-between">
+        <p class="text-xs text-gray-500">
+          Keys are automatically assigned when orders are approved
+        </p>
+        
+        <button
+          (click)="onClose()"
+          class="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium
+                 hover:bg-gray-800 transition cursor-pointer">
+          Done
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -5,6 +5,7 @@ import { Observable, map } from 'rxjs';
 import { DigitalProduct } from '../../models/digital-products/digital-product.model';
 import { CreateDigitalProductDto } from '../../models/digital-products/create-digital-product.dto';
 import { UpdateDigitalProductDto } from '../../models/digital-products/update-digital-product.dto';
+import { DigitalProductKey } from '../../models/digital-products/digital-product-key.model';
 
 import { environment } from 'src/environments/environment';
 
@@ -142,13 +143,17 @@ export class DigitalProductService{
     }
 
     /** Add product key */
-    addProductKey(productId: number, productKey: string): Observable<any> {
+    addProductKey(payload: { digitalProductId: number; productKey: string;
+    }) {
         return this.http.post(
-        `${this.API_URL}/admin/digital-products/keys`,
-        {
-            digitalProductId: productId,
-            productKey
-        }
+            `${this.API_URL}/admin/digital-products/keys`,
+            payload
         );
+    }
+
+    getProductKeys(productId: number) {
+        return this.http.get<DigitalProductKey[]>(
+            `${this.API_URL}/admin/digital-products/${productId}/keys`
+        )
     }
 }

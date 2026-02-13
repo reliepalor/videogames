@@ -7,6 +7,7 @@ import { OrderService } from 'src/app/core/services/order.service';
 import { VideoGameService } from 'src/app/core/services/videogame.service';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { Subscription } from 'rxjs';
+import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 interface CartItemWithSelection extends CartItem {
   selected: boolean;
@@ -17,7 +18,7 @@ interface CartItemWithSelection extends CartItem {
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css'],
 })
@@ -27,6 +28,7 @@ export class CartComponent implements OnInit, OnDestroy {
 
   search = '';
   selectAll = false;
+  loadingCart = true;
   loading = false;
   errorMsg = '';
   showSuccessModal = false;
@@ -83,6 +85,7 @@ export class CartComponent implements OnInit, OnDestroy {
 
   /* ================= LOAD CART ================= */
   loadCart(): void {
+    this.loadingCart = true;
     this.cartService.getCart().subscribe({
       next: res => {
         this.ngZone.run(() => {
@@ -101,6 +104,7 @@ export class CartComponent implements OnInit, OnDestroy {
       error: err => {
         console.error('Failed to load cart:', err);
         this.errorMsg = 'Failed to load cart.';
+        this.loadingCart = false;
       }
     });
   }
@@ -113,6 +117,7 @@ export class CartComponent implements OnInit, OnDestroy {
       imageUrl: gameMap.get(i.title || '') || '/assets/no-image.png'
     })).sort((a, b) => b.cartItemId - a.cartItemId);
     this.filteredItems = [...this.cartItems];
+    this.loadingCart = false;
     this.cdr.detectChanges();
   }
 

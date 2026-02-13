@@ -2,6 +2,8 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 
+import { DigitalOrder } from "../../models/digital-orders/digital-order.model";
+
 @Injectable({
     providedIn: 'root'
 })
@@ -33,18 +35,23 @@ export class DigitalOrderService {
 
   //-------------ADMIN approved orders
 
-  approveOrder(orderId: number): Observable<any> {
-    return this.http.post(
-        `${this.API_URL}/admin/digital-orders/${orderId}/approve`,
-        {}
+  getAllOrders() {
+    return this.http.get<DigitalOrder[]>(
+      `${this.API_URL}/admin/digital-orders`
     );
   }
 
-  //----------ADMIN reject order
-  rejectOrder(orderId: number): Observable<any> {
+  approveOrder(orderId: number) {
     return this.http.post(
-        `${this.API_URL}/admin/digital-orders/${orderId}/reject`,
-        {}
-    )
+      `${this.API_URL}/admin/digital-orders/${orderId}/approve`,
+      {}
+    );
+  }
+
+  rejectOrder(orderId: number) {
+    return this.http.post(
+      `${this.API_URL}/admin/digital-orders/${orderId}/reject`,
+      {}
+    );
   }
 }

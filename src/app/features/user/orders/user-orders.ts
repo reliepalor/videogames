@@ -1,32 +1,38 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewEncapsulation, signal } from '@angular/core';
 import { UserOrdersService, UserOrder, UserOrderItem } from 'src/app/core/services/user-orders.service';
+import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
+import { DigitalOrder } from 'src/app/core/models/digital-orders/digital-order.model';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ReviewService } from '../../../core/services/review.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
+import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 @Component({
   standalone: true,
   selector: 'app-user-orders',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
   templateUrl: './user-orders.html',
   styleUrls: ['./user-orders.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class UserOrdersComponent implements OnInit, OnDestroy {
   private userOrdersService = inject(UserOrdersService);
+  private digitalOrderService = inject(DigitalOrderService);
   private themeService = inject(ThemeService);
   private authService = inject(AuthService);
   private reviewService = inject(ReviewService);
   private cdr = inject(ChangeDetectorRef);
 
   orders: UserOrder[] = [];
+  digitalOrders: DigitalOrder[] = [];
   loading = false;
   errorMsg = '';
   searchTerm = '';
-  statusFilter: number | null = null; 
+  statusFilter: 'all' | 'pending' | 'approved' | 'rejected' = 'all';
+  orderType: 'games' | 'digital' = 'games';
 
   // toggles between card and table view
   viewMode: 'card' | 'table' = 'card';
@@ -63,14 +69,17 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.errorMsg = '';
 
-    this.userOrdersService.getMyOrders().subscribe({
-      next: (orders) => {
-        // Add showItems property to each order for table expansion
-        this.orders = orders.map(order => ({
+    forkJoin({
+      gameOrders: this.userOrdersService.getMyOrders(),
+      digitalOrders: this.digitalOrderService.getMyOrders()
+    }).subscribe({
+      next: ({ gameOrders, digitalOrders }) => {
+        this.orders = gameOrders.map(order => ({
           ...order,
           showItems: false
-        })).sort((a, b) => b.id - a.id); // Sort by id descending to show newest first
+        })).sort((a, b) => b.id - a.id);
 
+        this.digitalOrders = [...(digitalOrders ?? [])].sort((a, b) => b.id - a.id);
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -79,7 +88,7 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
         this.errorMsg = 'Failed to load your orders.';
         this.loading = false;
         this.cdr.detectChanges();
-      },
+      }
     });
   }
 
@@ -92,12 +101,35 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
-  get filteredOrders() {
+  getDigitalStatusLabel(status: string | null | undefined): 'Pending' | 'Approved' | 'Rejected' | 'Unknown' {
+    const normalized = (status || '').toLowerCase();
+    if (normalized === 'pending') return 'Pending';
+    if (normalized === 'approved') return 'Approved';
+    if (normalized === 'rejected') return 'Rejected';
+    return 'Unknown';
+  }
+
+  private mapGameStatusToKey(status: number): 'pending' | 'approved' | 'rejected' | 'unknown' {
+    if (status === 0) return 'pending';
+    if (status === 1) return 'approved';
+    if (status === 2) return 'rejected';
+    return 'unknown';
+  }
+
+  private mapDigitalStatusToKey(status: string | null | undefined): 'pending' | 'approved' | 'rejected' | 'unknown' {
+    const normalized = (status || '').toLowerCase();
+    if (normalized === 'pending') return 'pending';
+    if (normalized === 'approved') return 'approved';
+    if (normalized === 'rejected') return 'rejected';
+    return 'unknown';
+  }
+
+  get filteredGameOrders() {
     let filtered = this.orders;
 
     // Filter by status
-    if (this.statusFilter !== null) {
-      filtered = filtered.filter(order => order.status === this.statusFilter);
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(order => this.mapGameStatusToKey(order.status) === this.statusFilter);
     }
 
     // Filter by search term
@@ -113,8 +145,65 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
     return filtered;
   }
 
+  get filteredDigitalOrders() {
+    let filtered = this.digitalOrders;
+
+    if (this.statusFilter !== 'all') {
+      filtered = filtered.filter(order => this.mapDigitalStatusToKey(order.status) === this.statusFilter);
+    }
+
+    const term = this.searchTerm.trim().toLowerCase();
+    if (term) {
+      filtered = filtered.filter(order =>
+        (order.digitalProductName || '').toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
+  }
+
+  get paginatedGameOrders() {
+    const filtered = this.filteredGameOrders;
+    this.totalPages = Math.max(1, Math.ceil(filtered.length / this.pageSize));
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get paginatedDigitalOrders() {
+    const filtered = this.filteredDigitalOrders;
+    this.totalPages = Math.max(1, Math.ceil(filtered.length / this.pageSize));
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return filtered.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get selectedTotalPages(): number {
+    const total = this.orderType === 'games'
+      ? this.filteredGameOrders.length
+      : this.filteredDigitalOrders.length;
+
+    return Math.max(1, Math.ceil(total / this.pageSize));
+  }
+
+  get hasOrdersInSelectedType(): boolean {
+    return this.orderType === 'games'
+      ? this.filteredGameOrders.length > 0
+      : this.filteredDigitalOrders.length > 0;
+  }
+
+  get currentDisplayOrdersCount(): number {
+    return this.orderType === 'games'
+      ? this.paginatedGameOrders.length
+      : this.paginatedDigitalOrders.length;
+  }
+
+  get activeSearchPlaceholder(): string {
+    return this.orderType === 'games'
+      ? 'Search by game title...'
+      : 'Search by digital product...';
+  }
+
   get paginatedOrders() {
-    const filtered = this.filteredOrders;
+    const filtered = this.orderType === 'games' ? this.filteredGameOrders : this.filteredDigitalOrders;
     this.totalPages = Math.ceil(filtered.length / this.pageSize);
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return filtered.slice(startIndex, startIndex + this.pageSize);
@@ -126,7 +215,7 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
 
   // Pagination methods
   nextPage() {
-    if (this.currentPage < this.totalPages) {
+    if (this.currentPage < this.selectedTotalPages) {
       this.currentPage++;
     }
   }
@@ -145,7 +234,7 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
 
   get pages(): number[] {
     const pages = [];
-    for (let i = 1; i <= this.totalPages; i++) {
+    for (let i = 1; i <= this.selectedTotalPages; i++) {
       pages.push(i);
     }
     return pages;
@@ -157,6 +246,13 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
 
   onStatusFilterChange() {
     this.currentPage = 1; // Reset to first page when filtering
+  }
+
+  onOrderTypeChange(type: 'games' | 'digital') {
+    this.orderType = type;
+    this.currentPage = 1;
+    this.searchTerm = '';
+    this.statusFilter = 'all';
   }
 
   startReview(item: UserOrderItem) {
@@ -193,5 +289,18 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }, 300);
     }, 1800);
+  }
+
+  getOrderProductImageUrl(order: DigitalOrder): string | null {
+    const path =
+      order.digitalProductImagePath?.trim() ||
+      order.imagePath?.trim() ||
+      order.digitalProduct?.imagePath?.trim();
+
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `http://localhost:5019${normalized}`;
   }
 }

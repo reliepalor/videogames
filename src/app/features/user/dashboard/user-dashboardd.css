@@ -1,119 +1,253 @@
-/* Glass navbar solid on scroll */
-.nav-solid {
-  background: rgba(0,0,0,0.85);
+/* ============================================
+   MINIMALIST PRODUCTS SECTION
+   Neutral tones with subtle violet accents
+   ============================================ */
+
+/* Scrollbar Hide Utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Product Cards */
-.product-card {
-  position: relative;
-  padding: 2rem;
-  border-radius: 1.5rem;
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(12px);
-  transition: transform .4s ease, box-shadow .4s ease;
-}
-.product-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 40px 80px rgba(0,0,0,0.4);
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
-.badge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  font-size: .75rem;
-  background: purple;
-  padding: .25rem .5rem;
-  border-radius: 999px;
+/* Smooth Scroll Behavior */
+#products-scroll {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
-.price {
-  margin: 1rem 0;
-  font-size: 1.25rem;
-}
-
-.add-to-cart {
-  margin-top: 1rem;
-  width: 100%;
-  padding: .75rem;
-  border-radius: .75rem;
-  background: white;
-  color: black;
-}
-
-.product-thumb {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 1rem;
+/* Line Clamp Utility */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  background: rgba(255,255,255,0.08);
-  margin-bottom: 1.25rem;
 }
 
-.product-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+/* ============================================
+   REFINED ANIMATIONS
+   ============================================ */
+
+/* Subtle Pulse Animation for Skeleton */
+@keyframes subtle-pulse {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
-.product-thumb--placeholder {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  place-items: center;
-  color: rgba(255,255,255,0.6);
-  font-size: 0.85rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.animate-pulse {
+  animation: subtle-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Skeleton cards */
-.skeleton-card {
-  pointer-events: none;
+/* Smooth Entry Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.skeleton {
+.product-card-enter {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* ============================================
+   ENHANCED INTERACTIONS
+   ============================================ */
+
+/* Product Card Stagger Animation on Load */
+#products-scroll > div:nth-child(1) { animation-delay: 0ms; }
+#products-scroll > div:nth-child(2) { animation-delay: 100ms; }
+#products-scroll > div:nth-child(3) { animation-delay: 200ms; }
+#products-scroll > div:nth-child(4) { animation-delay: 300ms; }
+#products-scroll > div:nth-child(5) { animation-delay: 400ms; }
+#products-scroll > div:nth-child(6) { animation-delay: 500ms; }
+
+/* Subtle Border Glow on Hover */
+.group:hover {
+  box-shadow: 
+    0 0 0 1px rgba(139, 92, 246, 0.1),
+    0 20px 40px -12px rgba(0, 0, 0, 0.4);
+}
+
+/* Badge Dot Pulse */
+.badge-dot {
+  animation: dot-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* Smooth Image Scaling */
+img {
+  will-change: transform;
+}
+
+/* ============================================
+   ACCESSIBILITY & FOCUS STATES
+   ============================================ */
+
+/* Focus Visible for Keyboard Navigation */
+button:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.4);
+  outline-offset: 2px;
+}
+
+.group:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.3);
+  outline-offset: 4px;
+}
+
+/* ============================================
+   RESPONSIVE REFINEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  /* Tighter spacing on mobile */
+  #products-scroll {
+    gap: 1rem;
+  }
+  
+  /* Smaller fade zones */
+  .fade-overlay {
+    width: 4rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Reduce card width slightly on small screens */
+  .w-\[280px\] {
+    width: 260px;
+  }
+  
+  /* Adjust heading size */
+  .text-4xl {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Hardware Acceleration for Smooth Animations */
+.group,
+.group img,
+button {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Reduce Motion for Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   SCROLL SNAP REFINEMENT
+   ============================================ */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Enhanced scroll snap on touch devices */
+  #products-scroll {
+    scroll-snap-type: x mandatory;
+    scroll-padding: 1.5rem;
+  }
+  
+  #products-scroll > div {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+}
+
+/* ============================================
+   CUSTOM SCROLLING BEHAVIOR
+   ============================================ */
+
+/* Smooth momentum scrolling on iOS */
+#products-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-padding-left: 1.5rem;
+  scroll-padding-right: 1.5rem;
+}
+
+/* ============================================
+   TYPOGRAPHY REFINEMENTS
+   ============================================ */
+
+/* Prevent text selection during drag */
+#products-scroll.active\:cursor-grabbing * {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Smooth font rendering */
+#products {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================
+   SUBTLE GRADIENT BACKGROUND
+   ============================================ */
+
+#products {
+  background: 
+    radial-gradient(ellipse at top, rgba(139, 92, 246, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(0, 0, 0, 1) 0%, rgba(9, 9, 11, 1) 100%);
+}
+
+/* ============================================
+   LOADING STATE ENHANCEMENTS
+   ============================================ */
+
+/* Skeleton shimmer effect */
+.skeleton-shimmer {
   position: relative;
   overflow: hidden;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.08);
 }
 
-.skeleton::after {
-  content: "";
+.skeleton-shimmer::after {
+  content: '';
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  animation: shimmer 1.2s infinite;
-}
-
-.badge-skeleton {
-  width: 3rem;
-  height: 1.25rem;
-  border-radius: 999px;
-  margin-bottom: 1.5rem;
-}
-
-.title-skeleton {
-  width: 80%;
-  height: 1.25rem;
-  margin-bottom: 0.75rem;
-  border-radius: 0.5rem;
-}
-
-.price-skeleton {
-  width: 50%;
-  height: 1rem;
-  margin-bottom: 1.5rem;
-  border-radius: 0.5rem;
-}
-
-.button-skeleton {
-  width: 100%;
-  height: 2.5rem;
-  border-radius: 0.75rem;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.03) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
@@ -122,20 +256,415 @@
   }
 }
 
-/* CTA Glow */
-.glow-btn {
-  padding: 1rem 3rem;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #7c3aed, #a78bfa);
-  box-shadow: 0 0 40px rgba(167,139,250,.6);
-  animation: pulse 2.5s infinite;
+
+
+
+/* ============================================
+   UNIQUE HERO SECTION - APPLE-INSPIRED
+   Asymmetric layout with floating product cards
+   ============================================ */
+
+/* ============================================
+   TYPOGRAPHY & SPACING
+   ============================================ */
+
+/* Refined text rendering */
+#heroText {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 20px rgba(167,139,250,.4); }
-  50% { box-shadow: 0 0 60px rgba(167,139,250,.9); }
-  100% { box-shadow: 0 0 20px rgba(167,139,250,.4); }
+/* Optical adjustment for large headlines */
+#heroText span {
+  letter-spacing: -0.02em;
 }
+
+/* ============================================
+   SOPHISTICATED ANIMATIONS
+   ============================================ */
+
+/* Staggered Fade-In for Headline */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#heroText span:nth-child(1) {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+#heroText span:nth-child(2) {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
+}
+
+#heroText span:nth-child(3) {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+}
+
+/* Floating Product Cards Animation */
+@keyframes floatCard1 {
+  0%, 100% {
+    transform: rotate(6deg) translate(2rem, 2rem) translateY(0px);
+  }
+  50% {
+    transform: rotate(6deg) translate(2rem, 2rem) translateY(-10px);
+  }
+}
+
+@keyframes floatCard2 {
+  0%, 100% {
+    transform: rotate(3deg) translate(1rem, 1rem) translateY(0px);
+  }
+  50% {
+    transform: rotate(3deg) translate(1rem, 1rem) translateY(-15px);
+  }
+}
+
+@keyframes floatCard3 {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+#productCard1 {
+  animation: floatCard1 6s ease-in-out infinite;
+  animation-delay: 0s;
+}
+
+#productCard2 {
+  animation: floatCard2 5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+#productCard3 {
+  animation: floatCard3 4s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Entrance animations for cards */
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px) rotate(12deg);
+  }
+  to {
+    opacity: 0.6;
+    transform: rotate(6deg) translate(2rem, 2rem);
+  }
+}
+
+@keyframes slideInFromRight2 {
+  from {
+    opacity: 0;
+    transform: translateX(80px) rotate(8deg);
+  }
+  to {
+    opacity: 0.8;
+    transform: rotate(3deg) translate(1rem, 1rem);
+  }
+}
+
+@keyframes slideInFromRight3 {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+#productCard1 {
+  animation: slideInFromRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.8s both,
+             floatCard1 6s ease-in-out 1.6s infinite;
+}
+
+#productCard2 {
+  animation: slideInFromRight2 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1s both,
+             floatCard2 5s ease-in-out 1.8s infinite;
+}
+
+#productCard3 {
+  animation: slideInFromRight3 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.2s both,
+             floatCard3 4s ease-in-out 2s infinite;
+}
+
+/* ============================================
+   INTERACTIVE STATES
+   ============================================ */
+
+/* Card hover effects */
+#productCard1:hover,
+#productCard2:hover {
+  transform: rotate(0deg) translate(0, 0) scale(1.05) !important;
+  opacity: 1 !important;
+  z-index: 10;
+  cursor: pointer;
+}
+
+#productCard3:hover {
+  transform: scale(1.08) translateY(-10px) !important;
+  cursor: pointer;
+}
+
+/* Button micro-interactions */
+button {
+  will-change: transform;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Gradient animation for headline */
+@keyframes gradientFlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+#heroText span:nth-child(3) {
+  background-size: 200% 200%;
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both,
+             gradientFlow 8s ease infinite;
+}
+
+/* ============================================
+   SUBTLE PARALLAX EFFECT
+   ============================================ */
+
+/* Particle canvas moves slower than content */
+#particleCanvas {
+  will-change: transform;
+}
+
+@media (min-width: 1024px) {
+  /* Applied via JavaScript for parallax effect */
+  .parallax-slow {
+    transform: translateY(var(--scroll-offset, 0));
+  }
+}
+
+/* ============================================
+   TRUST INDICATORS ANIMATION
+   ============================================ */
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.trust-indicator {
+  animation: fadeInScale 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.trust-indicator:nth-child(1) { animation-delay: 1.4s; }
+.trust-indicator:nth-child(2) { animation-delay: 1.5s; }
+.trust-indicator:nth-child(3) { animation-delay: 1.6s; }
+
+/* ============================================
+   STATS BAR ANIMATION
+   ============================================ */
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stats bar entrance */
+.stats-container {
+  animation: slideUpFade 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.8s both;
+}
+
+/* Individual stat counters */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.stat-item {
+  animation: countUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.stat-item:nth-child(1) { animation-delay: 2s; }
+.stat-item:nth-child(2) { animation-delay: 2.1s; }
+.stat-item:nth-child(3) { animation-delay: 2.2s; }
+.stat-item:nth-child(4) { animation-delay: 2.3s; }
+
+/* ============================================
+   GLASS MORPHISM REFINEMENTS
+   ============================================ */
+
+/* Enhanced backdrop blur for cards */
+@supports (backdrop-filter: blur(20px)) {
+  #productCard1,
+  #productCard2,
+  #productCard3 {
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+}
+
+/* Subtle inner glow on cards */
+#productCard1::before,
+#productCard2::before,
+#productCard3::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 1rem;
+  padding: 1px;
+  background: linear-gradient(135deg, 
+    rgba(255,255,255,0.1) 0%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0) 100%);
+  -webkit-mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+#productCard1:hover::before,
+#productCard2:hover::before,
+#productCard3:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 1023px) {
+  /* Disable complex animations on mobile for performance */
+  #productCard1,
+  #productCard2,
+  #productCard3 {
+    animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+  }
+
+  #productCard1 { animation-delay: 0.8s !important; }
+  #productCard2 { animation-delay: 1s !important; }
+  #productCard3 { animation-delay: 1.2s !important; }
+
+  /* Stack cards horizontally on mobile */
+  .product-cards-mobile {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 1rem;
+  }
+
+  .product-cards-mobile > div {
+    scroll-snap-align: center;
+    position: relative !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  #productCard1,
+  #productCard2,
+  #productCard3 {
+    animation: none !important;
+  }
+}
+
+/* Focus states for keyboard navigation */
+button:focus-visible {
+  outline: 2px solid rgba(139, 92, 246, 0.6);
+  outline-offset: 4px;
+}
+
+/* ============================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================ */
+
+/* Hardware acceleration for smooth animations */
+#productCard1,
+#productCard2,
+#productCard3,
+button,
+#heroText span {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize repaints */
+#particleCanvas {
+  will-change: opacity;
+}
+
+/* ============================================
+   CUSTOM SCROLLBAR (OPTIONAL)
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
 
 /* Gradient Orb */
 .orb {
@@ -144,7 +673,9 @@
   background: radial-gradient(circle at center, rgba(167,139,250,.3), transparent 60%);
   animation: rotate 30s linear infinite;
 }
-@keyframes rotate {
-  from { transform: rotate(0); }
-  to { transform: rotate(360deg); }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }

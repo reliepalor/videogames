@@ -306,6 +306,7 @@
     (edit)="openEditModal($event)"
     (archive)="confirmArchive($event)"
     (restore)="confirmRestore($event)"
+    (manageKeys)="openManageKeys($event)"
   ></app-digital-product-table>
 
   <!-- PRODUCT FORM MODAL -->
@@ -315,5 +316,12 @@
     (closed)="closeProductModal()"
     (saved)="onProductSaved($event)"
   ></app-digital-product-form-modal>
+
+  <app-manage-product-keys-modal
+    *ngIf="showManageKeysModal() && selectedProductForKeys()"
+    [product]="selectedProductForKeys()!"
+    [onClose]="closeManageKeys.bind(this)"
+  ></app-manage-product-keys-modal>
+
 
 </div>

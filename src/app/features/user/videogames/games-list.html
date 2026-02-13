@@ -18,9 +18,34 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .animate-fade-slow {
     animation: fade 0.3s ease-out;
   }
+
+  /* Staggered animation for product cards */
+  .product-card {
+    opacity: 0;
+    animation: fadeInUp 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+
+  /* Stagger delay for each row of 3 items */
+  .product-card:nth-child(3n+1) { animation-delay: 0.15s; }
+  .product-card:nth-child(3n+2) { animation-delay: 0.3s; }
+  .product-card:nth-child(3n+3) { animation-delay: 0.45s; }
+  .product-card:nth-child(n+4) { animation-delay: 0.55s; }
+  .product-card:nth-child(n+7) { animation-delay: 0.65s; }
+  .product-card:nth-child(n+10) { animation-delay: 0.75s; }
 
   .filter-panel {
     max-height: 0;
@@ -32,7 +57,7 @@
   }
 
   .filter-panel.open {
-    max-height: 240px;
+    max-height: 280px;
     opacity: 1;
     transform: translateY(0);
     pointer-events: auto;
@@ -54,9 +79,13 @@
     color: #9aa0b5;
   }
 
-  .dark-games .filter-button {
+  .dark-games .filter-trigger {
     background-color: #111118;
     border-color: #2a2a35;
+  }
+
+  .dark-games .filter-trigger-label {
+    color: #f3f4f6;
   }
 
   .dark-games .filter-panel {
@@ -83,22 +112,39 @@
     background-color: #101018;
     border-color: #2a2a35;
   }
+
+  /* Pagination styles */
+  .pagination-button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .pagination-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+  }
+
+  .pagination-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  .pagination-button.active {
+    transform: scale(1.1);
+  }
 </style>
 
-<!-- ================= SKELETON LOADING ================= -->
+<!-- SKELETON LOADING  -->
 <ng-template #loadingSkeleton>
-  <div class="max-w-7xl mx-auto px-4 py-10">
+  <div class="max-w-7xl mx-auto px-4 py-10 mt-10">
 
     <div class="flex justify-between mb-12">
       <app-skeleton-box width="200px" height="40px"></app-skeleton-box>
       <app-skeleton-box width="300px" height="45px" rounded="30px"></app-skeleton-box>
     </div>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-14">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
 
-      <div *ngFor="let x of [1,2,3,4,5,6,7,8]">
+      <div *ngFor="let x of [1,2,3,4,5,6,7,8,9]">
 
-        <app-skeleton-box width="100%" height="220px" rounded="16px"></app-skeleton-box>
+        <app-skeleton-box width="100%" height="320px" rounded="0"></app-skeleton-box>
 
         <div class="mt-4 space-y-2">
           <app-skeleton-box width="40%" height="12px"></app-skeleton-box>
@@ -113,212 +159,317 @@
   </div>
 </ng-template>
 
-<!-- ==================== MAIN WRAPPER ==================== -->
+<!--  MAIN WRAPPER -->
 <div *ngIf="filteredGames$ | async as games; else loadingSkeleton"
      class="mt-10 max-w-7xl mx-auto px-4 py-10 font-sans bg-white text-gray-900 flex flex-row"
      [ngClass]="{ 'dark-games': isDarkMode }">
 
-     <div class="">
-        <!-- ================= HEADER ================= -->
-        <div class="flex flex-col gap-4 sm:gap-5 mb-6">
+     <div class="w-full">
+        <!--  HEADER  -->
+        <div class="flex flex-col gap-4 sm:gap-5 mb-6 animate-fade-slow">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
             <h1 class="text-4xl font-semibold tracking-tight">
               Games Store
             </h1>
+            
+            <!-- Results count -->
+            <div class="text-sm text-gray-500">
+              Showing {{ getStartIndex() + 1 }}-{{ getEndIndex() }} of {{ games.length }} games
+            </div>
+          </div>
+        </div>
+
+            <div class="flex flex-col sm:flex-row items-start gap-3 w-full mb-8 animate-fade-slow">
+        <input
+          type="search"
+          placeholder="Search games..."
+          class="rounded-full px-5 py-3 w-full md:w-80 border border-gray-300
+                focus:ring-2 focus:ring-black/10 transition outline-none"
+          (input)="onSearchChange($event)"
+        />
+
+        <div class="flex items-center gap-3 w-full sm:w-auto">
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600 whitespace-nowrap">Show:</label>
+            <select
+              [(ngModel)]="itemsPerPage"
+              (change)="onItemsPerPageChange()"
+              class="px-3 py-2 border border-gray-300 rounded-lg text-sm
+                     focus:outline-none focus:ring-2 focus:ring-black/10 transition"
+            >
+              <option [value]="9">9</option>
+              <option [value]="18">18</option>
+              <option [value]="36">36</option>
+              <option [value]="72">72</option>
+            </select>
           </div>
 
-          <div class="flex flex-col sm:flex-row items-start gap-3 w-full">
-            <input
-              type="search"
-              placeholder="Search games..."
-              class="rounded-full px-5 py-3 w-full md:w-80 border border-gray-300
-                    focus:ring-2 focus:ring-black/10 transition"
-              (input)="searchTerm$.next($event.target.value)"
-            />
-
-            <!-- ================= FILTER DROPDOWN WRAPPER ================= -->
-            <div class="w-full sm:w-60 relative">
-
-              <!-- TRIGGER BUTTON -->
-              <button
-                type="button"
-                class="w-full rounded-full px-5 py-3 text-sm font-medium filter-button
-                      flex items-center justify-between gap-3
-                      bg-white border border-gray-300
-                      hover:border-gray-400 transition
-                      focus:outline-none focus:ring-4 focus:ring-purple-500/20"
-                [attr.aria-expanded]="filtersOpen"
-                (click)="toggleFilters()"
+          <div class="flex-1 sm:flex-initial sm:w-60 relative">
+            <button
+              type="button"
+              class="filter-trigger w-full rounded-full px-5 py-3 text-sm font-medium
+                    flex items-center justify-between gap-3
+                    bg-white border border-gray-300
+                    hover:border-gray-400 transition
+                    focus:outline-none focus:ring-2 focus:ring-black/10"
+              [attr.aria-expanded]="filtersOpen"
+              (click)="toggleFilters()"
+            >
+              <span class="filter-trigger-label text-gray-900">Filters</span>
+              <svg
+                class="w-4 h-4 text-gray-500 transition-transform duration-300"
+                [ngClass]="{ 'rotate-180': filtersOpen }"
+                viewBox="0 0 20 20"
+                fill="currentColor"
               >
-                <span class="text-gray-900 label-text">
-                  Filters
-                </span>
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </button>
+            
+            <div
+              class="filter-panel
+                    relative sm:absolute
+                    sm:left-0 sm:top-full
+                    mt-2 w-full z-30
+                    rounded-2xl
+                    bg-white/95 backdrop-blur-xl
+                    border border-gray-200
+                    shadow-[0_20px_40px_rgba(0,0,0,0.12)]
+                    px-5 py-5"
+              [ngClass]="{ 'open': filtersOpen }"
+            >
+              <div class="space-y-5">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                    Platform
+                  </p>
+                  <div class="relative">
+                    <select
+                      class="w-full appearance-none rounded-xl
+                            border border-gray-200
+                            bg-gray-50 px-4 py-3 pr-10
+                            text-sm text-gray-900
+                            shadow-sm transition
+                            focus:outline-none
+                            focus:border-gray-400
+                            focus:ring-2 focus:ring-black/10"
+                      (change)="setPlatform($any($event.target).value)"
+                      [value]="(filters$ | async)?.platform"
+                    >
+                      <option value="all">All platforms</option>
+                      <option *ngFor="let platform of platforms$ | async" [value]="platform">
+                        {{ platform }}
+                      </option>
+                    </select>
 
-                <svg
-                  class="w-4 h-4 text-gray-500 transition-transform duration-300"
-                  [ngClass]="{ 'rotate-180': filtersOpen }"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path fill-rule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-              </button>
-
-              <!-- ================= DROPDOWN PANEL ================= -->
-              <div
-                class="filter-panel
-                      relative sm:absolute
-                      sm:left-0 sm:top-full
-                      mt-2 w-full z-30
-                      rounded-2xl
-                      bg-white/95 backdrop-blur-xl
-                      border border-gray-200
-                      shadow-[0_20px_40px_rgba(0,0,0,0.12)]
-                      px-5 py-5"
-                [ngClass]="{ 'open': filtersOpen }"
-              >
-
-                <div class="space-y-5">
-
-                  <!-- PLATFORM -->
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 label-text">
-                      Platform
-                    </p>
-
-                    <div class="relative">
-                      <select
-                        class="w-full appearance-none rounded-xl
-                              border border-gray-200
-                              bg-gray-50 px-4 py-3 pr-10
-                              text-sm text-gray-900
-                              shadow-sm
-                              transition
-                              focus:outline-none
-                              focus:border-purple-500
-                              focus:ring-2 focus:ring-purple-500/20"
-                        (change)="setPlatform($any($event.target).value)"
-                        [value]="(filters$ | async)?.platform"
-                      >
-                        <option value="all">All platforms</option>
-                        <option *ngFor="let platform of platforms$ | async" [value]="platform">
-                          {{ platform }}
-                        </option>
-                      </select>
-
-                      <svg
-                        class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path fill-rule="evenodd"
-                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                    <svg
+                      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
                   </div>
+                </div>
 
-                  <!-- PRICE -->
-                  <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2 label-text">
-                      Price
-                    </p>
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-2">
+                    Price
+                  </p>
+                  <div class="relative">
+                    <select
+                      class="w-full appearance-none rounded-xl
+                            border border-gray-200
+                            bg-gray-50 px-4 py-3 pr-10
+                            text-sm text-gray-900
+                            shadow-sm transition
+                            focus:outline-none
+                            focus:border-gray-400
+                            focus:ring-2 focus:ring-black/10"
+                      (change)="setPrice($any($event.target).value)"
+                      [value]="(filters$ | async)?.price"
+                    >
+                      <option value="any">Any price</option>
+                      <option value="under-500">Under ₱500</option>
+                      <option value="500-1000">₱500 – ₱1,000</option>
+                      <option value="over-1000">Over ₱1,000</option>
+                    </select>
 
-                    <div class="relative">
-                      <select
-                        class="w-full appearance-none rounded-xl
-                              border border-gray-200
-                              bg-gray-50 px-4 py-3 pr-10
-                              text-sm text-gray-900
-                              shadow-sm
-                              transition
-                              focus:outline-none
-                              focus:border-purple-500
-                              focus:ring-4 focus:ring-purple-500/20"
-                        (change)="setPrice($any($event.target).value)"
-                        [value]="(filters$ | async)?.price"
-                      >
-                        <option value="any">Any price</option>
-                        <option value="under-500">Under ₱500</option>
-                        <option value="500-1000">₱500 – ₱1,000</option>
-                        <option value="over-1000">Over ₱1,000</option>
-                      </select>
-
-                      <svg
-                        class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path fill-rule="evenodd"
-                          d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                          clip-rule="evenodd"
-                        />
-                      </svg>
-                    </div>
+                    <svg
+                      class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
                   </div>
-
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
+      <!-- ================= PRODUCT GRID ================= -->
+      <section class="max-w-7xl mx-auto px-6 py-16">
 
-        <!-- ================= CARD GRID (NIKE STYLE) ================= -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-14 animate-fade-slow">
+        <!-- Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-14">
 
           <div
-            *ngFor="let game of games"
+            *ngFor="let game of paginatedGames"
             [routerLink]="['/games', game.id, 'reviews']"
-            class="group cursor-pointer"
+            class="product-card group cursor-pointer"
           >
 
             <!-- IMAGE -->
-            <div class="aspect-square bg-gray-100 rounded-xl overflow-hidden card-image
-                        transition-transform duration-300 group-hover:-translate-y-1">
+            <div class="aspect-square bg-gray-100 overflow-hidden">
               <img
                 *ngIf="game.imageUrl"
                 [src]="game.imageUrl"
-                class="w-full h-full object-cover"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             </div>
 
             <!-- CONTENT -->
             <div class="mt-4 space-y-1">
 
-              <!-- META -->
-              <p class="text-xs text-gray-500 uppercase tracking-wide meta-text">
-                {{ game.platform }}
+              <!-- JUST IN -->
+              <p class="text-xs font-semibold text-red-600">
+                Just In
               </p>
 
               <!-- TITLE -->
-              <h3 class="text-sm font-medium leading-snug line-clamp-2">
+              <h3 class="text-base font-medium text-gray-900 leading-snug line-clamp-2">
                 {{ game.title }}
               </h3>
 
-              <!-- PRICE -->
-              <p class="text-sm font-semibold price-text">
-                ₱{{ game.price | number:'1.2-2' }}
+              <!-- CATEGORY -->
+              <p class="text-sm text-gray-500">
+                {{ game.platform }}
               </p>
 
-              <!-- CTA -->
+              <!-- PRICE -->
+              <p class="text-sm font-medium text-gray-900">
+                ₱{{ game.price | number:'1.0-0' }}
+              </p>
+
+              <!-- CTA (Hover Only) -->
               <button
                 (click)="$event.stopPropagation(); addToCart(game)"
                 [disabled]="game.id && loadingGames.has(game.id)"
-                class="mt-3 text-sm font-medium text-gray-700 cta-text
+                class="mt-3 text-sm font-medium text-gray-700
                       opacity-0 group-hover:opacity-100
-                      transition-opacity duration-200 hover:text-black cursor-pointer"
+                      transition-opacity duration-200
+                      hover:text-black disabled:opacity-50"
               >
-                Add to Cart →
+                {{ game.id && loadingGames.has(game.id) ? 'Adding...' : 'Add to Cart →' }}
               </button>
 
             </div>
 
           </div>
+
         </div>
+
+        <!-- ================= PAGINATION ================= -->
+        <div *ngIf="totalPages > 1" class="mt-16 flex items-center justify-center gap-2">
+          
+          <!-- Previous Button -->
+          <button
+            (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 1"
+            class="pagination-button flex items-center gap-2 px-4 py-2 rounded-lg
+                   border border-gray-300 text-gray-700 font-medium
+                   hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed
+                   transition-all"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <span class="hidden sm:inline">Previous</span>
+          </button>
+
+          <!-- Page Numbers -->
+          <div class="flex items-center gap-1">
+            
+            <!-- First page -->
+            <button
+              *ngIf="shouldShowFirstPage"
+              (click)="goToPage(1)"
+              class="pagination-button w-10 h-10 rounded-lg flex items-center justify-center
+                     font-medium transition-all"
+              [ngClass]="currentPage === 1 
+                ? 'bg-black text-white active' 
+                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'"
+            >
+              1
+            </button>
+
+            <!-- Left ellipsis -->
+            <span *ngIf="shouldShowLeftEllipsis" class="px-2 text-gray-400">...</span>
+
+            <!-- Visible page numbers -->
+            <button
+              *ngFor="let page of visiblePages"
+              (click)="goToPage(page)"
+              class="pagination-button w-10 h-10 rounded-lg flex items-center justify-center
+                     font-medium transition-all"
+              [ngClass]="currentPage === page 
+                ? 'bg-black text-white active' 
+                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'"
+            >
+              {{ page }}
+            </button>
+
+            <!-- Right ellipsis -->
+            <span *ngIf="shouldShowRightEllipsis" class="px-2 text-gray-400">...</span>
+
+            <!-- Last page -->
+            <button
+              *ngIf="shouldShowLastPage"
+              (click)="goToPage(totalPages)"
+              class="pagination-button w-10 h-10 rounded-lg flex items-center justify-center
+                     font-medium transition-all"
+              [ngClass]="currentPage === totalPages 
+                ? 'bg-black text-white active' 
+                : 'border border-gray-300 text-gray-700 hover:bg-gray-50'"
+            >
+              {{ totalPages }}
+            </button>
+
+          </div>
+
+          <!-- Next Button -->
+          <button
+            (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages"
+            class="pagination-button flex items-center gap-2 px-4 py-2 rounded-lg
+                   border border-gray-300 text-gray-700 font-medium
+                   hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed
+                   transition-all"
+          >
+            <span class="hidden sm:inline">Next</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+
+        </div>
+
+      </section>
+
      </div>
 
   <!-- ================= SUCCESS TOAST ================= -->
@@ -340,10 +491,4 @@
     </div>
   </div>
 </div>
-
-
-
-
-
-
 

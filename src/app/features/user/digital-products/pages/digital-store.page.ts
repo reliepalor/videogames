@@ -11,30 +11,38 @@ import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.compo
   standalone: true,
   selector: 'app-digital-store.page',
   imports: [CommonModule, FormsModule, SkeletonBoxComponent],
+  styleUrls: ['./digital-store.page.css'],
   templateUrl: './digital-store.page.html'
 })
 export class DigitalStorePage implements OnInit {
+  private readonly API_URL = 'http://localhost:5019';
 
-  // ================= TAB STATE =================
+  //  TAB STATE 
   activeTab = signal<'products' | 'orders'>('products');
 
-  // ================= PRODUCTS STATE =================
+  //  PRODUCTS STATE 
   products = signal<DigitalProduct[]>([]);
   productsLoading = signal(false);
   productsError = signal<string | null>(null);
 
-  // ================= ORDERS STATE =================
+  //  ORDERS STATE 
   orders = signal<any[]>([]);
   ordersLoading = signal(false);
   ordersError = signal<string | null>(null);
 
-  // ================= FILTERS & SEARCH =================
+  //  FILTERS & SEARCH 
   searchTerm = '';
   filterStatus = 'all';
   filterPrice = 'any';
   filtersOpen = false;
 
-  // ================= FILTERED PRODUCTS =================
+  //  PAGINATION STATE 
+  currentPage = 1;
+  itemsPerPage = 9;
+  paginatedProducts: DigitalProduct[] = [];
+  totalPages = 0;
+
+  //  FILTERED PRODUCTS 
   filteredProducts = computed(() => {
     let result = this.products();
 
@@ -62,22 +70,57 @@ export class DigitalStorePage implements OnInit {
       result = result.filter(p => p.price > 1000);
     }
 
+    // Update pagination when filters change
+    this.updatePagination(result);
+
     return result;
   });
 
-  // ================= PURCHASE MODAL STATE =================
+  //  PAGINATION HELPERS 
+  get shouldShowFirstPage(): boolean {
+    return this.visiblePages[0] > 1;
+  }
+  
+  get shouldShowLastPage(): boolean {
+    return this.visiblePages[this.visiblePages.length - 1] < this.totalPages;
+  }
+  
+  get shouldShowLeftEllipsis(): boolean {
+    return this.visiblePages[0] > 2;
+  }
+  
+  get shouldShowRightEllipsis(): boolean {
+    return this.visiblePages[this.visiblePages.length - 1] < this.totalPages - 1;
+  }
+  
+  get visiblePages(): number[] {
+    const delta = 2; // Number of pages to show on each side of current page
+    const range: number[] = [];
+    
+    for (
+      let i = Math.max(2, this.currentPage - delta);
+      i <= Math.min(this.totalPages - 1, this.currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+    
+    return range;
+  }
+
+  //  PURCHASE MODAL STATE 
   showPurchaseModal = signal(false);
   selectedProduct = signal<DigitalProduct | null>(null);
   purchaseQuantity = signal(1);
   purchaseLoading = signal(false);
   purchaseError = signal<string | null>(null);
 
-  // ================= TOAST STATE =================
+  //  TOAST STATE 
   showSuccessModal = false;
   successMessage = '';
   isFadingOut = false;
 
-  // ================= COMPUTED =================
+  //  COMPUTED 
   totalPrice = computed(() => {
     const product = this.selectedProduct();
     if (!product) return 0;
@@ -96,20 +139,30 @@ export class DigitalStorePage implements OnInit {
     this.loadOrders();
   }
 
-  // ================= PRODUCTS METHODS =================
+  //  PRODUCTS METHODS 
 
   loadProducts(): void {
+    const startTime = Date.now();
+    const minSkeletonMs = 6000;
     this.productsLoading.set(true);
     this.productsError.set(null);
 
     this.digitalProductService.getActiveProducts().subscribe({
       next: (products) => {
         this.products.set(products ?? []);
-        this.productsLoading.set(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        setTimeout(() => {
+          this.productsLoading.set(false);
+        }, remaining);
       },
       error: () => {
         this.productsError.set('Failed to load products.');
-        this.productsLoading.set(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        setTimeout(() => {
+          this.productsLoading.set(false);
+        }, remaining);
       }
     });
   }
@@ -117,19 +170,69 @@ export class DigitalStorePage implements OnInit {
   // ================= ORDERS METHODS =================
 
   loadOrders(): void {
+    const startTime = Date.now();
+    const minSkeletonMs = 6000;
     this.ordersLoading.set(true);
     this.ordersError.set(null);
 
     this.digitalOrderService.getMyOrders().subscribe({
       next: (orders) => {
         this.orders.set(orders);
-        this.ordersLoading.set(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        setTimeout(() => {
+          this.ordersLoading.set(false);
+        }, remaining);
       },
       error: () => {
         this.ordersError.set('Failed to load orders.');
-        this.ordersLoading.set(false);
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        setTimeout(() => {
+          this.ordersLoading.set(false);
+        }, remaining);
       }
     });
+  }
+
+  // ================= PAGINATION METHODS =================
+
+  updatePagination(products: DigitalProduct[]): void {
+    this.totalPages = Math.ceil(products.length / this.itemsPerPage);
+    
+    // Ensure current page is within bounds
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+    
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedProducts = products.slice(startIndex, endIndex);
+    
+    // Scroll to top smoothly when page changes
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePagination(this.filteredProducts());
+  }
+
+  onItemsPerPageChange(): void {
+    this.currentPage = 1; // Reset to first page when changing items per page
+    this.updatePagination(this.filteredProducts());
+  }
+
+  getStartIndex(): number {
+    return (this.currentPage - 1) * this.itemsPerPage;
+  }
+
+  getEndIndex(): number {
+    return Math.min(this.getStartIndex() + this.itemsPerPage, this.paginatedProducts.length + this.getStartIndex());
   }
 
   // ================= FILTER METHODS =================
@@ -139,10 +242,12 @@ export class DigitalStorePage implements OnInit {
   }
 
   onSearchChange(): void {
+    this.currentPage = 1; // Reset to first page when searching
     this.products.set([...this.products()]);
   }
 
   onFilterChange(): void {
+    this.currentPage = 1; // Reset to first page when filtering
     this.products.set([...this.products()]);
   }
 
@@ -223,5 +328,21 @@ export class DigitalStorePage implements OnInit {
         this.isFadingOut = false;
       }, 300);
     }, 2000);
+  }
+
+  getOrderProductImageUrl(order: any): string | null {
+    const path =
+      order?.digitalProductImagePath?.trim?.() ||
+      order?.imagePath?.trim?.() ||
+      order?.digitalProduct?.imagePath?.trim?.();
+
+    if (!path) return null;
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `${this.API_URL}${normalized}`;
   }
 }

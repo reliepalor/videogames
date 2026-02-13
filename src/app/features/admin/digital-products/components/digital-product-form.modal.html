@@ -180,8 +180,8 @@
             <select 
               formControlName="productType" 
               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white">
-              <option *ngFor="let t of DigitalProductType | keyvalue" [value]="t.value">
-                {{ t.key }}
+              <option *ngFor="let t of productTypeOptions" [value]="t.value">
+                {{ t.label }}
               </option>
             </select>
           </div>
@@ -193,8 +193,8 @@
             <select 
               formControlName="licenseDuration" 
               class="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-white">
-              <option *ngFor="let l of LicenseDuration | keyvalue" [value]="l.value">
-                {{ l.key }}
+              <option *ngFor="let l of licenseDurationOptions" [value]="l.value">
+                {{ l.label }}
               </option>
             </select>
           </div>
@@ -247,6 +247,11 @@
           <label for="isActive" class="text-sm font-medium text-gray-700 cursor-pointer select-none">
             Product is active and available for purchase
           </label>
+        </div>
+
+        <div *ngIf="submitError"
+             class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {{ submitError }}
         </div>
 
       </form>

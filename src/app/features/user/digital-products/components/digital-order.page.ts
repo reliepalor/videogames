@@ -11,6 +11,7 @@ import { DigitalOrderService } from 'src/app/core/services/digital-products/digi
   templateUrl: './digital-order.page.html'
 })
 export class DigitalOrdersPage implements OnInit {
+  private readonly API_URL = 'http://localhost:5019';
 
   // ================= ORDER LIST STATE =================
   orders = signal<any[]>([]);
@@ -122,5 +123,21 @@ export class DigitalOrdersPage implements OnInit {
     this.messageTimeout = setTimeout(() => {
       this.successMessage.set(null);
     }, 3000);
+  }
+
+  getOrderProductImageUrl(order: any): string | null {
+    const path =
+      order?.digitalProductImagePath?.trim?.() ||
+      order?.imagePath?.trim?.() ||
+      order?.digitalProduct?.imagePath?.trim?.();
+
+    if (!path) return null;
+
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `${this.API_URL}${normalized}`;
   }
 }

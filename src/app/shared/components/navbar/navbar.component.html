@@ -30,18 +30,8 @@
     }
   }
 
-  @keyframes pulse {
-    0%, 100% {
-      opacity: 1;
-    }
-    50% {
-      opacity: 0.6;
-    }
-  }
-
   .nav-item {
     position: relative;
-    overflow: hidden;
   }
 
   .nav-item::before {
@@ -50,15 +40,15 @@
     left: 0;
     top: 50%;
     transform: translateY(-50%);
-    width: 3px;
+    width: 2px;
     height: 0;
-    background: linear-gradient(to bottom, #8b5cf6, #6366f1);
-    border-radius: 0 2px 2px 0;
+    background: #0f172a;
+    border-radius: 0 1px 1px 0;
     transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .nav-item.active::before {
-    height: 60%;
+    height: 50%;
   }
 
   .nav-item-enter {
@@ -69,35 +59,21 @@
     animation: scaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .badge-pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-
   .sidebar-backdrop {
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
   }
 
-  /* Hover glow effect */
-  .nav-item:hover .nav-icon {
-    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.3));
-  }
-
   /* Smooth icon transitions */
   .nav-icon {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .nav-item:hover .nav-icon {
-    transform: translateY(-1px);
+    transform: translateX(2px);
   }
 
-  /* Active state glow */
-  .nav-item.active .nav-icon {
-    filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.4));
-  }
-
-  /* Logo container hover effect for minimized state */
+  /* Logo container hover effect */
   .logo-container {
     position: relative;
   }
@@ -127,29 +103,47 @@
     transform: scale(1);
     pointer-events: auto;
   }
+
+  /* Scrollbar styling */
+  .sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.3);
+    border-radius: 2px;
+  }
+
+  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.5);
+  }
 </style>
 
 <aside
   class="fixed left-0 top-0 h-full z-40
-         sidebar-backdrop bg-white/80
-         border-r border-gray-200/50 shadow-2xl
+         sidebar-backdrop bg-white
+         border-r border-slate-200
          flex flex-col
          transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
-  [class.w-72]="!isMinimized"
+  [class.w-64]="!isMinimized"
   [class.w-20]="isMinimized">
 
   <!-- ================= HEADER ================= -->
   <div
-    class="flex items-center h-20 border-b border-gray-200/50
+    class="flex items-center h-16 border-b border-slate-200
            transition-all duration-300"
     [class.justify-center]="isMinimized"
-    [class.px-5]="!isMinimized"
+    [class.px-4]="!isMinimized"
     [class.px-3]="isMinimized">
 
-    <!-- LOGO CONTAINER - WITH HOVER TOGGLE FOR MINIMIZED STATE -->
-      <div 
-        class="logo-container flex items-center transition-all duration-300"
-        [class.minimized]="isMinimized"
+    <!-- LOGO CONTAINER -->
+    <div 
+      class="logo-container flex items-center transition-all duration-300"
+      [class.minimized]="isMinimized"
       [class.w-full]="isMinimized"
       [class.justify-center]="isMinimized"
       [class.gap-3]="!isMinimized">
@@ -158,62 +152,54 @@
       <div class="logo-content flex items-center"
            [class.gap-3]="!isMinimized">
         
-        <!-- LOGO CIRCLE -->
+        <!-- LOGO ICON -->
         <div
-          class="relative w-11 h-11 
-                 border border-purple-300
-                 rounded-2xl
+          class="relative w-9 h-9 
+                 bg-slate-900
+                 rounded-lg
                  flex items-center justify-center 
-                 shadow-lg shadow-purple-500/30
-                 transition-all duration-300 hover:shadow-xl hover:shadow-purple-200/40
-                 hover:scale-105 flex-shrink-0 cursor-pointer">
+                 transition-all duration-300 hover:scale-105
+                 flex-shrink-0 cursor-pointer">
           <svg 
-            class="w-6 h-6 text-purple-500"
+            class="w-5 h-5 text-white"
             viewBox="0 0 24 24" 
             fill="none" 
             stroke="currentColor" 
-            stroke-width="2.5">
+            stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
-              d="M6 12h2m4-4v2m0 4v2m4-4h2M7 17l2-2h6l2 2M5 7h14a2 2 0 0 1 2 2v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V9a2 2 0 0 1 2-2z"/>
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
           </svg>
-          
-          <!-- Glow effect -->
-          <div class="absolute inset-0 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 opacity-0 hover:opacity-10 transition-opacity duration-300"></div>
         </div>
 
-        <!-- TITLE (ONLY WHEN EXPANDED) -->
         <div
           *ngIf="!isMinimized"
           class="flex flex-col">
-          <span class="font-bold text-lg text-gray-900 leading-tight">
+          <span class="font-bold text-base text-slate-900 leading-tight">
             Outspace
           </span>
-          <span class="text-xs text-gray-500 font-medium">
-            Admin Panel
+          <span class="text-[11px] text-slate-500 font-medium tracking-wide">
+            ADMIN PANEL
           </span>
         </div>
       </div>
 
-      <!-- TOGGLE BUTTON REVEAL (HOVER TO TOGGLE BOTH STATES) -->
+      <!-- TOGGLE BUTTON REVEAL (MINIMIZED STATE) -->
       <div 
         *ngIf="isMinimized"
         class="toggle-reveal flex items-center justify-center w-full">
         <button
           (click)="toggleSidebar()"
-          class="p-2.5 rounded-xl 
-                 bg-gradient-to-br from-purple-500 to-indigo-600
-                 hover:from-purple-600 hover:to-indigo-700
-                 shadow-lg shadow-purple-500/30
-                 transition-all duration-300
+          class="p-2 rounded-lg 
+                 bg-slate-900 hover:bg-slate-800
+                 transition-all duration-200
                  hover:scale-105 active:scale-95 cursor-pointer">
-
           <svg
-            class="w-5 h-5 text-white"
+            class="w-4 h-4 text-white"
             fill="none" 
             stroke="currentColor" 
-            viewBox="0 0 24 24">
+            viewBox="0 0 24 24"
+            stroke-width="2">
             <path 
-              stroke-width="2.5" 
               stroke-linecap="round"
               stroke-linejoin="round"
               d="M9 5l7 7-7 7"/>
@@ -222,22 +208,21 @@
       </div>
     </div>
 
-    <!-- TOGGLE BUTTON (ONLY WHEN EXPANDED) -->
+    <!-- TOGGLE BUTTON (EXPANDED STATE) -->
     <button
       *ngIf="!isMinimized"
       (click)="toggleSidebar()"
-      class="ml-auto p-2.5 rounded-xl 
-             bg-gray-100/50 hover:bg-gray-200/70
-             transition-all duration-300
+      class="ml-auto p-2 rounded-lg 
+             bg-slate-100 hover:bg-slate-200
+             transition-all duration-200
              hover:scale-105 active:scale-95 cursor-pointer">
-
       <svg
-        class="w-5 h-5 text-gray-600"
+        class="w-4 h-4 text-slate-600"
         fill="none" 
         stroke="currentColor" 
-        viewBox="0 0 24 24">
+        viewBox="0 0 24 24"
+        stroke-width="2">
         <path 
-          stroke-width="2.5" 
           stroke-linecap="round"
           stroke-linejoin="round"
           d="M15 19l-7-7 7-7"/>
@@ -246,207 +231,223 @@
   </div>
 
   <!-- ================= NAVIGATION ================= -->
-  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-1
-              scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+  <nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6 space-y-6 sidebar-scroll">
 
-    <!-- DASHBOARD -->
-    <a
-      routerLink="/dashboard"
-      title="Dashboard"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-      class="nav-item nav-item-enter group
-             flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/dashboard')}">
+    <!-- OVERVIEW SECTION -->
+    <div>
+      <div 
+        *ngIf="!isMinimized"
+        class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        Overview
+      </div>
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="14" y="3" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="14" y="14" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="3" y="14" width="7" height="7" rx="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
+      <div class="space-y-1">
+        <!-- DASHBOARD -->
+        <a
+          routerLink="/dashboard"
+          title="Dashboard"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/dashboard')}">
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
-        Dashboard
-      </span>
-    </a>
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+          </svg>
 
-    <!-- CONVERSATIONS -->
-    <a
-      routerLink="/admin/conversations"
-      title="Conversations"
-      routerLinkActive="active"
-      class="nav-item nav-item-enter group
-             relative flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/admin/conversations')}">
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Dashboard
+          </span>
+        </a>
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-      </svg>
+        <!-- CONVERSATIONS -->
+        <a
+          routerLink="/admin/conversations"
+          title="Conversations"
+          routerLinkActive="active"
+          class="nav-item nav-item-enter group
+                 relative flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/admin/conversations')}">
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
-        Conversations
-      </span>
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+          </svg>
 
-      <!-- UNREAD BADGE -->
-      <span
-        *ngIf="unreadCount > 0"
-        class="badge-pulse
-               absolute top-2 
-               min-w-[20px] h-5 px-1.5
-               rounded-full 
-               bg-gradient-to-br from-red-500 to-pink-500
-               text-white
-               text-[11px] font-bold
-               flex items-center justify-center
-               shadow-lg shadow-red-500/50
-               transition-all duration-300"
-        [class.right-2]="!isMinimized"
-        [class.right-1]="isMinimized"
-        [class.scale-90]="isMinimized">
-        {{ unreadCount > 99 ? '99+' : unreadCount }}
-      </span>
-    </a>
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Conversations
+          </span>
 
-    <!-- GAMES -->
-    <a
-      routerLink="/videogames"
-      title="Video Games"
-      routerLinkActive="active"
-      class="nav-item nav-item-enter group
-             flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/videogames')}">
+          <!-- UNREAD BADGE -->
+          <span
+            *ngIf="unreadCount > 0"
+            class="absolute top-1.5 
+                   min-w-[18px] h-[18px] px-1
+                   rounded-full 
+                   bg-slate-900 text-white
+                   text-[10px] font-bold
+                   flex items-center justify-center
+                   transition-all duration-300"
+            [class.right-1.5]="!isMinimized"
+            [class.right-1]="isMinimized">
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        </a>
+      </div>
+    </div>
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-      </svg>
+    <!-- PRODUCTS SECTION -->
+    <div>
+      <div 
+        *ngIf="!isMinimized"
+        class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        Products
+      </div>
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
-        Games
-      </span>
-    </a>
+      <div class="space-y-1">
+        <!-- VIDEO GAMES -->
+        <a
+          routerLink="/videogames"
+          title="Video Games"
+          routerLinkActive="active"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/videogames')}">
 
-    <!-- ADD GAME 
-    <a
-      routerLink="/videogames/new"
-      routerLinkActive="active"
-      class="nav-item nav-item-enter group
-             flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/videogames/new')}">
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          </svg>
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-      </svg>
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Video Games
+          </span>
+        </a>
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
-        Add Game
-      </span>
-    </a>
-    -->
+        <!-- DIGITAL PRODUCTS -->
+        <a
+          routerLink="/admin/digital-products"
+          title="Digital Products"
+          routerLinkActive="active"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/admin/digital-products')}">
 
-    <!-- ORDERS -->
-    <a
-      routerLink="/admin/orders"
-      title="Order"
-      routerLinkActive="active"
-      class="nav-item nav-item-enter group
-             flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/admin/orders')}">
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/>
+          </svg>
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-      </svg>
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Digital Products
+          </span>
+        </a>
+      </div>
+    </div>
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
+    <!-- ORDERS SECTION -->
+    <div>
+      <div 
+        *ngIf="!isMinimized"
+        class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
         Orders
-      </span>
-    </a>
+      </div>
 
-    <!-- DIGITAL PRODUCTS -->
-    <a
-      routerLink="/admin/digital-products"
-      title="Digital Products"
-      routerLinkActive="active"
-      class="nav-item nav-item-enter group
-             flex items-center px-3.5 py-3 rounded-xl
-             font-medium text-gray-600
-             hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-             hover:text-purple-700
-             transition-all duration-300"
-      [class.justify-center]="isMinimized"
-      [class.gap-3]="!isMinimized"
-      [ngClass]="{'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-700': isActiveRoute('/admin/digital-products')}">
+      <div class="space-y-1">
+        <!-- VIDEO GAME ORDERS -->
+        <a
+          routerLink="/admin/orders"
+          title="Game Orders"
+          routerLinkActive="active"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/admin/orders')}">
 
-      <svg class="nav-icon w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round"
-              d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
-      </svg>
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
 
-      <span 
-        class="transition-all duration-300 text-sm whitespace-nowrap"
-        [class.opacity-0]="isMinimized"
-        [class.w-0]="isMinimized"
-        [class.overflow-hidden]="isMinimized">
-        Digital Products
-      </span>
-    </a>
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Game Orders
+          </span>
+        </a>
 
-    <!-- DIVIDER -->
-    <div class="py-2" [class.hidden]="isMinimized">
-      <div class="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent"></div>
+        <!-- DIGITAL ORDERS -->
+        <a
+          routerLink="/admin/digital-orders"
+          title="Digital Orders"
+          routerLinkActive="active"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/admin/digital-orders')}">
+
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            Digital Orders
+          </span>
+        </a>
+      </div>
     </div>
 
   </nav>
@@ -454,30 +455,29 @@
   <!-- ================= USER PANEL ================= -->
   <div
     *ngIf="user$ | async as user"
-    class="p-3 border-t border-gray-200/50 relative">
+    class="p-3 border-t border-slate-200 relative">
 
     <button
       (click)="toggleDropdown()"
-      class="flex items-center w-full px-3 py-3 rounded-xl
-             hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100
-             transition-all duration-300
+      class="flex items-center w-full px-3 py-2.5 rounded-lg
+             hover:bg-slate-100
+             transition-all duration-200
              group"
       [class.justify-center]="isMinimized">
 
       <!-- AVATAR -->
       <div
-        class="relative w-10 h-10 rounded-xl
-               border border-purple-200
+        class="relative w-9 h-9 rounded-lg
+               bg-slate-900
                flex items-center justify-center
-               text-gray-600 font-bold text-sm
-               shadow-lg shadow-purple-500/30
-               transition-all duration-300
-               group-hover:shadow-xl group-hover:shadow-purple-500/40
-               group-hover:scale-105 flex-shrink-0">
+               text-white font-semibold text-sm
+               transition-all duration-200
+               group-hover:scale-105
+               flex-shrink-0">
         {{ (user.username || user.email || 'U')[0] | uppercase }}
         
         <!-- Online indicator -->
-        <div class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+        <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white"></div>
       </div>
 
       <!-- USER INFO -->
@@ -485,22 +485,23 @@
            [class.hidden]="isMinimized"
            [class.opacity-0]="isMinimized"
            [class.w-0]="isMinimized">
-        <div class="font-semibold text-sm text-gray-900 truncate leading-tight">
+        <div class="font-semibold text-sm text-slate-900 truncate leading-tight">
           {{ user.username }}
         </div>
-        <div class="text-xs text-gray-500 truncate mt-0.5">
-          {{ user.email }}
+        <div class="text-xs text-slate-500 truncate mt-0.5">
+          Admin
         </div>
       </div>
 
       <!-- CHEVRON -->
       <svg *ngIf="!isMinimized"
-           class="w-4 h-4 text-gray-400 transition-all duration-300 flex-shrink-0"
+           class="w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0"
            [class.rotate-180]="isDropdownOpen"
            fill="none" 
            stroke="currentColor" 
-           viewBox="0 0 24 24">
-        <path stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+           viewBox="0 0 24 24"
+           stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
       </svg>
     </button>
 
@@ -508,52 +509,50 @@
     <div
       *ngIf="isDropdownOpen && !isMinimized"
       class="dropdown-enter
-             absolute left-3 right-3 bottom-20
-             rounded-xl 
-             bg-white/90 backdrop-blur-xl
-             border border-gray-200/50 
-             shadow-2xl 
+             absolute left-3 right-3 bottom-16
+             rounded-lg 
+             bg-white
+             border border-slate-200
+             shadow-xl 
              overflow-hidden
-             divide-y divide-gray-100">
+             divide-y divide-slate-100">
 
       <a 
         routerLink="/profile" 
         (click)="closeDropdown()"
         class="flex items-center gap-3 px-4 py-3 text-sm font-medium
-               text-gray-700 
-               hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-               hover:text-purple-700
-               transition-all duration-200">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+               text-slate-700 
+               hover:bg-slate-50
+               transition-colors duration-150">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
         </svg>
-        Profile
+        <span>Profile</span>
       </a>
 
       <a 
         routerLink="/settings/password"
         (click)="closeDropdown()"
         class="flex items-center gap-3 px-4 py-3 text-sm font-medium
-               text-gray-700 
-               hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50
-               hover:text-purple-700
-               transition-all duration-200">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+               text-slate-700 
+               hover:bg-slate-50
+               transition-colors duration-150">
+        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
         </svg>
-        Change Password
+        <span>Change Password</span>
       </a>
 
       <button 
         (click)="logout()"
         class="flex items-center gap-3 w-full px-4 py-3 text-sm font-medium
-               text-red-600 
-               hover:bg-red-50
-               transition-all duration-200">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+               text-slate-700 
+               hover:bg-red-50 hover:text-red-600
+               transition-colors duration-150">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
         </svg>
-        Logout
+        <span>Logout</span>
       </button>
     </div>
   </div>
@@ -562,7 +561,7 @@
 <!-- MOBILE BACKDROP -->
 <div
   *ngIf="!isMinimized"
-  class="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden
+  class="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-30 lg:hidden
          transition-opacity duration-300 cursor-pointer"
   (click)="toggleSidebar()">
 </div>

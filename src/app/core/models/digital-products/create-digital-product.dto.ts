@@ -1,4 +1,4 @@
-import { DigitalProduct } from "./digital-product.model";
+import { DigitalProductType } from "./enums/digital-product-type.enum";
 import { LicenseDuration } from "./enums/license-duration.enum";
 
 export interface CreateDigitalProductDto {
@@ -6,7 +6,7 @@ export interface CreateDigitalProductDto {
   brand: string;
   platform: string;
 
-  productType: DigitalProduct;
+  productType: DigitalProductType;
   licenseDuration: LicenseDuration;
   description?: string;
   price: number;

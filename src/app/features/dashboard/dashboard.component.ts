@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ReportsService } from 'src/app/core/services/reports.service';
 import { SidebarService } from 'src/app/core/services/sidebar.service';
 import { VideoGameSales } from 'src/app/shared/models/videogame-sales';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 import { Observable, map, BehaviorSubject, combineLatest } from 'rxjs';
 import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -12,7 +11,7 @@ import { ChartConfiguration, ChartData } from 'chart.js';
 @Component({
   standalone: true,
   selector: 'app-dashboard',
-  imports: [CommonModule, BaseChartDirective, SkeletonBoxComponent],
+  imports: [CommonModule, BaseChartDirective],
   providers: [provideCharts(withDefaultRegisterables())],
   templateUrl: './dashboard.component.html',
 })
@@ -22,6 +21,7 @@ export class AdminDashboardComponent {
   private sidebarService = inject(SidebarService);
 
   isSidebarMinimized$ = this.sidebarService.isMinimized$;
+  currentDate = new Date();
 
   sales$: Observable<VideoGameSales[]> = this.reportsService.getVideoGameSales();
 
@@ -68,13 +68,15 @@ export class AdminDashboardComponent {
 
   getColor(index: number): string {
     const colors = [
-      'rgba(147,51,234,0.9)',
-      '#facc15',
-      '#3b82f6',
-      '#22c55e',
-      '#ef4444'
+      '#0f172a', // slate-900
+      '#3b82f6', // blue-500
+      '#f59e0b', // amber-500
+      '#10b981', // green-500
+      '#8b5cf6', // violet-500
+      '#ec4899', // pink-500
+      '#14b8a6', // teal-500
     ];
-    return colors[index] || '#gray';
+    return colors[index] || '#64748b';
   }
 
   /* ===== LINE CHART ===== */
@@ -87,34 +89,100 @@ export class AdminDashboardComponent {
     plugins: {
       legend: { display: false },
       tooltip: {
-        padding: 10,
-        backgroundColor: 'rgba(147, 51, 234, 0.9)',
+        padding: 16,
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleColor: '#fff',
-        bodyColor: '#fff',
-        displayColors: false
+        bodyColor: '#cbd5e1',
+        borderColor: 'rgba(148, 163, 184, 0.2)',
+        borderWidth: 1,
+        displayColors: false,
+        titleFont: {
+          size: 13,
+          weight: 600
+        },
+        bodyFont: {
+          size: 14,
+          weight: 700
+        },
+        cornerRadius: 12,
+        callbacks: {
+          label: function(context) {
+            return '₱' + (context.parsed.y ?? 0).toLocaleString('en-US', {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0
+            });
+          }
+        }
       },
     },
     elements: {
       line: {
         tension: 0.4,
-        borderColor: 'rgba(147,51,234,0.7)',
-        borderWidth: 2,
+        borderColor: '#0f172a',
+        borderWidth: 3,
+        backgroundColor: 'transparent',
       },
       point: {
-        radius: 3,
-        backgroundColor: 'rgba(147,51,234)'
+        radius: 5,
+        hoverRadius: 7,
+        backgroundColor: '#0f172a',
+        borderColor: '#fff',
+        borderWidth: 3,
+        hoverBackgroundColor: '#0f172a',
+        hoverBorderColor: '#fff',
+        hoverBorderWidth: 4,
       }
     },
     scales: {
-      x: { grid: { display: false } },
-      y: { beginAtZero: true }
+      x: {
+        grid: {
+          display: false,
+        },
+        border: {
+          display: false
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 12,
+            weight: 500
+          }
+        }
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.1)',
+        },
+        border: {
+          display: false,
+          dash: [5, 5]
+        },
+        ticks: {
+          color: '#64748b',
+          font: {
+            size: 12,
+            weight: 500
+          },
+          callback: function(value) {
+            return '₱' + value.toLocaleString();
+          }
+        }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
     }
   };
 
   lineChartData$: Observable<ChartData<'line'>> = this.sales$.pipe(
     map(sales => ({
       labels: sales.map(s => s.title),
-      datasets: [{ data: sales.map(s => s.totalRevenue) }]
+      datasets: [{
+        data: sales.map(s => s.totalRevenue),
+        fill: false
+      }]
     }))
   );
 
@@ -128,21 +196,53 @@ export class AdminDashboardComponent {
       datasets: [{
         data: games.map(g => g.percent),
         backgroundColor: [
-          'rgba(147,51,234,0.9)',
-          '#facc15',
-          '#3b82f6',
-          '#22c55e',
-          '#ef4444'
+          '#0f172a', // slate-900
+          '#3b82f6', // blue-500
+          '#f59e0b', // amber-500
+          '#10b981', // green-500
+          '#8b5cf6', // violet-500
         ],
-        borderWidth: 0,
-        cutout: '70%',
+        borderWidth: 4,
+        borderColor: '#fff',
+        hoverBorderWidth: 6,
+        hoverBorderColor: '#fff',
+        cutout: '75%',
       }]
     }))
   );
 
-  donutChartOptions = {
+  donutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
-    plugins: { legend: { display: false } }
+    maintainAspectRatio: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        padding: 12,
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
+        titleColor: '#fff',
+        bodyColor: '#cbd5e1',
+        borderColor: 'rgba(148, 163, 184, 0.2)',
+        borderWidth: 1,
+        displayColors: true,
+        boxWidth: 12,
+        boxHeight: 12,
+        cornerRadius: 8,
+        titleFont: {
+          size: 12,
+          weight: 600
+        },
+        bodyFont: {
+          size: 13,
+          weight: 700
+        },
+        callbacks: {
+          label: function(context) {
+            return context.parsed.toFixed(1) + '%';
+          }
+        }
+      }
+    },
+    cutout: '75%',
   };
 
   donutCenterText$ = this.topGames$.pipe(
@@ -150,3 +250,4 @@ export class AdminDashboardComponent {
   );
 
 }
+

@@ -5,11 +5,12 @@ import { DigitalProduct } from 'src/app/core/models/digital-products/digital-pro
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { DigitalProductTable } from './components/digital-product-table';
 import { DigitalProductFormModal } from './components/digital-product-form.modal';
+import { ManageProductKeysModal } from './components/manage-product-keys.modal';
 
 @Component({
   standalone: true,
   selector: 'app-admin-digital-products',
-  imports: [CommonModule, DigitalProductTable, DigitalProductFormModal],
+  imports: [CommonModule, DigitalProductTable, DigitalProductFormModal, ManageProductKeysModal],
   templateUrl: './admin-digital-products.page.html'
 })
 export class AdminDigitalProductsPage {
@@ -22,6 +23,10 @@ export class AdminDigitalProductsPage {
   // Product form modal signals
   showProductModal = signal(false);
   selectedProduct = signal<DigitalProduct | null>(null);
+
+  // Manage keys modal signals
+  showManageKeysModal = signal(false);
+  selectedProductForKeys = signal<DigitalProduct | null>(null);
   
   // Toast notification signals
   successMessage = signal('');
@@ -83,6 +88,16 @@ export class AdminDigitalProductsPage {
   closeProductModal(): void {
     this.showProductModal.set(false);
     this.selectedProduct.set(null);
+  }
+
+  openManageKeys(product: DigitalProduct): void {
+    this.selectedProductForKeys.set(product);
+    this.showManageKeysModal.set(true);
+  }
+
+  closeManageKeys(): void {
+    this.showManageKeysModal.set(false);
+    this.selectedProductForKeys.set(null);
   }
 
   onProductSaved(message: string): void {
