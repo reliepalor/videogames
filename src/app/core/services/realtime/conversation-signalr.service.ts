@@ -1,28 +1,34 @@
-import { Injectable, inject, NgZone } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {
   HubConnection,
   HubConnectionBuilder,
   HubConnectionState
 } from '@microsoft/signalr';
-import { BehaviorSubject } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Injectable({ providedIn: 'root' })
 export class ConversationSignalRService {
 
   private platformId = inject(PLATFORM_ID);
-  private ngZone = inject(NgZone);
   private hub?: HubConnection;
 
   private connected = false;
   private connectPromise?: Promise<void>;
 
-  message$ = new BehaviorSubject<any>(null);
-  typing$ = new BehaviorSubject<boolean>(false);
-  seen$ = new BehaviorSubject<boolean>(false);
-  onlineUsers$ = new BehaviorSubject<Set<string>>(new Set());
-  conversationListUpdated$ = new BehaviorSubject<boolean>(false);
+  readonly message = signal<any>(null);
+  readonly typingState = signal<boolean>(false);
+  readonly seenState = signal<boolean>(false);
+  readonly onlineUsers = signal<Set<string>>(new Set());
+  readonly conversationListUpdated = signal<number>(0);
+
+  // Backward-compatible observable streams for existing subscribers.
+  readonly message$ = toObservable(this.message);
+  readonly typing$ = toObservable(this.typingState);
+  readonly seen$ = toObservable(this.seenState);
+  readonly onlineUsers$ = toObservable(this.onlineUsers);
+  readonly conversationListUpdated$ = toObservable(this.conversationListUpdated);
 
   async connect(): Promise<void> {
     // Return existing promise if already connecting/connected
@@ -72,25 +78,18 @@ export class ConversationSignalRService {
     if (!this.hub) return;
 
     this.hub.on('ReceiveMessage', msg => {
-      // Run inside NgZone to trigger Angular change detection
-      this.ngZone.run(() => {
-        console.log('[SignalR] ReceiveMessage event received:', msg);
-        this.message$.next(msg);
-        this.conversationListUpdated$.next(true);
-      });
+      console.log('[SignalR] ReceiveMessage event received:', msg);
+      this.message.set(msg);
+      this.conversationListUpdated.update(v => v + 1);
     });
 
     this.hub.on('UserTyping', () => {
-      this.ngZone.run(() => {
-        this.typing$.next(true);
-        setTimeout(() => this.ngZone.run(() => this.typing$.next(false)), 1500);
-      });
+      this.typingState.set(true);
+      setTimeout(() => this.typingState.set(false), 1500);
     });
 
     this.hub.on('MessagesSeen', () => {
-      this.ngZone.run(() => {
-        this.seen$.next(true);
-      });
+      this.seenState.set(true);
     });
   }
 

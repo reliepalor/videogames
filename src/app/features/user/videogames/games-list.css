@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;500;700&display=swap');
+
+.games-page {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.filter-panel {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.3s ease;
+  margin-bottom: 0;
+}
+
+.filter-panel.open {
+  max-height: 320px;
+  opacity: 1;
+  margin-bottom: 28px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.game-enter {
+  opacity: 0;
+  animation: fadeUp 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.game-enter:nth-child(3n + 1) { animation-delay: 0.05s; }
+.game-enter:nth-child(3n + 2) { animation-delay: 0.12s; }
+.game-enter:nth-child(3n + 3) { animation-delay: 0.19s; }
+
+.glass-hover-btn {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  padding: 13px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1),
+              opacity 0.28s ease,
+              background 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+.group:hover .glass-hover-btn {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.glass-hover-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+.glass-hover-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.toast-pill {
+  background: #111;
+  color: #fff;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: opacity 0.3s ease;
+}
+
+.toast-pill.fade-out {
+  opacity: 0;
+}
+
+.skeleton-img {
+  aspect-ratio: 4 / 3;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line {
+  margin-top: 10px;
+  height: 13px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+  /* ========== PAGE WRAP ========== */
+  .page-wrap { max-width: 1440px; margin: 0 auto; padding: 0 40px; }
+  @media (max-width: 768px) { .page-wrap { padding: 0 20px; } .hero { padding: 48px 0 40px; } }

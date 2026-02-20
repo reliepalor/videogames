@@ -24,6 +24,9 @@ export class AdminDashboardComponent {
   currentDate = new Date();
 
   sales$: Observable<VideoGameSales[]> = this.reportsService.getVideoGameSales();
+  sortedSalesByPurchaseRate$: Observable<VideoGameSales[]> = this.sales$.pipe(
+    map((sales) => [...sales].sort((a, b) => b.totalRevenue - a.totalRevenue))
+  );
 
   /* ===== Top Metrics ===== */
 

@@ -1,278 +1,730 @@
-<!-- SKELETON LOADING -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --text-primary: #111111;
+    --text-secondary: #757575;
+    --text-accent: #e44000;
+    --border: #e5e5e5;
+    --card-bg: #f5f5f5;
+    --btn-bg: #111111;
+    --btn-text: #ffffff;
+    --btn-hover: #333333;
+  }
+
+  * {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+  }
+
+  /* ========== PAGE WRAP ========== */
+  .page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  @media (max-width: 768px) { .page-wrap { padding: 0 20px; } }
+
+  /* ========== HERO ========== */
+  .hero { padding: 64px 0 48px; }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text-primary);
+    margin: 0 0 14px;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin: 0;
+    max-width: 480px;
+  }
+
+  /* ========== TOOLBAR ========== */
+  .toolbar {
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    max-width: 380px;
+    min-width: 200px;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-size: 14px;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .search-input:focus { border-color: #111; background: #fff; }
+
+  .toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  .filter-select {
+    padding: 10px 36px 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-size: 14px;
+    background: #fafafa;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23757575' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    transition: border-color 0.2s;
+  }
+  .filter-select:focus { border-color: #111; }
+  .count-label { font-size: 14px; color: var(--text-secondary); white-space: nowrap; }
+
+  /* ========== TAB NAV ========== */
+  .tab-nav {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin: 32px 0 36px;
+  }
+  .tab-btn {
+    padding: 12px 0;
+    margin-right: 32px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    position: relative;
+    bottom: -1px;
+  }
+  .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+  .tab-btn:hover  { color: var(--text-primary); }
+
+  /* ========== SECTION HEADING ========== */
+  .section-heading {
+    font-size: 26px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    margin: 0 0 24px;
+  }
+
+  /* ========== GAME ORDER CARD ========== */
+  .order-card {
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background: #fff;
+    transition: box-shadow 0.25s ease;
+  }
+  .order-card:hover { box-shadow: 0 6px 24px -8px rgba(0,0,0,0.1); }
+
+  .order-card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .order-meta { display: flex; flex-direction: column; gap: 2px; }
+  .order-date { font-size: 12px; color: var(--text-secondary); }
+  .order-total-label { font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+  .order-total-amount { font-size: 18px; font-weight: 600; color: var(--text-primary); }
+
+  /* Status pill */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .status-pending  { background: #fff8e1; color: #a05e00; }
+  .status-approved { background: #e6f7ee; color: #1a7f4e; }
+  .status-rejected { background: #fdecea; color: #b91c1c; }
+
+  /* Table */
+  .order-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .order-table thead tr { background: #fafafa; }
+  .order-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    border-bottom: 1px solid var(--border);
+  }
+  .order-table th.right  { text-align: right; }
+  .order-table th.center { text-align: center; }
+
+  .order-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .order-table tbody tr:last-child { border-bottom: none; }
+  .order-table tbody tr:hover { background: #fafafa; }
+
+  .order-table td {
+    padding: 14px 16px;
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+  .order-table td.right  { text-align: right; }
+  .order-table td.center { text-align: center; }
+
+  .game-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    display: block;
+    border: 1px solid var(--border);
+  }
+
+  .key-mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .review-btn {
+    padding: 6px 16px;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: none;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .review-btn:hover { background: var(--btn-hover); }
+
+  /* Mobile game items */
+  .mobile-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mobile-item:last-child { border-bottom: none; }
+  .mobile-item-info { flex: 1; min-width: 0; }
+  .mobile-item-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .mobile-item-price { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+  .mobile-item-key   { font-size: 11px; font-family: monospace; color: #999; margin-top: 2px; }
+
+  /* ========== DIGITAL ORDER CARDS ========== */
+  .digital-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 1024px) { .digital-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .digital-grid { grid-template-columns: 1fr; } }
+
+  .digital-card {
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    background: #fff;
+    transition: box-shadow 0.25s ease;
+  }
+  .digital-card:hover { box-shadow: 0 6px 24px -8px rgba(0,0,0,0.1); }
+
+  .digital-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .digital-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    background: var(--card-bg);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+  }
+  .digital-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+  .digital-name { font-size: 14px; font-weight: 500; color: var(--text-primary); margin: 0 0 2px; line-height: 1.3; }
+  .digital-meta { font-size: 12px; color: var(--text-secondary); }
+
+  .digital-price-wrap { padding: 12px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 14px; }
+  .digital-price-label { font-size: 11px; color: var(--text-secondary); margin: 0 0 2px; }
+  .digital-price-amount { font-size: 20px; font-weight: 700; color: var(--text-primary); margin: 0; }
+
+  .key-block {
+    padding: 9px 12px;
+    background: #fafafa;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    word-break: break-all;
+    line-height: 1.5;
+    margin-bottom: 6px;
+  }
+  .key-block:last-child { margin-bottom: 0; }
+
+  .order-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .order-notice svg { flex-shrink: 0; margin-top: 1px; }
+  .notice-pending  { background: #fff8e1; color: #7a4a00; border: 1px solid #ffe082; }
+  .notice-rejected { background: #fdecea; color: #9b1c1c; border: 1px solid #fca5a5; }
+
+  /* ========== EMPTY / ERROR ========== */
+  .state-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .state-empty svg { color: #ddd; margin-bottom: 16px; }
+  .state-empty h3 { font-size: 17px; font-weight: 500; color: var(--text-primary); margin: 0 0 6px; }
+  .state-empty p  { font-size: 14px; margin: 0; }
+
+  .error-bar {
+    padding: 12px 16px;
+    background: #fdecea;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #9b1c1c;
+    margin-bottom: 24px;
+  }
+
+  /* ========== PAGINATION ========== */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 40px;
+    padding-bottom: 64px;
+  }
+  .page-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .page-btn:hover   { border-color: #111; }
+  .page-btn.active  { background: #111; color: #fff; border-color: #111; }
+  .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .page-btn-wide {
+    width: auto;
+    padding: 0 14px;
+    border-radius: 100px;
+    height: 36px;
+    border: 1.5px solid var(--border);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+  }
+  .page-btn-wide:hover   { border-color: #111; }
+  .page-btn-wide:disabled { opacity: 0.3; cursor: not-allowed; }
+  .page-ellipsis { font-size: 14px; color: #999; padding: 0 4px; }
+
+  /* ========== SKELETON ========== */
+  .skeleton-line {
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  .skeleton-block {
+    border-radius: 12px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ========== FADE IN ========== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .order-card, .digital-card {
+    animation: fadeUp 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  }
+  .order-card:nth-child(1), .digital-card:nth-child(1) { animation-delay: 0.04s; }
+  .order-card:nth-child(2), .digital-card:nth-child(2) { animation-delay: 0.09s; }
+  .order-card:nth-child(3), .digital-card:nth-child(3) { animation-delay: 0.14s; }
+  .order-card:nth-child(4), .digital-card:nth-child(4) { animation-delay: 0.19s; }
+  .order-card:nth-child(n+5), .digital-card:nth-child(n+5) { animation-delay: 0.22s; }
+
+  /* ========== BUTTONS ========== */
+  .btn-primary {
+    padding: 14px 28px; background: var(--btn-bg); color: var(--btn-text);
+    border-radius: 100px; border: none; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s; letter-spacing: 0.01em;
+  }
+  .btn-primary:hover { background: #333; }
+  .btn-ghost {
+    padding: 14px 28px; background: transparent; color: var(--text-primary);
+    border-radius: 100px; border: 1.5px solid var(--border); font-size: 14px;
+    font-weight: 500; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: #999; background: #fafafa; }
+
+  /* Promo */
+  .promo { background: #f5f5f5; padding: 64px 0; text-align: center; margin-top: 48px; }
+  .promo h2 { font-size: clamp(22px, 3.5vw, 40px); font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary); margin: 0 0 10px; }
+  .promo p  { font-size: 16px; color: var(--text-secondary); font-weight: 300; margin: 0 0 24px; }
+</style>
+
+
+<!-- ==================== SKELETON ==================== -->
 <ng-template #loadingSkeleton>
-  <div class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans min-h-screen">
-    <div class="mb-8">
-      <app-skeleton-box width="200px" height="36px"></app-skeleton-box>
+  <div class="page-wrap" style="padding-top: 32px;">
+    <div style="padding: 56px 0 40px;">
+      <div class="skeleton-line" style="width: 220px; height: 52px;"></div>
+      <div class="skeleton-line" style="width: 320px; height: 18px; margin-top: 14px;"></div>
     </div>
 
-    <div class="mb-8">
-      <app-skeleton-box width="100%" height="64px" rounded="16px"></app-skeleton-box>
+    <div class="skeleton-line" style="height: 1px; margin-bottom: 0;"></div>
+    <div style="padding: 16px 0; display:flex; gap:12px;">
+      <div class="skeleton-line" style="width:320px; height:40px; border-radius:100px;"></div>
+      <div class="skeleton-line" style="width:140px; height:40px; border-radius:100px; margin-left:auto;"></div>
+    </div>
+    <div class="skeleton-line" style="height: 1px;"></div>
+
+    <div style="display:flex; gap:32px; padding: 28px 0 36px; border-bottom: 1px solid var(--border);">
+      <div class="skeleton-line" style="width:100px; height:14px;"></div>
+      <div class="skeleton-line" style="width:120px; height:14px;"></div>
     </div>
 
-    <div class="space-y-6">
-      <div *ngFor="let x of [1,2,3]">
-        <app-skeleton-box width="100%" height="180px" rounded="20px"></app-skeleton-box>
-      </div>
+    <div class="skeleton-block" style="height:20px; width:140px; margin-bottom:24px; margin-top:8px;"></div>
+
+    <div *ngFor="let x of [1,2,3]" style="margin-bottom:20px;">
+      <div class="skeleton-block" style="height:180px;"></div>
     </div>
   </div>
 </ng-template>
 
-<div *ngIf="!loading; else loadingSkeleton"
-     class="mt-8 max-w-5xl mx-auto px-4 sm:px-6 py-10 font-sans min-h-screen transition-colors duration-300"
-     [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'">
 
-  <h1 class="text-3xl font-semibold tracking-tight mb-6">My Orders</h1>
+<!-- ==================== MAIN ==================== -->
+<div *ngIf="!loading; else loadingSkeleton" class="min-h-screen bg-white">
 
-  <div class="inline-flex items-center rounded-xl border p-1 mb-6"
-       [ngClass]="isDarkMode() ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-gray-100'">
-    <button
-      (click)="onOrderTypeChange('games')"
-      class="px-4 py-2 rounded-lg text-sm font-medium transition"
-      [ngClass]="orderType === 'games'
-        ? 'bg-purple-600 text-white'
-        : (isDarkMode() ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-white')">
-      Games
-    </button>
-    <button
-      (click)="onOrderTypeChange('digital')"
-      class="px-4 py-2 rounded-lg text-sm font-medium transition"
-      [ngClass]="orderType === 'digital'
-        ? 'bg-purple-600 text-white'
-        : (isDarkMode() ? 'text-gray-200 hover:bg-gray-700' : 'text-gray-700 hover:bg-white')">
-      Digital Products
-    </button>
+  <!-- ===== HERO ===== -->
+  <div class="page-wrap">
+    <section class="hero">
+      <h1>My Orders</h1>
+      <p>Track your games and digital product purchases all in one place.</p>
+    </section>
   </div>
 
-  <div
-    class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8 rounded-2xl p-3 sm:p-2 backdrop-blur-md transition"
-    [ngClass]="isDarkMode()
-      ? 'bg-gray-900/60 border-white/10'
-      : 'bg-white/70 border-gray-200'">
+  <div style="border-top: 1px solid var(--border);"></div>
 
-    <div class="relative w-full sm:w-44">
-      <div
-        class="relative rounded-xl border bg-white/70 backdrop-blur-md transition focus-within:ring-1 focus-within:ring-purple-500/20"
-        [ngClass]="isDarkMode()
-          ? 'border-gray-700 bg-gray-900/60'
-          : 'border-gray-200 bg-white/70'">
+  <!-- ===== TOOLBAR ===== -->
+  <div class="page-wrap">
+    <div class="toolbar">
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" stroke-width="2"/>
+          <path d="M21 21l-4.35-4.35" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input
+          type="text"
+          [placeholder]="activeSearchPlaceholder"
+          [(ngModel)]="searchTerm"
+          (ngModelChange)="onSearchChange()"
+          class="search-input"
+        />
+      </div>
 
+      <!-- Status filter -->
+      <div class="toolbar-right">
         <select
           [(ngModel)]="statusFilter"
           (ngModelChange)="onStatusFilterChange()"
-          class="w-full appearance-none bg-transparent px-4 py-3 pr-10 text-sm font-medium outline-none cursor-pointer"
-          [ngClass]="isDarkMode() ? 'text-gray-100' : 'text-gray-900'">
-          <option [ngValue]="'all'">All statuses</option>
-          <option [ngValue]="'pending'">Pending</option>
-          <option [ngValue]="'approved'">Approved</option>
-          <option [ngValue]="'rejected'">Rejected</option>
+          class="filter-select">
+          <option ngValue="all">All statuses</option>
+          <option ngValue="pending">Pending</option>
+          <option ngValue="approved">Approved</option>
+          <option ngValue="rejected">Rejected</option>
         </select>
-
-        <svg
-          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-60"
-          viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd"
-            d="M5.23 7.21a.75.75 0 011.06.02L10 11.19l3.71-3.96a.75.75 0 111.08 1.04l-4.25 4.53a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"
-            clip-rule="evenodd" />
-        </svg>
       </div>
     </div>
 
-    <div class="relative flex-1">
-      <input
-        type="text"
-        [placeholder]="activeSearchPlaceholder"
-        [(ngModel)]="searchTerm"
-        (ngModelChange)="onSearchChange()"
-        class="w-full rounded-xl px-11 py-3 text-sm border outline-none transition focus:ring-2 focus:ring-purple-500/20"
-        [ngClass]="isDarkMode()
-          ? 'bg-gray-800 text-gray-100 border-gray-700 placeholder-gray-400'
-          : 'bg-white text-gray-900 border-gray-300 placeholder-gray-400'" />
+    <!-- ===== TAB NAV ===== -->
+    <div class="tab-nav">
+      <button
+        class="tab-btn"
+        [class.active]="orderType === 'games'"
+        (click)="onOrderTypeChange('games')">
+        Games
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="orderType === 'digital'"
+        (click)="onOrderTypeChange('digital')">
+        Digital Products
+      </button>
+    </div>
 
-      <svg
-        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 opacity-60"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2">
-        <circle cx="11" cy="11" r="8" />
-        <path d="M21 21l-4.35-4.35" />
+    <!-- Error -->
+    <div *ngIf="errorMsg" class="error-bar">{{ errorMsg }}</div>
+
+    <!-- Empty state -->
+    <div *ngIf="!loading && !hasOrdersInSelectedType" class="state-empty">
+      <svg width="56" height="56" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
       </svg>
+      <h3>No orders found</h3>
+      <p>Try adjusting your search or status filter.</p>
     </div>
-  </div>
 
-  <div *ngIf="errorMsg"
-       class="mb-6 px-4 py-3 rounded-xl text-sm"
-       [ngClass]="isDarkMode()
-         ? 'bg-red-900/20 text-red-400'
-         : 'bg-red-100 text-red-700'">
-    {{ errorMsg }}
-  </div>
 
-  <div *ngIf="!loading && !hasOrdersInSelectedType"
-       class="text-center text-sm opacity-60 py-12">
-    No orders found.
-  </div>
+    <!-- ==================== GAMES TAB ==================== -->
+    <ng-container *ngIf="orderType === 'games' && hasOrdersInSelectedType">
 
-  <ng-container *ngIf="orderType === 'games'">
-    <div *ngFor="let order of paginatedGameOrders"
-         class="mb-8 rounded-2xl border transition"
-         [ngClass]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
+      <h2 class="section-heading">Game Orders</h2>
 
-      <div class="px-6 pt-6 text-xs text-gray-500 dark:text-gray-400">
-        {{ order.createdAt | date:'medium' }}
-      </div>
+      <div *ngFor="let order of paginatedGameOrders" class="order-card">
 
-      <div class="px-6 py-4 flex justify-between items-center">
-        <div>
-          <div class="text-xs text-gray-500">Total</div>
-          <div class="text-lg font-medium">P{{ order.totalPrice | number:'1.2-2' }}</div>
-        </div>
-
-        <span
-          class="px-3 py-1 rounded-full text-xs font-medium"
-          [ngClass]="{
-            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400': order.status === 0,
-            'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': order.status === 1,
-            'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': order.status === 2
-          }">
-          {{ getStatusLabel(order.status) }}
-        </span>
-      </div>
-
-      <div class="hidden sm:block border-t"
-           [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
-        <table class="w-full text-sm">
-          <thead class="text-gray-500"
-                 [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-gray-50'">
-            <tr>
-              <th class="p-4 text-left font-medium">Image</th>
-              <th class="p-4 text-left font-medium">Game</th>
-              <th class="p-4 text-right font-medium">Price</th>
-              <th class="p-4 text-center font-medium">Key</th>
-              <th class="p-4 text-center font-medium" *ngIf="order.status === 1">Review</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr *ngFor="let item of order.items"
-                class="border-t hover:bg-purple-50/40 dark:hover:bg-purple-900/10 transition"
-                [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
-              <td class="p-4">
-                <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
-              </td>
-              <td class="p-4">{{ item.gameTitle }}</td>
-              <td class="p-4 text-right">P{{ item.unitPrice | number:'1.2-2' }}</td>
-              <td class="p-4 text-center font-mono text-xs">{{ item.productKey || '-' }}</td>
-              <td class="p-4 text-center" *ngIf="order.status === 1">
-                <button
-                  (click)="startReview(item)"
-                  class="text-xs font-medium px-4 py-1.5 rounded-full bg-purple-600 text-white hover:bg-purple-700 transition">
-                  Review
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="sm:hidden p-4 space-y-4">
-        <div *ngFor="let item of order.items"
-             class="flex gap-3 items-center rounded-xl p-3 border"
-             [ngClass]="isDarkMode() ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'">
-          <img [src]="item.imageUrl" class="w-12 h-12 rounded-lg object-cover">
-          <div class="flex-1">
-            <div class="font-medium">{{ item.gameTitle }}</div>
-            <div class="text-sm opacity-70">P{{ item.unitPrice | number:'1.2-2' }}</div>
-            <div class="text-xs font-mono opacity-60">{{ item.productKey || '-' }}</div>
-          </div>
-          <button *ngIf="order.status === 1"
-                  (click)="startReview(item)"
-                  class="text-xs px-3 py-1 rounded-full bg-purple-600 text-white">
-            Review
-          </button>
-        </div>
-      </div>
-    </div>
-  </ng-container>
-
-  <ng-container *ngIf="orderType === 'digital'">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div *ngFor="let order of paginatedDigitalOrders"
-           class="rounded-2xl border p-5 transition"
-           [ngClass]="isDarkMode() ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'">
-
-        <div class="flex items-start justify-between gap-3 mb-4">
-          <div class="flex items-start gap-3">
-            <img *ngIf="getOrderProductImageUrl(order)"
-                 [src]="getOrderProductImageUrl(order)"
-                 class="h-12 w-12 rounded-lg object-cover border"
-                 [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'"
-                 alt="Product image" />
-            <div *ngIf="!getOrderProductImageUrl(order)"
-                 class="h-12 w-12 rounded-lg flex items-center justify-center border"
-                 [ngClass]="isDarkMode() ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-200'">
-              <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14" />
-              </svg>
-            </div>
-
-            <div>
-              <div class="font-medium">{{ order.digitalProductName }}</div>
-              <div class="text-xs opacity-70">Qty: {{ order.quantity }}</div>
-              <div class="text-xs opacity-70">{{ order.createdAt | date:'medium' }}</div>
-            </div>
+        <!-- Card header -->
+        <div class="order-card-header">
+          <div class="order-meta">
+            <span class="order-date">{{ order.createdAt | date:'mediumDate' }}</span>
+            <span class="order-total-label">Total</span>
+            <span class="order-total-amount">₱{{ order.totalPrice | number:'1.2-2' }}</span>
           </div>
 
-          <span class="px-3 py-1 rounded-full text-xs font-medium"
-                [ngClass]="{
-                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400': order.status === 'Pending',
-                  'bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400': order.status === 'Approved',
-                  'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400': order.status === 'Rejected'
-                }">
-            {{ getDigitalStatusLabel(order.status) }}
+          <span class="status-pill"
+                [class.status-pending]="order.status === 0"
+                [class.status-approved]="order.status === 1"
+                [class.status-rejected]="order.status === 2">
+            {{ getStatusLabel(order.status) }}
           </span>
         </div>
 
-        <div class="mb-4">
-          <div class="text-xs opacity-70">Total</div>
-          <div class="text-lg font-medium">P{{ order.totalPrice | number:'1.2-2' }}</div>
+        <!-- Desktop table -->
+        <div class="hidden sm:block">
+          <table class="order-table">
+            <thead>
+              <tr>
+                <th style="width:60px;"></th>
+                <th>Game</th>
+                <th class="right">Price</th>
+                <th class="center">Key</th>
+                <th class="center" *ngIf="order.status === 1">Review</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of order.items">
+                <td>
+                  <img [src]="item.imageUrl" class="game-thumb" [alt]="item.gameTitle" />
+                </td>
+                <td style="font-weight: 500;">{{ item.gameTitle }}</td>
+                <td class="right">₱{{ item.unitPrice | number:'1.2-2' }}</td>
+                <td class="center">
+                  <span class="key-mono">{{ item.productKey || '—' }}</span>
+                </td>
+                <td class="center" *ngIf="order.status === 1">
+                  <button class="review-btn" (click)="startReview(item)">Write review</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div *ngIf="order.status === 'Approved'" class="space-y-2">
-          <div *ngFor="let item of order.items"
-               class="rounded-lg px-3 py-2 border font-mono text-xs"
-               [ngClass]="isDarkMode() ? 'border-gray-700 bg-gray-700' : 'border-gray-200 bg-gray-50'">
-            {{ item.productKey || '-' }}
+        <!-- Mobile items -->
+        <div class="sm:hidden">
+          <div *ngFor="let item of order.items" class="mobile-item">
+            <img [src]="item.imageUrl" class="game-thumb" [alt]="item.gameTitle" />
+            <div class="mobile-item-info">
+              <p class="mobile-item-title">{{ item.gameTitle }}</p>
+              <p class="mobile-item-price">₱{{ item.unitPrice | number:'1.2-2' }}</p>
+              <p class="mobile-item-key">{{ item.productKey || '—' }}</p>
+            </div>
+            <button *ngIf="order.status === 1" class="review-btn" (click)="startReview(item)">
+              Review
+            </button>
           </div>
         </div>
+
       </div>
+    </ng-container>
+
+
+    <!-- ==================== DIGITAL TAB ==================== -->
+    <ng-container *ngIf="orderType === 'digital' && hasOrdersInSelectedType">
+
+      <h2 class="section-heading">Digital Orders</h2>
+
+      <div class="digital-grid">
+        <div *ngFor="let order of paginatedDigitalOrders" class="digital-card">
+
+          <!-- Header -->
+          <div class="digital-card-header">
+            <div style="display:flex; align-items:flex-start; gap:12px; flex:1; min-width:0;">
+              <div class="digital-thumb">
+                <img *ngIf="getOrderProductImageUrl(order)"
+                     [src]="getOrderProductImageUrl(order)" alt="Product" />
+                <svg *ngIf="!getOrderProductImageUrl(order)"
+                     width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16
+                           m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/>
+                </svg>
+              </div>
+              <div style="flex:1; min-width:0;">
+                <p class="digital-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  {{ order.digitalProductName }}
+                </p>
+                <p class="digital-meta">Qty: {{ order.quantity }}</p>
+                <p class="digital-meta">{{ order.createdAt | date:'mediumDate' }}</p>
+              </div>
+            </div>
+
+            <span class="status-pill"
+                  [class.status-pending]="order.status === 'Pending'"
+                  [class.status-approved]="order.status === 'Approved'"
+                  [class.status-rejected]="order.status === 'Rejected'">
+              {{ getDigitalStatusLabel(order.status) }}
+            </span>
+          </div>
+
+          <!-- Price -->
+          <div class="digital-price-wrap">
+            <p class="digital-price-label">Total paid</p>
+            <p class="digital-price-amount">₱{{ order.totalPrice | number:'1.2-2' }}</p>
+          </div>
+
+          <!-- Keys (approved) -->
+          <div *ngIf="order.status === 'Approved'">
+            <p style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-secondary); margin:0 0 8px;">
+              Product keys
+            </p>
+            <div *ngFor="let item of order.items" class="key-block">{{ item.productKey || '—' }}</div>
+          </div>
+
+          <!-- Pending -->
+          <div *ngIf="order.status === 'Pending'" class="order-notice notice-pending">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Awaiting approval. Your keys will appear here once confirmed.
+          </div>
+
+          <!-- Rejected -->
+          <div *ngIf="order.status === 'Rejected'" class="order-notice notice-rejected">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            This order was rejected. Contact support for more information.
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
+
+
+    <!-- ==================== PAGINATION ==================== -->
+    <div *ngIf="hasOrdersInSelectedType" class="pagination">
+      <button class="page-btn-wide" (click)="prevPage()" [disabled]="currentPage === 1">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        Prev
+      </button>
+
+      <button *ngFor="let p of pages"
+              class="page-btn"
+              [class.active]="p === currentPage"
+              (click)="goToPage(p)">{{ p }}</button>
+
+      <button class="page-btn-wide" (click)="nextPage()" [disabled]="currentPage === selectedTotalPages">
+        Next
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
     </div>
-  </ng-container>
 
-  <div *ngIf="hasOrdersInSelectedType" class="flex justify-center items-center gap-2 mt-10">
-    <button (click)="prevPage()"
-            [disabled]="currentPage === 1"
-            class="px-4 py-2 rounded-full text-sm border disabled:opacity-50"
-            [ngClass]="isDarkMode() ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-100'">
-      Prev
-    </button>
+  </div><!-- /page-wrap -->
 
-    <button *ngFor="let p of pages"
-            (click)="goToPage(p)"
-            class="px-4 py-2 rounded-full text-sm transition"
-            [ngClass]="p === currentPage
-              ? 'bg-purple-600 text-white'
-              : (isDarkMode() ? 'border border-gray-700 hover:bg-gray-800' : 'border border-gray-300 hover:bg-gray-100')">
-      {{ p }}
-    </button>
-
-    <button (click)="nextPage()"
-            [disabled]="currentPage === selectedTotalPages"
-            class="px-4 py-2 rounded-full text-sm border disabled:opacity-50"
-            [ngClass]="isDarkMode() ? 'border-gray-700 hover:bg-gray-800' : 'border-gray-300 hover:bg-gray-100'">
-      Next
-    </button>
+  <!-- ===== PROMO ===== -->
+  <div class="promo">
+    <div class="page-wrap">
+      <h2>Keep playing. Keep exploring.</h2>
+      <p>Browse thousands of titles and digital products in the store.</p>
+      <button class="btn-primary" routerLink="/games">Shop now</button>
+    </div>
   </div>
 
-</div>
+</div><!-- /main -->

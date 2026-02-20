@@ -36,7 +36,7 @@ export class AdminOrdersApprovalComponent implements OnInit, OnDestroy {
   isMessageClosing = false;
 
   // View & Filter
-  viewMode: ViewMode = 'card';
+  viewMode: ViewMode = 'table';
   filterStatus: FilterStatus = 'All';
   filterOptions: FilterStatus[] = ['All', 'Pending', 'Approved', 'Rejected'];
 

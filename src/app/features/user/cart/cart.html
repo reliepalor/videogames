@@ -1,182 +1,602 @@
-<!-- SKELETON LOADING -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Helvetica+Neue:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #ffffff;
+    --text-primary: #111111;
+    --text-secondary: #757575;
+    --text-accent: #e44000;
+    --border: #e5e5e5;
+    --card-bg: #f5f5f5;
+    --btn-bg: #111111;
+    --btn-text: #ffffff;
+    --btn-hover: #333333;
+  }
+
+  * {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+  }
+
+  /* ========== PAGE WRAP ========== */
+  .page-wrap { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
+  @media (max-width: 768px) { .page-wrap { padding: 0 20px; } }
+
+  /* ========== HERO ========== */
+  .hero { padding: 64px 0 48px; }
+  .hero h1 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    color: var(--text-primary);
+    margin: 0 0 14px;
+  }
+  .hero p {
+    font-size: 17px;
+    color: var(--text-secondary);
+    font-weight: 300;
+    margin: 0;
+    max-width: 440px;
+  }
+
+  /* ========== TOOLBAR ========== */
+  .toolbar {
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 36px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .search-wrap { position: relative; flex: 1; max-width: 380px; min-width: 200px; }
+  .search-wrap svg {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: #999; pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    padding: 10px 14px 10px 40px;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    font-size: 14px;
+    background: #fafafa;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .search-input:focus { border-color: #111; background: #fff; }
+  .count-label { font-size: 14px; color: var(--text-secondary); white-space: nowrap; }
+
+  /* ========== SELECT ALL ROW ========== */
+  .select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .select-all-row label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Custom checkbox */
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid #ccc;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background: #fff;
+    transition: background 0.15s, border-color 0.15s;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .check-box:checked {
+    background: #111111 !important;
+    border-color: #111111 !important;
+  }
+  .check-box:checked::after {
+    content: '';
+    display: block;
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 9px;
+    border: 2px solid #ffffff;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+  .check-box:hover { border-color: #888; }
+
+  /* ========== CART ITEM ========== */
+  .cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    background: #fff;
+    margin-bottom: 12px;
+    transition: box-shadow 0.25s ease, border-color 0.2s;
+  }
+  .cart-item:hover { box-shadow: 0 4px 18px -6px rgba(0,0,0,0.1); }
+  .cart-item.selected { border-color: #bbb; }
+  .cart-item:last-child { margin-bottom: 0; }
+
+  .item-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .item-thumb {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--card-bg);
+    display: block;
+  }
+
+  .item-info { flex: 1; min-width: 0; }
+  .item-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item-price {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .item-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+
+  .item-subtotal {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    min-width: 90px;
+    text-align: right;
+  }
+
+  .remove-btn {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0;
+    transition: color 0.2s;
+    white-space: nowrap;
+  }
+  .remove-btn:hover { color: #c0392b; }
+
+  /* ========== FADE IN ========== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .cart-item {
+    opacity: 0;
+    animation: fadeUp 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  .cart-item:nth-child(1) { animation-delay: 0.04s; }
+  .cart-item:nth-child(2) { animation-delay: 0.09s; }
+  .cart-item:nth-child(3) { animation-delay: 0.14s; }
+  .cart-item:nth-child(4) { animation-delay: 0.18s; }
+  .cart-item:nth-child(n+5) { animation-delay: 0.21s; }
+
+  /* ========== ORDER SUMMARY ========== */
+  .summary-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 24px 0 0;
+    margin-top: 28px;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .summary-total-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 4px;
+  }
+  .summary-total-amount {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    margin: 0;
+  }
+  .summary-selected {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .checkout-btn {
+    padding: 14px 36px;
+    background-color: #111111 !important;
+    color: #ffffff !important;
+    border-radius: 100px;
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    -webkit-appearance: none;
+  }
+  .checkout-btn:hover { background-color: #333333 !important; }
+  .checkout-btn:active { transform: scale(0.98); }
+  .checkout-btn:disabled { opacity: 0.35 !important; cursor: not-allowed; transform: none; }
+
+  /* ========== EMPTY STATE ========== */
+  .state-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 96px 0;
+    text-align: center;
+    color: var(--text-secondary);
+  }
+  .state-empty svg { color: #ddd; margin-bottom: 20px; }
+  .state-empty h3 {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+  }
+  .state-empty p { font-size: 15px; margin: 0 0 24px; }
+
+  .btn-primary {
+    padding: 14px 28px; background-color: #111111 !important; color: #ffffff !important;
+    border-radius: 100px; border: none; font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background-color 0.2s;
+  }
+  .btn-primary:hover { background-color: #333333 !important; }
+  .btn-ghost {
+    padding: 14px 28px; background: transparent; color: #111111;
+    border-radius: 100px; border: 1.5px solid #e5e5e5; font-size: 14px;
+    font-weight: 500; cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-ghost:hover { border-color: #999; background: #fafafa; }
+
+  /* ========== ERROR ========== */
+  .error-bar {
+    padding: 12px 16px;
+    background: #fdecea;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #9b1c1c;
+    margin-bottom: 24px;
+  }
+
+  /* ========== SKELETON ========== */
+  .skeleton-line {
+    border-radius: 4px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  .skeleton-block {
+    border-radius: 16px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ========== TOAST ========== */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+  .toast-wrap {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    pointer-events: none;
+    animation: slideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .toast-pill {
+    background: #111;
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px -4px rgba(0,0,0,0.25);
+  }
+
+  /* ========== SUCCESS MODAL (glassmorphism) ========== */
+  @keyframes modalFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50;
+    animation: modalFadeIn 0.2s ease-out;
+  }
+
+  .modal-box {
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 24px;
+    padding: 40px 36px;
+    width: 320px;
+    text-align: center;
+    box-shadow: 0 24px 60px -12px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.8);
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .modal-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: #111;
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+  }
+
+  .modal-title {
+    font-size: 18px; font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    margin: 0 0 6px;
+  }
+  .modal-sub {
+    font-size: 14px; color: var(--text-secondary);
+    font-weight: 300; margin: 0;
+  }
+
+  /* Promo */
+  .promo { background: #f5f5f5; padding: 64px 0; text-align: center; margin-top: 48px; }
+  .promo h2 { font-size: clamp(22px, 3.5vw, 40px); font-weight: 700; letter-spacing: -0.02em; color: var(--text-primary); margin: 0 0 10px; }
+  .promo p  { font-size: 16px; color: var(--text-secondary); font-weight: 300; margin: 0 0 24px; }
+
+  /* Divider */
+  .divider { border-top: 1px solid var(--border); }
+</style>
+
+
+<!-- ==================== SKELETON ==================== -->
 <ng-template #loadingSkeleton>
-  <div class="max-w-6xl mx-auto px-6 py-10 mt-10">
-    <div class="flex items-center justify-between mb-10">
-      <app-skeleton-box width="200px" height="32px"></app-skeleton-box>
-      <app-skeleton-box width="240px" height="40px" rounded="999px"></app-skeleton-box>
+  <div class="page-wrap" style="padding-top: 32px;">
+    <div style="padding: 56px 0 40px;">
+      <div class="skeleton-line" style="width: 240px; height: 52px;"></div>
+      <div class="skeleton-line" style="width: 300px; height: 18px; margin-top: 14px;"></div>
     </div>
-
-    <div class="space-y-4">
-      <div *ngFor="let x of [1,2,3]">
-        <app-skeleton-box width="100%" height="80px" rounded="18px"></app-skeleton-box>
+    <div class="divider"></div>
+    <div style="padding: 16px 0; display:flex; gap:12px;">
+      <div class="skeleton-line" style="width:300px; height:40px; border-radius:100px;"></div>
+      <div class="skeleton-line" style="width:100px; height:40px; border-radius:100px; margin-left:auto;"></div>
+    </div>
+    <div class="divider" style="margin-bottom:28px;"></div>
+    <div *ngFor="let x of [1,2,3]" style="margin-bottom:12px;">
+      <div class="skeleton-block" style="height:96px;"></div>
+    </div>
+    <div style="padding: 24px 0 0; border-top: 1px solid var(--border); margin-top:28px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div class="skeleton-line" style="width:80px; height:12px;"></div>
+        <div class="skeleton-line" style="width:160px; height:32px; margin-top:8px;"></div>
       </div>
-    </div>
-
-    <div class="mt-12 flex items-center justify-between">
-      <app-skeleton-box width="180px" height="28px"></app-skeleton-box>
-      <app-skeleton-box width="140px" height="44px" rounded="999px"></app-skeleton-box>
+      <div class="skeleton-line" style="width:140px; height:48px; border-radius:100px;"></div>
     </div>
   </div>
 </ng-template>
 
-<div *ngIf="!loadingCart; else loadingSkeleton"
-     class="max-w-6xl mx-auto px-6 py-10 mt-10 transition-colors"
-     [ngClass]="isDarkMode() ? 'bg-gray-900 text-gray-100' : 'bg-white text-gray-900'">
 
-  <!-- HEADER -->
-  <div class="flex items-center justify-between mb-10">
-    <h1 class="text-3xl font-semibold tracking-tight">
-      Shopping Cart
-    </h1>
+<!-- ==================== MAIN ==================== -->
+<div *ngIf="!loadingCart; else loadingSkeleton" class="min-h-screen bg-white">
 
-    <input
-      type="text"
-      [(ngModel)]="search"
-      (input)="filterItems()"
-      placeholder="Search"
-      class="w-64 px-4 py-2.5 rounded-full border text-sm
-             focus:outline-none focus:ring-2 focus:ring-purple-400/30 transition"
-      [ngClass]="isDarkMode()
-        ? 'border-gray-700 bg-gray-800 text-gray-200 placeholder-gray-500'
-        : 'border-gray-300 bg-gray-50 text-gray-800 placeholder-gray-400'"
-    />
+  <!-- ===== HERO ===== -->
+  <div class="page-wrap">
+    <section class="hero">
+      <h1>Shopping Cart</h1>
+      <p>Review your items and check out when you're ready.</p>
+    </section>
   </div>
 
-  <!-- ERROR -->
-  <div *ngIf="errorMsg"
-       class="mb-6 px-4 py-3 rounded-xl text-sm"
-       [ngClass]="isDarkMode()
-         ? 'bg-red-900/20 text-red-400'
-         : 'bg-red-100 text-red-700'">
-    {{ errorMsg }}
-  </div>
+  <div class="divider"></div>
 
-  <!-- CART CONTENT -->
-  <div *ngIf="filteredItems.length; else empty">
-
-    <!-- SELECT ALL -->
-    <div class="flex items-center gap-3 mb-6">
-      <input
-        type="checkbox"
-        class="ios-checkbox cursor-pointer"
-        [(ngModel)]="selectAll"
-        (change)="toggleSelectAll()"
-      />
-      <span class="text-sm opacity-70">
-        Select all items
+  <!-- ===== TOOLBAR ===== -->
+  <div class="page-wrap">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="search"
+          (input)="filterItems()"
+          placeholder="Search cart..."
+          class="search-input"
+        />
+      </div>
+      <span class="count-label" *ngIf="filteredItems.length">
+        {{ filteredItems.length }} item{{ filteredItems.length !== 1 ? 's' : '' }}
       </span>
     </div>
 
-    <!-- ITEMS -->
-    <div class="space-y-4">
+    <!-- Error -->
+    <div *ngIf="errorMsg" class="error-bar">{{ errorMsg }}</div>
 
-      <div
-        *ngFor="let item of filteredItems; trackBy: trackByFn"
-        class="flex items-center justify-between rounded-2xl px-6 py-4 border transition"
-        [ngClass]="isDarkMode()
-          ? 'bg-gray-800 border-gray-700'
-          : 'bg-white border-gray-200'"
-      >
+    <!-- ===== CART CONTENT ===== -->
+    <div *ngIf="filteredItems.length; else empty">
 
-        <!-- LEFT -->
-        <div class="flex items-center gap-5">
-          <input
-            type="checkbox"
-            class="ios-checkbox cursor-pointer"
-            [(ngModel)]="item.selected"
-            (change)="toggleItem()"
-          />
+      <!-- Select all -->
+      <div class="select-all-row">
+        <input
+          type="checkbox"
+          class="check-box"
+          id="select-all"
+          [(ngModel)]="selectAll"
+          (change)="toggleSelectAll()"
+        />
+        <label for="select-all">Select all items</label>
+      </div>
 
-          <img
-            [src]="item.imageUrl"
-            class="w-14 h-14 rounded-xl object-cover"
-            [ngClass]="isDarkMode() ? 'bg-black' : 'bg-gray-100'"
-          />
+      <!-- Items list -->
+      <div>
+        <div
+          *ngFor="let item of filteredItems; trackBy: trackByFn"
+          class="cart-item"
+          [class.selected]="item.selected">
 
-          <div>
-            <h3 class="text-sm font-medium">
-              {{ item.title }}
-            </h3>
-            <p class="text-xs opacity-70">
-              ₱{{ item.price | number:'1.2-2' }}
-            </p>
+          <!-- Left side -->
+          <div class="item-left">
+            <input
+              type="checkbox"
+              class="check-box"
+              [(ngModel)]="item.selected"
+              (change)="toggleItem()"
+            />
+            <img
+              [src]="item.imageUrl"
+              class="item-thumb"
+              [alt]="item.title"
+            />
+            <div class="item-info">
+              <h3 class="item-title">{{ item.title }}</h3>
+              <p class="item-price">₱{{ item.price | number:'1.2-2' }}</p>
+            </div>
+          </div>
+
+          <!-- Right side -->
+          <div class="item-right">
+            <span class="item-subtotal">₱{{ item.subtotal | number:'1.2-2' }}</span>
+            <button class="remove-btn" (click)="removeItem(item)">Remove</button>
           </div>
         </div>
+      </div>
 
-        <!-- RIGHT -->
-        <div class="flex items-center gap-6">
-          <span class="text-sm font-medium w-24 text-right">
-            ₱{{ item.subtotal | number:'1.2-2' }}
-          </span>
-
-          <button
-            (click)="removeItem(item)"
-            class="text-xs opacity-60 hover:text-red-500 transition"
-          >
-            Remove
-          </button>
+      <!-- Order summary -->
+      <div class="summary-bar">
+        <div>
+          <p class="summary-total-label">Order total</p>
+          <p class="summary-total-amount">₱{{ total | number:'1.2-2' }}</p>
+          <p class="summary-selected">
+            {{ filteredItems.length }} item{{ filteredItems.length !== 1 ? 's' : '' }} selected
+          </p>
         </div>
-      </div>
-    </div>
 
-    <!-- FOOTER -->
-    <div class="mt-12 flex items-center justify-between border-t pt-6"
-         [ngClass]="isDarkMode() ? 'border-gray-700' : 'border-gray-200'">
-
-      <div class="text-xl font-medium">
-        Total: ₱{{ total | number:'1.2-2' }}
+        <button
+          class="checkout-btn"
+          (click)="checkout()"
+          [disabled]="!total || loading">
+          {{ loading ? 'Processing…' : 'Checkout' }}
+        </button>
       </div>
 
-      <button
-        (click)="checkout()"
-        [disabled]="!total || loading"
-        class="px-8 py-3 rounded-full text-white text-sm font-medium
-               bg-purple-600 hover:bg-purple-700
-               transition disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        Checkout
-      </button>
     </div>
 
-  </div>
+    <!-- ===== EMPTY STATE ===== -->
+    <ng-template #empty>
+      <div class="state-empty">
+        <svg width="64" height="64" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"
+                d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6" stroke-linecap="round" stroke-width="1.2"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.2"
+                d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+        <h3>Your cart is empty</h3>
+        <p>Add some games to get started.</p>
+        <button class="btn-primary" routerLink="/games">Browse games</button>
+      </div>
+    </ng-template>
 
-  <!-- EMPTY -->
-  <ng-template #empty>
-    <div class="py-24 text-center text-sm opacity-60">
-      Your cart is empty
-    </div>
-  </ng-template>
+  </div><!-- /page-wrap -->
 
-  <!-- SUCCESS MODAL -->
-  <div *ngIf="showSuccessModal"
-       class="fixed inset-0 bg-black/30 backdrop-blur-sm
-              flex items-center justify-center z-50">
-    <div class="rounded-2xl p-8 w-80 text-center shadow-xl"
-         [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
-      <div class="text-purple-600 dark:text-purple-400 text-4xl mb-4">✓</div>
-      <h2 class="text-lg font-medium mb-1">
-        Checkout Complete
-      </h2>
-      <p class="text-sm opacity-70">
-        Your order was placed successfully.
-      </p>
+  <!-- ===== PROMO ===== -->
+  <div *ngIf="filteredItems.length" class="promo">
+    <div class="page-wrap">
+      <h2>Free digital delivery</h2>
+      <p>Your keys are delivered instantly after checkout.</p>
+      <button class="btn-ghost" routerLink="/games">Keep shopping</button>
     </div>
   </div>
 
-  <!-- REMOVE SUCCESS MODAL -->
-  <div *ngIf="showRemoveSuccessModal"
-       class="fixed inset-0 bg-black/30 backdrop-blur-sm
-              flex items-center justify-center z-50">
-    <div class="rounded-2xl p-6 w-72 text-center shadow-xl"
-         [ngClass]="isDarkMode() ? 'bg-gray-800' : 'bg-white'">
-      <div class="text-green-600 dark:text-green-400 text-3xl mb-3">✓</div>
-      <h2 class="text-lg font-medium mb-1">
-        Item Removed
-      </h2>
-      <p class="text-sm opacity-70">
-        Cart item removed successfully.
-      </p>
-    </div>
-  </div>
+</div><!-- /main -->
 
+
+<!-- ==================== CHECKOUT SUCCESS MODAL ==================== -->
+<div *ngIf="showSuccessModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+      </svg>
+    </div>
+    <h2 class="modal-title">Order placed!</h2>
+    <p class="modal-sub">Your checkout was successful. You'll receive your keys shortly.</p>
+  </div>
+</div>
+
+
+<!-- ==================== REMOVE SUCCESS TOAST ==================== -->
+<div *ngIf="showRemoveSuccessModal" class="toast-wrap">
+  <div class="toast-pill">
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+    </svg>
+    Item removed from cart
+  </div>
 </div>

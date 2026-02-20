@@ -275,7 +275,7 @@
       <div class="relative animate-fade-in-up stagger-5">
 
         <div
-          *ngIf="sales$ | async as sales; else loading"
+          *ngIf="sortedSalesByPurchaseRate$ | async as sales; else loading"
           class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
 
           <div class="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent">

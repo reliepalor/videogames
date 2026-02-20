@@ -1,251 +1,342 @@
-<style></style>
+<style>
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-<!-- GLASS NAVBAR -->
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-fade-in  { animation: fadeIn  0.25s ease-out; }
+.animate-slide-up { animation: slideUp 0.3s cubic-bezier(.22,1,.36,1); }
+.animate-drop-in  { animation: dropIn  0.22s cubic-bezier(.22,1,.36,1); }
+
+.nav-swipe {
+  will-change: transform, opacity, filter;
+  transition:
+    transform 900ms cubic-bezier(.22,1,.36,1),
+    opacity   700ms ease,
+    filter    900ms ease;
+}
+.nav-hidden {
+  opacity: 0 !important;
+  transform: translateY(-20px) scale(0.97) !important;
+  filter: blur(2px) !important;
+  pointer-events: none !important;
+}
+.nav-shown {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-swipe, .nav-hidden, .nav-shown { transition: none; }
+}
+
+/* Active nav link — dot indicator */
+.nav-link-active {
+  color: #111 !important;
+  font-weight: 600;
+}
+.nav-link-active::after {
+  content: '';
+  display: block;
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #111;
+  border-radius: 50%;
+}
+
+/* Mobile active */
+.nav-link-active-mobile {
+  color: #111 !important;
+  background: rgba(0,0,0,0.05) !important;
+  font-weight: 600 !important;
+}
+</style>
+
+<!-- ===== NAVBAR ===== -->
 <nav
-  class="fixed top-4 left-1/2 -translate-x-1/2 z-50
-         w-[95%] max-w-7xl
-         rounded-2xl backdrop-blur-xl
-         border shadow-lg nav-swipe"
-  [ngClass]="[
-    isDarkMode
-      ? 'bg-white/10 border-white/20 text-white'
-      : 'bg-white/70 border-gray-200 text-gray-900',
-    isNavHidden
-      ? 'nav-hidden opacity-0 pointer-events-none -translate-y-24 scale-95 blur-sm'
-      : 'nav-shown opacity-100 translate-y-0 scale-100 blur-0'
-  ]">
+  class="fixed top-0 left-0 right-0 z-50 nav-swipe
+         bg-white/85 backdrop-blur-xl border-b border-black/[0.07]"
+  [ngClass]="isNavHidden ? 'nav-hidden' : 'nav-shown'">
 
-  <div class="flex items-center justify-between px-6 py-3">
+  <div class="max-w-[1440px] mx-auto px-10 h-[58px] flex items-center justify-between gap-6"
+       style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 
-    <!-- BRAND -->
-    <div class="flex justify-center items-center gap-3">
-      <svg 
-        class="w-7 h-7 text-purple-600 flex-shrink-0"
-        viewBox="0 0 24 24" 
-        fill="none" 
-        stroke="currentColor" 
-        stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round"
-          d="M6 12h2m4-4v2m0 4v2m4-4h2
-             M7 17l2-2h6l2 2
-             M5 7h14a2 2 0 0 1 2 2v6
-             a5 5 0 0 1-5 5H8
-             a5 5 0 0 1-5-5V9
-             a2 2 0 0 1 2-2z"/>
-      </svg>
+    <!-- ===== BRAND ===== -->
+    <a routerLink="/user-dashboard"
+       class="flex items-center gap-2.5 flex-shrink-0 no-underline group">
+      <!-- Icon box -->
+      <div class="w-7.5 h-7 bg-[#111] rounded-[7px] flex items-center justify-center flex-shrink-0
+                  transition-transform duration-200 group-hover:scale-95">
+        <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M6 12h2m4-4v2m0 4v2m4-4h2
+                   M7 17l2-2h6l2 2
+                   M5 7h14a2 2 0 0 1 2 2v6
+                   a5 5 0 0 1-5 5H8
+                   a5 5 0 0 1-5-5V9
+                   a2 2 0 0 1 2-2z"/>
+        </svg>
+      </div>
+      <span class="text-[15px] font-bold tracking-[-0.02em] text-[#111]">Outspace</span>
+    </a>
 
-      <a routerLink="/user-dashboard"
-         class="text-sm font-semibold tracking-wide hover:opacity-80 transition">
-        Outspace
+    <!-- ===== DESKTOP LINKS ===== -->
+    <div class="hidden md:flex items-center gap-1" *ngIf="user$ | async as user">
+      <a *ngFor="let link of [
+           {label:'Games',           path:'/games'},
+           {label:'Digital Products',path:'/digital-products'},
+           {label:'Orders',          path:'/orders'},
+           {label:'Cart',            path:'/cart'}
+         ]"
+         (click)="guardedNavigate(link.path)"
+         class="relative px-3 py-1.5 text-[14px] font-medium text-gray-700
+                rounded-lg cursor-pointer transition-colors duration-150
+                hover:text-[#111] hover:bg-black/[0.04] select-none"
+         [ngClass]="isActive(link.path) ? 'nav-link-active' : ''">
+        {{ link.label }}
       </a>
     </div>
 
-    <!-- DESKTOP LINKS -->
-    <div class="hidden md:flex items-center gap-8 text-sm font-medium" *ngIf="user$ | async as user">
-      <a (click)="guardedNavigate('/games')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Games</a>
-      <a (click)="guardedNavigate('/digital-products')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Digital Products</a>
-      <a (click)="guardedNavigate('/orders')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Orders</a>
-      <a (click)="guardedNavigate('/cart')" class="opacity-80 hover:opacity-100 transition cursor-pointer">Cart</a>
-    </div>
+    <!-- ===== RIGHT ACTIONS ===== -->
+    <div class="flex items-center gap-1.5">
 
-    <!-- RIGHT -->
-    <div class="flex items-center gap-3">
-
-      <!-- 💬 MESSENGER ICON -->
+      <!-- Messages -->
       <button
         *ngIf="user$ | async"
         (click)="guardedNavigate('/conversations')"
-        class="relative w-9 h-9 rounded-xl flex items-center justify-center
-               transition hover:scale-105"
-        [ngClass]="isDarkMode ? 'hover:bg-white/10' : 'hover:bg-black/10'">
-
-        <!-- ICON -->
-        <svg class="w-5 h-5"
-             fill="none"
-             stroke="currentColor"
-             viewBox="0 0 24 24"
-             stroke-width="2">
+        class="relative w-9 h-9 rounded-lg flex items-center justify-center
+               text-[#757575] hover:text-[#111] hover:bg-black/[0.05]
+               transition-colors duration-150">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor"
+             viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round"
-            d="M8 10h8m-8 4h5
-               M21 12c0 4.418-4.03 8-9 8
-               a9.77 9.77 0 01-4-.8L3 20l1.5-3.8
-               A7.94 7.94 0 013 12
-               c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                d="M8 10h8m-8 4h5
+                   M21 12c0 4.418-4.03 8-9 8
+                   a9.77 9.77 0 01-4-.8L3 20l1.5-3.8
+                   A7.94 7.94 0 013 12
+                   c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
         </svg>
-
-        <!-- UNREAD BADGE -->
-        <span
-          *ngIf="unreadCount > 0"
-          class="absolute -top-1 -right-1
-                 min-w-[18px] h-[18px]
-                 px-1 rounded-full
-                 bg-purple-600 text-white
-                 text-[10px] font-semibold
-                 flex items-center justify-center">
+        <span *ngIf="unreadCount > 0"
+              class="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1
+                     bg-[#111] text-white text-[10px] font-bold rounded-full
+                     flex items-center justify-center border-[1.5px] border-white">
           {{ unreadCount }}
         </span>
       </button>
 
-      <!-- THEME TOGGLE -->
+      <!-- Theme toggle 
       <button
         (click)="toggleTheme()"
-        class="w-9 h-9 rounded-xl flex items-center justify-center
-               transition hover:scale-105"
-        [ngClass]="isDarkMode ? 'hover:bg-white/10' : 'hover:bg-black/10'">
-
-        <svg *ngIf="!isDarkMode"
-             class="w-5 h-5 text-yellow-400"
-             fill="none" stroke="currentColor"
-             viewBox="0 0 24 24">
+        class="w-9 h-9 rounded-lg flex items-center justify-center
+               text-[#757575] hover:text-[#111] hover:bg-black/[0.05]
+               transition-colors duration-150">
+        <svg *ngIf="!isDarkMode" class="w-[18px] h-[18px]"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="5"/>
-          <path d="M12 1v2M12 21v2M4 12H2M22 12h-2"/>
+          <path stroke-linecap="round"
+                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42
+                   M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
         </svg>
-
-        <svg *ngIf="isDarkMode"
-             class="w-5 h-5 text-purple-300"
-             fill="currentColor"
-             viewBox="0 0 24 24">
+        <svg *ngIf="isDarkMode" class="w-[18px] h-[18px]"
+             fill="currentColor" viewBox="0 0 24 24">
           <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
         </svg>
       </button>
-
-      <!-- USER DROPDOWN -->
+        --> 
+      
+      <!-- Avatar + dropdown (desktop) -->
       <div *ngIf="user$ | async as user; else desktopAuth"
-           class="hidden md:block relative">
+           class="hidden md:block relative nav-dropdown-wrap">
 
         <button
           (click)="toggleDropdown()"
-          class="flex items-center gap-2 p-1 rounded-full
-                 transition hover:scale-105">
-
-          <div class="w-9 h-9 rounded-full overflow-hidden">
-            <img *ngIf="user.profilePicture; else initials"
-                 [src]="user.profilePicture"
-                 class="w-full h-full object-cover">
-
-            <ng-template #initials>
-              <div
-                class="w-full h-full bg-gradient-to-br
-                       from-purple-500 to-indigo-500
-                       flex items-center justify-center
-                       text-white text-sm font-semibold">
-                {{ getInitials(user.username) }}
-              </div>
-            </ng-template>
+          class="w-8 h-8 rounded-full overflow-hidden border-[1.5px] border-[#e5e5e5]
+                 hover:border-[#bbb] transition-colors duration-150 flex-shrink-0
+                 focus:outline-none ml-1">
+          <img *ngIf="user.profilePicture"
+               [src]="user.profilePicture"
+               class="w-full h-full object-cover block">
+          <div *ngIf="!user.profilePicture"
+               class="w-full h-full bg-[#111] flex items-center justify-center
+                      text-white text-[11px] font-semibold tracking-wide">
+            {{ getInitials(user.username) }}
           </div>
         </button>
 
-        <!-- DROPDOWN -->
+        <!-- Dropdown -->
         <div *ngIf="isDropdownOpen"
-          class="absolute right-0 mt-4 w-56
-                 rounded-2xl backdrop-blur-xl
-                 border shadow-xl animate-fade-in"
-          [ngClass]="isDarkMode
-            ? 'bg-gray-900/80 border-white/10'
-            : 'bg-white/80 border-gray-200'">
+             class="absolute right-0 mt-2.5 w-52
+                    bg-white/95 backdrop-blur-xl
+                    border border-black/[0.09] rounded-2xl
+                    shadow-[0_16px_40px_-8px_rgba(0,0,0,0.15)]
+                    overflow-hidden animate-drop-in">
 
-          <div class="px-4 py-3 text-xs opacity-70 truncate">
+          <div class="px-4 py-3 text-[12px] text-[#757575]
+                      border-b border-black/[0.07] truncate">
             {{ user.email }}
           </div>
 
           <a routerLink="/profile" (click)="closeAllMenus()"
-             class="block px-4 py-3 text-sm hover:bg-white/10 transition">
+             class="flex items-center gap-2.5 px-4 py-2.5 text-[14px] text-[#111]
+                    hover:bg-black/[0.04] transition-colors duration-100 no-underline">
             Profile
           </a>
-
           <a routerLink="/settings/password" (click)="closeAllMenus()"
-             class="block px-4 py-3 text-sm hover:bg-white/10 transition">
+             class="flex items-center gap-2.5 px-4 py-2.5 text-[14px] text-[#111]
+                    hover:bg-black/[0.04] transition-colors duration-100 no-underline">
             Security
           </a>
 
-          <button
-            (click)="logout()"
-            class="w-full text-left px-4 py-3 text-sm
-                   text-red-500 hover:bg-red-500/10 transition">
-            Logout
+          <div class="h-px bg-black/[0.07] mx-0"></div>
+
+          <button (click)="logout()"
+                  class="w-full text-left px-4 py-2.5 text-[14px] text-[#c0392b]
+                         hover:bg-red-50 transition-colors duration-100">
+            Log out
           </button>
         </div>
       </div>
 
-      <!-- LOGIN / REGISTER -->
+      <!-- Auth buttons (desktop, logged-out) -->
       <ng-template #desktopAuth>
-        <div class="hidden md:flex items-center gap-2">
+        <div class="hidden md:flex items-center gap-2 ml-1">
           <a routerLink="/login"
-             class="px-4 py-2 text-sm rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition">
-            Login
+             class="px-4 py-1.5 text-[13px] font-medium text-[#111]
+                    border border-[#e5e5e5] rounded-full hover:border-[#999]
+                    hover:bg-black/[0.03] transition-all duration-150 no-underline">
+            Log in
           </a>
           <a routerLink="/register"
-             class="px-4 py-2 text-sm rounded-xl border border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white transition">
-            Register
+             class="px-4 py-1.5 text-[13px] font-medium text-white
+                    bg-[#111] rounded-full hover:bg-[#333]
+                    transition-colors duration-150 no-underline">
+            Sign up
           </a>
         </div>
       </ng-template>
 
-      <!-- MOBILE BUTTON -->
+      <!-- Mobile hamburger -->
       <button
-        class="md:hidden w-9 h-9 rounded-xl flex items-center justify-center"
+        class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center
+               text-[#757575] hover:text-[#111] hover:bg-black/[0.05]
+               transition-colors duration-150 ml-1"
         (click)="toggleMobileMenu()">
-        <svg *ngIf="!isMobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor"
-             viewBox="0 0 24 24">
-          <path stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        <svg *ngIf="!isMobileMenuOpen" class="w-5 h-5"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
-        <svg *ngIf="isMobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor"
-             viewBox="0 0 24 24">
-          <path stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        <svg *ngIf="isMobileMenuOpen" class="w-5 h-5"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
 
     </div>
   </div>
 
-  <!-- MOBILE MENU -->
+  <!-- ===== MOBILE MENU ===== -->
   <div *ngIf="isMobileMenuOpen"
-       class="md:hidden border-t animate-fade-in"
-       [ngClass]="isDarkMode
-         ? 'border-white/10 bg-gray-900/80'
-         : 'border-gray-200 bg-white/80'">
+       class="md:hidden border-t border-black/[0.07] bg-white/95 backdrop-blur-xl
+              animate-fade-in"
+       style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
 
-    <div class="px-4 py-4 space-y-3" *ngIf="user$ | async as user; else mobileAuth">
-      <!-- User info -->
-      <div class="flex items-center gap-3 px-2 py-2">
-        <div class="w-10 h-10 rounded-full overflow-hidden">
-          <img *ngIf="user.profilePicture; else mobileInitials"
-               [src]="user.profilePicture"
-               class="w-full h-full object-cover">
-          <ng-template #mobileInitials>
-            <div class="w-full h-full bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white font-semibold">
-              {{ getInitials(user.username) }}
-            </div>
-          </ng-template>
+    <ng-container *ngIf="user$ | async as user; else mobileAuth">
+
+      <!-- User row -->
+      <div class="flex items-center gap-3 px-5 py-4 border-b border-black/[0.07]">
+        <div class="w-9 h-9 rounded-full overflow-hidden border border-[#e5e5e5] flex-shrink-0">
+          <img *ngIf="user.profilePicture"
+               [src]="user.profilePicture" class="w-full h-full object-cover">
+          <div *ngIf="!user.profilePicture"
+               class="w-full h-full bg-[#111] flex items-center justify-center
+                      text-white text-[11px] font-semibold">
+            {{ getInitials(user.username) }}
+          </div>
         </div>
-        <div>
-          <div class="font-medium">{{ user.username }}</div>
-          <div class="text-xs opacity-70">{{ user.email }}</div>
+        <div class="min-w-0">
+          <p class="text-[14px] font-600 text-[#111] m-0 truncate">{{ user.username }}</p>
+          <p class="text-[12px] text-[#757575] m-0 truncate">{{ user.email }}</p>
         </div>
       </div>
 
-      <div class="border-t" [ngClass]="isDarkMode ? 'border-white/10' : 'border-gray-200'"></div>
+      <!-- Nav links -->
+      <div class="px-3 py-3 space-y-0.5">
+        <a *ngFor="let link of [
+             {label:'Games',           path:'/games'},
+             {label:'Digital Products',path:'/digital-products'},
+             {label:'Orders',          path:'/orders'},
+             {label:'Cart',            path:'/cart'},
+             {label:'Messages',        path:'/conversations'}
+           ]"
+           (click)="guardedNavigate(link.path)"
+           class="flex items-center justify-between px-3 py-2.5 rounded-xl
+                  text-[14px] font-medium text-gray-700
+                  hover:text-[#111] hover:bg-black/[0.04]
+                  transition-colors duration-150 cursor-pointer"
+           [ngClass]="isActive(link.path) ? 'nav-link-active-mobile' : ''">
+          {{ link.label }}
+          <svg *ngIf="isActive(link.path)"
+               class="w-3.5 h-3.5 text-[#111]" fill="currentColor" viewBox="0 0 8 8">
+            <circle cx="4" cy="4" r="3"/>
+          </svg>
+        </a>
+      </div>
 
-      <!-- Mobile Links -->
-      <a (click)="guardedNavigate('/games')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Games</a>
-      <a (click)="guardedNavigate('/digital-products')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Digital Products</a>
-      <a (click)="guardedNavigate('/orders')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Orders</a>
-      <a (click)="guardedNavigate('/cart')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Cart</a>
-      <a (click)="guardedNavigate('/conversations')" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition cursor-pointer">Messages</a>
+      <div class="mx-4 h-px bg-black/[0.07]"></div>
 
-      <div class="border-t" [ngClass]="isDarkMode ? 'border-white/10' : 'border-gray-200'"></div>
+      <!-- Profile / settings / logout -->
+      <div class="px-3 py-3 space-y-0.5">
+        <a routerLink="/profile" (click)="closeAllMenus()"
+           class="block px-3 py-2.5 rounded-xl text-[14px] font-medium text-[#757575]
+                  hover:text-[#111] hover:bg-black/[0.04] transition-colors duration-150 no-underline">
+          Profile
+        </a>
+        <a routerLink="/settings/password" (click)="closeAllMenus()"
+           class="block px-3 py-2.5 rounded-xl text-[14px] font-medium text-[#757575]
+                  hover:text-[#111] hover:bg-black/[0.04] transition-colors duration-150 no-underline">
+          Security
+        </a>
+        <button (click)="logout()"
+                class="w-full text-left px-3 py-2.5 rounded-xl text-[14px] font-medium
+                       text-[#c0392b] hover:bg-red-50 transition-colors duration-150">
+          Log out
+        </button>
+      </div>
 
-      <a routerLink="/profile" (click)="closeAllMenus()" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition">Profile</a>
-      <a routerLink="/settings/password" (click)="closeAllMenus()" class="block px-3 py-3 rounded-xl text-sm font-medium hover:bg-white/10 transition">Security</a>
-      <button (click)="logout()" class="w-full text-left px-3 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-500/10 transition">Logout</button>
-    </div>
+    </ng-container>
 
-    <!-- Mobile Auth -->
+    <!-- Mobile logged-out -->
     <ng-template #mobileAuth>
-      <div class="px-4 py-4 space-y-3">
-        <a routerLink="/login" (click)="closeAllMenus()" class="block px-4 py-3 text-center rounded-xl bg-purple-500 text-white hover:bg-purple-600 transition">Login</a>
-        <a routerLink="/register" (click)="closeAllMenus()" class="block px-4 py-3 text-center rounded-xl border border-purple-500 text-purple-500 hover:bg-purple-500 hover:text-white transition">Register</a>
+      <div class="px-4 py-4 flex flex-col gap-2.5">
+        <a routerLink="/login" (click)="closeAllMenus()"
+           class="block px-4 py-3 text-center text-[14px] font-medium text-[#111]
+                  border border-[#e5e5e5] rounded-xl hover:border-[#999]
+                  hover:bg-black/[0.03] transition-all no-underline">
+          Log in
+        </a>
+        <a routerLink="/register" (click)="closeAllMenus()"
+           class="block px-4 py-3 text-center text-[14px] font-medium text-white
+                  bg-[#111] rounded-xl hover:bg-[#333]
+                  transition-colors no-underline">
+          Sign up
+        </a>
       </div>
     </ng-template>
+
   </div>
 </nav>

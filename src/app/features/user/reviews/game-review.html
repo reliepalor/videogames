@@ -1,0 +1,237 @@
+<!-- ===================================================== -->
+<!-- =================== REVIEWS SECTION ================= -->
+<!-- ===================================================== -->
+
+<div class="mt-16">
+
+  <!-- HEADER -->
+  <div *ngIf="data" class="mb-10">
+    <h2
+      class="text-2xl font-semibold tracking-tight"
+      [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+      Reviews
+    </h2>
+
+    <div class="flex items-center gap-4 mt-4">
+
+      <!-- Stars -->
+      <div class="flex">
+        <ng-container *ngFor="let _ of stars(roundRating(data.averageRating))">
+          <span
+            class="text-lg"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-black'">
+            ★
+          </span>
+        </ng-container>
+      </div>
+
+      <!-- Meta -->
+      <span
+        class="text-sm tracking-wide"
+        [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-500'">
+        {{ data.averageRating }} · {{ data.totalReviews }} reviews
+      </span>
+    </div>
+  </div>
+
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="space-y-4">
+    <app-skeleton-box height="56px"></app-skeleton-box>
+    <app-skeleton-box height="120px"></app-skeleton-box>
+  </div>
+
+
+  <!-- EMPTY -->
+  <div
+    *ngIf="!loading && data && data.reviews.length === 0"
+    class="text-sm border rounded-xl p-8 text-center"
+    [ngClass]="isDarkMode
+      ? 'text-gray-500 border-gray-800'
+      : 'text-gray-500 border-gray-200'">
+    No reviews yet.
+  </div>
+
+
+  <!-- REVIEWS -->
+  <div *ngIf="data && data.reviews.length" class="space-y-8">
+
+    <div
+      *ngFor="let r of data.reviews"
+      class="border rounded-2xl p-8 transition-all duration-200"
+      [ngClass]="isDarkMode
+        ? 'bg-gray-900 border-gray-800 hover:border-gray-700'
+        : 'bg-white border-gray-200 hover:border-gray-300'">
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-4">
+        <p class="font-medium tracking-wide"
+          [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+          {{ r.username }}
+        </p>
+
+        <span class="text-xs uppercase tracking-widest"
+          [ngClass]="isDarkMode ? 'text-gray-500' : 'text-gray-400'">
+          {{ r.createdAt | date:'mediumDate' }}
+        </span>
+      </div>
+
+      <!-- Rating -->
+      <div class="flex mb-4">
+        <ng-container *ngFor="let _ of stars(r.rating)">
+          <span
+            class="text-base"
+            [ngClass]="isDarkMode ? 'text-white' : 'text-black'">
+            ★
+          </span>
+        </ng-container>
+      </div>
+
+      <!-- Comment -->
+      <p class="text-sm leading-relaxed tracking-wide"
+        [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-700'">
+        {{ r.comment }}
+      </p>
+
+    </div>
+
+  </div>
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- =================== REVIEW FORM ===================== -->
+<!-- ===================================================== -->
+
+<div
+  class="mt-16 border rounded-2xl p-10 transition-all duration-200"
+  [ngClass]="isDarkMode
+    ? 'bg-gray-900 border-gray-800'
+    : 'bg-white border-gray-200'">
+
+  <h3
+    class="text-lg font-semibold tracking-wide mb-8"
+    [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+    Write a Review
+  </h3>
+
+
+  <!-- RATING -->
+  <div class="mb-8">
+    <label
+      class="text-xs uppercase tracking-widest"
+      [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-500'">
+      Rating
+    </label>
+
+    <div class="mt-4 flex gap-3">
+      <button
+        *ngFor="let star of [1,2,3,4,5]"
+        (click)="rating = star"
+        class="text-3xl transition-all duration-200 focus:outline-none"
+        [ngClass]="star <= rating
+          ? (isDarkMode ? 'text-white' : 'text-black')
+          : 'text-gray-400 hover:text-gray-600'">
+        ★
+      </button>
+    </div>
+  </div>
+
+
+  <!-- COMMENT -->
+  <div class="mb-8">
+    <label
+      class="text-xs uppercase tracking-widest"
+      [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-500'">
+      Comment
+    </label>
+
+    <textarea
+      [(ngModel)]="comment"
+      rows="4"
+      class="mt-4 w-full rounded-xl px-5 py-4 text-sm border transition-all duration-200 focus:outline-none"
+      [ngClass]="isDarkMode
+        ? 'bg-black text-white border-gray-700 focus:border-gray-500'
+        : 'bg-white text-gray-900 border-gray-300 focus:border-black'"
+      placeholder="Share your experience...">
+    </textarea>
+  </div>
+
+
+  <!-- SUBMIT -->
+  <button
+    (click)="submit()"
+    [disabled]="submitting"
+    class="w-full md:w-auto px-8 py-3 rounded-full text-sm font-medium tracking-wide transition-all duration-200"
+    [ngClass]="isDarkMode
+      ? 'bg-white text-black hover:bg-gray-200'
+      : 'bg-black text-white hover:bg-gray-800'">
+
+    <span *ngIf="!submitting">Submit Review</span>
+    <span *ngIf="submitting">Submitting…</span>
+  </button>
+
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- ================= SUCCESS TOAST ===================== -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="showSuccessModal"
+  class="fixed top-6 left-1/2 transform -translate-x-1/2 z-50">
+
+  <div
+    class="px-6 py-3 rounded-full text-sm font-medium shadow-lg"
+    [ngClass]="isDarkMode
+      ? 'bg-white text-black'
+      : 'bg-black text-white'">
+    {{ successMessage }}
+  </div>
+
+</div>
+
+
+
+<!-- ===================================================== -->
+<!-- ================= ERROR MODAL ======================= -->
+<!-- ===================================================== -->
+
+<div
+  *ngIf="error"
+  class="fixed inset-0 bg-black/70 flex items-center justify-center z-50"
+  (click)="closeErrorModal()">
+
+  <div
+    class="rounded-2xl p-8 max-w-sm mx-4 border"
+    [ngClass]="isDarkMode
+      ? 'bg-gray-900 border-gray-800'
+      : 'bg-white border-gray-200'"
+    (click)="$event.stopPropagation()">
+
+    <h3
+      class="text-lg font-semibold mb-4"
+      [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">
+      Error
+    </h3>
+
+    <p
+      class="text-sm mb-6"
+      [ngClass]="isDarkMode ? 'text-gray-400' : 'text-gray-600'">
+      {{ error }}
+    </p>
+
+    <button
+      (click)="closeErrorModal()"
+      class="px-6 py-2 rounded-full text-sm font-medium transition-all"
+      [ngClass]="isDarkMode
+        ? 'bg-white text-black hover:bg-gray-200'
+        : 'bg-black text-white hover:bg-gray-800'">
+      Close
+    </button>
+
+  </div>
+</div>

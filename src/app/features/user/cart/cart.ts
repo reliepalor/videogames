@@ -7,7 +7,6 @@ import { OrderService } from 'src/app/core/services/order.service';
 import { VideoGameService } from 'src/app/core/services/videogame.service';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { Subscription } from 'rxjs';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 interface CartItemWithSelection extends CartItem {
   selected: boolean;
@@ -18,7 +17,7 @@ interface CartItemWithSelection extends CartItem {
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.html',
   styleUrls: ['./cart.css'],
 })

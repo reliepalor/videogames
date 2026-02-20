@@ -5,14 +5,13 @@ import { FormsModule } from '@angular/forms';
 import { DigitalProduct } from 'src/app/core/models/digital-products/digital-product.model';
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 @Component({
   standalone: true,
   selector: 'app-digital-store.page',
-  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
-  styleUrls: ['./digital-store.page.css'],
-  templateUrl: './digital-store.page.html'
+  imports: [CommonModule, FormsModule],
+  templateUrl: './digital-store.page.html',
+  styleUrl: './digital-store.page.css'
 })
 export class DigitalStorePage implements OnInit {
   private readonly API_URL = 'http://localhost:5019';

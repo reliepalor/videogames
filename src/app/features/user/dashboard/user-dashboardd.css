@@ -133,9 +133,10 @@ button:focus-visible {
 }
 
 @media (max-width: 640px) {
-  /* Reduce card width slightly on small screens */
+  /* Keep one full card per view on mobile */
   .w-\[280px\] {
-    width: 260px;
+    width: 280px !important;
+    min-width: 280px !important;
   }
   
   /* Adjust heading size */
@@ -672,6 +673,69 @@ button,
   inset: 0;
   background: radial-gradient(circle at center, rgba(167,139,250,.3), transparent 60%);
   animation: rotate 30s linear infinite;
+}
+
+/* Buy confirmation modal */
+.buy-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  animation: buyFadeIn 180ms ease-out;
+}
+
+.buy-modal-panel {
+  width: min(92vw, 420px);
+  border-radius: 14px;
+  border: 1px solid rgba(63, 63, 70, 0.9);
+  background: rgba(9, 9, 11, 0.96);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  padding: 1.1rem 1.1rem 1rem;
+  animation: buyPanelIn 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.buy-modal-backdrop.closing {
+  animation: buyFadeOut 180ms ease-in forwards;
+}
+
+.buy-modal-panel.closing {
+  animation: buyPanelOut 180ms ease-in forwards;
+}
+
+@keyframes buyFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes buyFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes buyPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes buyPanelOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
 }
 
 @keyframes shimmer {

@@ -92,14 +92,14 @@ export const userRoutes: Routes = [
   {
     path: 'conversations',
     loadComponent: () =>
-      import('./conversations/conversation-list/conversation-list')
-        .then(m => m.ConversationListComponent)
+      import('./conversations/user-conversation-page')
+        .then(m => m.UserConversationsPageComponent)
   },
   {
     path: 'conversations/:id',
     loadComponent: () =>
-      import('./conversations/conversation-detail/conversation-detail')
-        .then(m => m.ConversationDetail)
+      import('./conversations/user-conversation-page')
+        .then(m => m.UserConversationsPageComponent)
   }
 
 ];

@@ -1,0 +1,353 @@
+<style>
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); }
+  }
+
+  .message-enter {
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #64748b;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typing 1.4s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .message-bubble {
+    position: relative;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .reaction-picker {
+    animation: fadeIn 0.2s ease-out;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-hidden {
+      display: none !important;
+    }
+  }
+</style>
+
+<!-- Main Container -->
+<div class="flex h-[calc(100vh-7rem)] bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm mt-17">
+
+  <!-- ================= LEFT SIDEBAR: CONVERSATION LIST ================= -->
+  <div 
+    class="flex flex-col border-r border-slate-200 bg-slate-50 transition-all duration-300"
+    [class.w-80]="!isMobileView || !showChatView"
+    [class.w-full]="isMobileView && !showChatView"
+    [class.mobile-hidden]="isMobileView && showChatView"
+    [class.flex-shrink-0]="!isMobileView">
+
+    <!-- Header -->
+    <div class="p-4 bg-white border-b border-slate-200">
+      <h2 class="text-lg font-bold text-slate-900">Messages</h2>
+      <p class="text-xs text-slate-500 mt-1">Chat with support team</p>
+    </div>
+
+    <!-- Conversation Item -->
+    <div class="flex-1 overflow-y-auto custom-scrollbar">
+      <div class="border-b border-slate-100">
+        <div
+          (click)="openConversation()"
+          class="px-4 py-3 cursor-pointer transition-colors duration-200 hover:bg-slate-100"
+          [class.bg-slate-900]="hasActiveConversation()"
+          [class.text-white]="hasActiveConversation()">
+
+          <div class="flex items-center gap-3">
+            <!-- Avatar -->
+            <div class="relative flex-shrink-0">
+              <div
+                class="w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold text-sm"
+                [class.bg-slate-700]="!hasActiveConversation()"
+                [class.bg-white]="hasActiveConversation()"
+                [class.text-slate-900]="hasActiveConversation()">
+                S
+              </div>
+              <!-- Online indicator -->
+              <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-semibold text-sm truncate">
+                  Support Team
+                </span>
+              </div>
+              <p class="text-xs truncate"
+                 [class.text-slate-300]="hasActiveConversation()"
+                 [class.text-slate-500]="!hasActiveConversation()">
+                {{ getConversationSubtext() }}
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Empty state helper -->
+      <div class="p-6 text-center text-slate-500 text-sm">
+        <svg class="w-12 h-12 mx-auto mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+        <p>Click above to start or continue your conversation with our support team</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-3 bg-white border-t border-slate-200 text-xs text-slate-500 text-center">
+      Messages are private and secure
+    </div>
+
+  </div>
+
+  <!-- ================= RIGHT PANEL: CHAT DETAIL ================= -->
+  <div 
+    class="flex flex-col min-w-0 transition-all duration-300"
+    [class.flex-1]="!isMobileView"
+    [class.w-full]="isMobileView && showChatView"
+    [class.mobile-hidden]="isMobileView && !showChatView">
+
+    <!-- Empty State: No Conversation (Desktop Only) -->
+    <div *ngIf="!showChatView && !isMobileView" class="flex-1 flex flex-col items-center justify-center text-center p-8">
+      <div class="w-24 h-24 rounded-full bg-slate-100 flex items-center justify-center mb-6">
+        <svg class="w-12 h-12 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold text-slate-900 mb-2">Support Chat</h3>
+      <p class="text-sm text-slate-500 max-w-sm">
+        Click on the conversation to start chatting with our support team
+      </p>
+    </div>
+
+    <!-- Chat Detail -->
+    <ng-container *ngIf="showChatView">
+
+      <!-- Header -->
+      <div class="px-4 md:px-6 py-4 border-b border-slate-200 bg-white slide-in-left">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            
+            <!-- Back Button (Mobile Only) -->
+            <button
+              *ngIf="isMobileView"
+              (click)="goBackToList()"
+              class="p-2 hover:bg-slate-100 rounded-lg transition-colors -ml-2">
+              <svg class="w-5 h-5 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            <div class="w-10 h-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-semibold text-sm flex-shrink-0">
+              S
+            </div>
+            <div class="min-w-0">
+              <div class="font-semibold text-slate-900 truncate">Support Team</div>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="flex items-center gap-1 text-slate-500">
+                  <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                  Online
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div *ngIf="isTyping()" class="px-4 md:px-6 py-2 bg-slate-50 border-b border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="flex gap-1">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+          <span class="text-xs text-slate-500">Support is typing...</span>
+        </div>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50 space-y-3 custom-scrollbar" #chatContainer>
+        <div
+          *ngFor="let msg of messages(); trackBy: trackByMessageId"
+          class="message-enter flex relative group"
+          [class.justify-end]="!msg.isAdmin"
+          [class.justify-start]="msg.isAdmin">
+
+          <!-- Avatar for Admin Messages -->
+          <div *ngIf="msg.isAdmin" class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white text-xs font-semibold mr-2 flex-shrink-0">
+            S
+          </div>
+
+          <div class="flex flex-col max-w-[85%] md:max-w-[70%]">
+            <!-- Message Bubble -->
+            <div
+              class="message-bubble px-4 py-2.5 rounded-2xl relative group cursor-pointer"
+              [class.bg-slate-900]="!msg.isAdmin"
+              [class.text-white]="!msg.isAdmin"
+              [class.bg-white]="msg.isAdmin"
+              [class.text-slate-900]="msg.isAdmin"
+              [class.shadow-sm]="msg.isAdmin"
+              (click)="toggleTimestamp(msg)">
+              
+              <!-- Reaction Button -->
+              <button
+                class="absolute -top-3 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                [class.right-2]="!msg.isAdmin"
+                [class.left-2]="msg.isAdmin"
+                (click)="toggleReactionPicker(msg); $event.stopPropagation()">
+                <span class="text-base">👻</span>
+              </button>
+
+              <!-- Emoji Picker -->
+              <div *ngIf="msg.showReactions"
+                   class="reaction-picker absolute -top-12 flex gap-2 bg-white shadow-xl rounded-full px-3 py-2 z-20 border border-slate-200"
+                   [class.right-0]="!msg.isAdmin"
+                   [class.left-0]="msg.isAdmin">
+                <button
+                  *ngFor="let emoji of reactionEmojis"
+                  class="text-lg hover:scale-125 transition-transform"
+                  (click)="reactToMessage(msg, emoji); $event.stopPropagation()">
+                  {{ emoji }}
+                </button>
+              </div>
+
+              <!-- Message Text -->
+              <p class="text-sm leading-relaxed break-words">{{ msg.message }}</p>
+
+              <!-- Timestamp Tooltip -->
+              <div *ngIf="selectedMessageId() === msg.id"
+                   class="absolute -bottom-7 text-xs px-2 py-1 rounded-md bg-slate-800 text-white whitespace-nowrap z-10 shadow-lg"
+                   [class.right-0]="!msg.isAdmin"
+                   [class.left-0]="msg.isAdmin">
+                {{ formatTimestamp(msg.createdAt) }}
+                <div class="absolute -top-1 w-2 h-2 bg-slate-800 rotate-45"
+                     [class.right-3]="!msg.isAdmin"
+                     [class.left-3]="msg.isAdmin">
+                </div>
+              </div>
+            </div>
+
+            <!-- Reaction Display -->
+            <div *ngIf="msg.reaction"
+                 class="mt-1 text-base bg-white rounded-full px-2 py-0.5 shadow-sm border border-slate-200 inline-block"
+                 [class.self-end]="!msg.isAdmin"
+                 [class.self-start]="msg.isAdmin">
+              {{ msg.reaction }}
+            </div>
+          </div>
+
+          <!-- Avatar for User Messages -->
+          <div *ngIf="!msg.isAdmin" class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center text-white text-xs font-semibold ml-2 flex-shrink-0">
+            U
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="p-3 md:p-4 border-t border-slate-200 bg-white">
+        <div class="space-y-3">
+          
+          <!-- Subject Input (Only for new conversations) -->
+          <input
+            *ngIf="isNewConversation"
+            [(ngModel)]="subject"
+            placeholder="Subject (optional)"
+            class="w-full px-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg
+                   focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-200 outline-none transition" />
+
+          <!-- Message Input -->
+          <div class="flex items-end gap-2 md:gap-3">
+            <div class="flex-1">
+                <textarea
+                  [(ngModel)]="newMessage"
+                (keydown.enter)="onEnterMessage($event)"
+                (input)="onTyping()"
+                  placeholder="Type a message..."
+                rows="1"
+                class="w-full px-3 md:px-4 py-2 md:py-3 bg-slate-50 border border-slate-200 rounded-2xl resize-none
+                       focus:bg-white focus:border-slate-300 focus:ring-2 focus:ring-slate-200 outline-none
+                       text-sm placeholder:text-slate-400 transition"
+                style="max-height: 120px; min-height: 42px;"></textarea>
+            </div>
+            
+            <button
+              (click)="send()"
+              [disabled]="!newMessage.trim()"
+              class="px-4 md:px-5 py-2 md:py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-medium
+                     transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
+                     flex items-center gap-2 flex-shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              <span class="text-sm hidden md:inline">Send</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</div>

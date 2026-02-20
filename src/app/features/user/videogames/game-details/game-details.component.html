@@ -1,83 +1,294 @@
-<div class="max-w-4xl mx-auto px-4 py-8">
-  <!-- LOADING SKELETON -->
-  <div *ngIf="loading" class="space-y-6">
-    <app-skeleton-box height="400px"></app-skeleton-box>
-    <app-skeleton-box height="200px"></app-skeleton-box>
-    <app-skeleton-box height="300px"></app-skeleton-box>
+<style>
+  @keyframes fade {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes toast-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(20px) scale(0.95); }
+  }
+
+  @keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes modalFadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+  }
+
+  @keyframes modalSlideOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-20px) scale(0.95); }
+  }
+
+  .animate-fade {
+    animation: fade 0.3s ease-out;
+  }
+
+  .toast-enter {
+    animation: toast-in 0.3s ease-out forwards;
+  }
+
+  .toast-leave {
+    animation: toast-out 0.3s ease-in forwards;
+  }
+
+  .buy-modal-backdrop {
+    animation: modalFadeIn 0.2s ease-out;
+  }
+
+  .buy-modal-backdrop.closing {
+    animation: modalFadeOut 0.2s ease-out;
+  }
+
+  .buy-modal-panel {
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .buy-modal-panel.closing {
+    animation: modalSlideOut 0.2s ease-out;
+  }
+</style>
+
+<div class="max-w-5xl mx-auto px-4 py-10 font-sans">
+
+  <!-- ================= LOADING SKELETON ================= -->
+  <div *ngIf="loading" class="space-y-8 animate-fade">
+    <app-skeleton-box height="500px" rounded="16px"></app-skeleton-box>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <app-skeleton-box height="120px" rounded="12px"></app-skeleton-box>
+      <app-skeleton-box height="120px" rounded="12px"></app-skeleton-box>
+    </div>
+    <app-skeleton-box height="300px" rounded="12px"></app-skeleton-box>
   </div>
 
-  <!-- GAME DETAILS -->
-  <div *ngIf="!loading && game" class="mt-10 rounded-xl shadow-lg overflow-hidden"
-    [ngClass]="isDarkMode ? 'bg-gray-800' : 'bg-white'">
-    <!-- IMAGE -->
-    <div class="h-64 md:h-80 relative"
-      [ngClass]="isDarkMode ? 'bg-gray-700' : 'bg-gray-200'">
-      <img *ngIf="game.imageUrl" [src]="game.imageUrl" class="w-full h-full object-cover" alt="{{ game.title }}" />
-      <div class="absolute top-4 right-4 bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-        {{ game.platform }}
+  <!-- ================= GAME DETAILS ================= -->
+  <div *ngIf="!loading && game" class="animate-fade">
+
+    <!-- IMAGE SECTION -->
+    <div class="relative aspect-[16/9] md:aspect-[21/9] bg-gray-100 rounded-2xl overflow-hidden mb-8 group">
+      <img 
+        *ngIf="game.imageUrl" 
+        [src]="game.imageUrl" 
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+        alt="{{ game.title }}" />
+      
+      <!-- Platform Badge -->
+      <div class="absolute top-4 right-4">
+        <span class="px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-semibold rounded-full">
+          {{ game.platform }}
+        </span>
       </div>
+
+      <!-- Gradient Overlay -->
+      <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/40 to-transparent"></div>
+    </div>
+
+    <!-- CONTENT SECTION -->
+    <div class="space-y-8">
+
+      <!-- HEADER -->
+      <div class="space-y-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <h1 class="text-4xl md:text-5xl font-semibold tracking-tight text-gray-900 mb-3">
+              {{ game.title }}
+            </h1>
+            <p class="text-base text-gray-600 leading-relaxed">
+              Experience immersive gameplay with stunning graphics and captivating storytelling.
+            </p>
+          </div>
+        </div>
+
+        <!-- PRICE & ACTIONS -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-gray-200">
+          <div>
+            <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Price</p>
+            <span class="text-3xl font-bold text-gray-900">
+              ₱{{ game.price | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="flex gap-3 w-full sm:w-auto">
+            <button 
+              (click)="addToCart(game)" 
+              class="flex-1 sm:flex-none px-6 py-3 border border-gray-900 text-gray-900 text-sm font-medium rounded-xl
+                     hover:bg-gray-900 hover:text-white transition-all duration-300 cursor-pointer">
+              Add to Cart
+            </button>
+
+            <button
+              (click)="openBuyConfirm()"
+              [disabled]="isBuyingNow"
+              class="flex-1 sm:flex-none px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-xl
+                     hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed
+                     transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
+              <svg *ngIf="isBuyingNow" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span>{{ isBuyingNow ? 'Processing...' : 'Buy Now' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div class="border-t border-gray-200"></div>
+
+      <!-- REVIEWS SECTION -->
+      <div class="space-y-6">
+        
+        <!-- Reviews Header -->
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-semibold tracking-tight text-gray-900">
+            Customer Reviews
+          </h2>
+          
+          <button 
+            *ngIf="!showReviews" 
+            (click)="showReviews = true" 
+            class="text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+            Show all reviews →
+          </button>
+        </div>
+
+        <!-- Reviews Content -->
+        <div *ngIf="showReviews" class="animate-fade">
+          <app-game-reviews 
+            [videoGameId]="gameId"
+            #reviews>
+          </app-game-reviews>
+        </div>
+
+        <!-- Login Prompt -->
+        <div *ngIf="!isLoggedIn && showReviews" 
+             class="p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
+          <p class="text-sm text-gray-600">
+            <a routerLink="/login" class="font-medium text-gray-900 hover:underline">Sign in</a> 
+            to leave a review
+          </p>
+        </div>
+
+        <!-- Purchase Required Prompt -->
+        <div *ngIf="isLoggedIn && !hasApprovedPurchase && showReviews" 
+             class="p-6 bg-gray-50 rounded-xl border border-gray-200 text-center">
+          <p class="text-sm text-gray-600">
+            Purchase this game to leave a review
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ================= NOT FOUND ================= -->
+  <div *ngIf="!loading && !game" class="text-center py-20 animate-fade">
+    <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <h3 class="text-lg font-medium text-gray-900 mb-1">Game not found</h3>
+    <p class="text-sm text-gray-500 mb-4">The game you're looking for doesn't exist.</p>
+    <a routerLink="/games" class="text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+      ← Back to store
+    </a>
+  </div>
+
+</div>
+
+<!-- ================= BUY CONFIRM MODAL ================= -->
+<div
+  *ngIf="showBuyConfirmModal"
+  class="buy-modal-backdrop fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  [class.closing]="isBuyConfirmClosing"
+  (click)="closeBuyConfirm()">
+
+  <div
+    class="buy-modal-panel bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+    [class.closing]="isBuyConfirmClosing"
+    (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-5">
+      <h3 class="text-xl font-semibold text-white">Confirm Purchase</h3>
     </div>
 
     <!-- CONTENT -->
-    <div class="p-6 md:p-8">
-      <h1 class="text-3xl font-bold mb-2"
-        [ngClass]="isDarkMode ? 'text-white' : 'text-gray-900'">{{ game.title }}</h1>
-      <p class="mb-4"
-        [ngClass]="isDarkMode ? 'text-gray-300' : 'text-gray-600'">Experience immersive gameplay and stunning graphics.</p>
+    <div class="p-6 space-y-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-2">
+          You're about to purchase:
+        </p>
+        <p class="text-lg font-semibold text-gray-900">
+          {{ game?.title }}
+        </p>
+        <p class="text-sm text-gray-500 mt-1">
+          {{ game?.platform }}
+        </p>
+      </div>
 
-      <div class="flex items-center justify-between mb-6">
-        <span class="text-2xl font-bold text-purple-600">₱{{ game.price | number:'1.2-2' }}</span>
-        <div class="flex gap-2">
-          <button (click)="addToCart(game)" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition cursor-pointer">
-            Add to Cart
-          </button>
-          <button (click)="buyNow(game)" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition">
-            Buy Now
-          </button>
+      <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div class="flex items-center justify-between">
+          <span class="text-sm text-gray-600">Total</span>
+          <span class="text-2xl font-bold text-gray-900">
+            ₱{{ game?.price | number:'1.2-2' }}
+          </span>
         </div>
       </div>
+    </div>
 
-      <!-- ================= SUCCESS TOAST ================= -->
-      <div
-        *ngIf="showSuccessModal"
-        class="fixed top-15 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none"
-      >
-        <div class="bg-white dark:bg-black shadow-xl border border-gray-300 dark:border-purple-500/40 rounded-2xl px-6 py-3 backdrop-blur-xl min-w-[260px]"
-             [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
-
-          <p class="text-gray-900 dark:text-white font-semibold text-sm flex items-center justify-center gap-2">
-            <svg class="w-5 h-5 text-blue-500 dark:text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            {{ successMessage }}
-          </p>
-
-        </div>
-      </div>
-
-      <!-- REVIEWS SECTION -->
-      <div *ngIf="showReviews">
-        <app-game-reviews 
-          [videoGameId]="gameId"
-          #reviews>
-        </app-game-reviews>
-      </div>
-
-      <button *ngIf="!showReviews" (click)="showReviews = true" class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition mt-4">
-        Show Reviews
+    <!-- FOOTER -->
+    <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t border-gray-200">
+      <button
+        type="button"
+        (click)="closeBuyConfirm()"
+        class="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700
+               hover:bg-gray-100 transition">
+        Cancel
       </button>
 
-      <!-- REVIEW FORM (IF LOGGED IN AND HAS APPROVED PURCHASE) -->
-      <app-review-form
-        *ngIf="isLoggedIn && hasApprovedPurchase"
-        [videoGameId]="gameId"
-        (reviewSubmitted) = "reviews?.load()">
-      </app-review-form>
+      <button
+        type="button"
+        (click)="confirmBuyNow()"
+        class="px-5 py-2.5 bg-gray-900 text-white rounded-xl text-sm font-medium
+               hover:bg-gray-800 transition">
+        Confirm Purchase
+      </button>
     </div>
-  </div>
 
-  <!-- NOT FOUND -->
-  <div *ngIf="!loading && !game" class="text-center py-12">
-    <p class="text-gray-500 text-lg">Game not found.</p>
+  </div>
+</div>
+
+<!-- ================= SUCCESS TOAST ================= -->
+<div
+  *ngIf="showSuccessModal"
+  class="fixed top-16 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+  
+  <div class="bg-white shadow-xl border border-gray-200 rounded-full px-6 py-3
+              backdrop-blur-xl min-w-[260px]"
+       [ngClass]="{ 'toast-enter': !isFadingOut, 'toast-leave': isFadingOut }">
+
+    <p class="text-gray-900 font-medium text-sm flex items-center justify-center gap-2">
+      <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      {{ successMessage }}
+    </p>
+
   </div>
 </div>

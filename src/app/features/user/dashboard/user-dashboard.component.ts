@@ -4,21 +4,28 @@ import {
   ElementRef,
   HostListener,
   OnDestroy,
+  OnInit,
   ViewChild,
   ViewEncapsulation,
   inject,
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   BestSeller,
   ReportsService,
 } from 'src/app/core/services/bestseller/reports.service';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { CartService } from 'src/app/core/services/cart.service';
+import { OrderService } from 'src/app/core/services/order.service';
+import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { VideoGameService } from 'src/app/core/services/videogame.service';
+import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
+import { VideoGame } from 'src/app/core/models/videogame.model';
+import { DigitalProduct } from 'src/app/core/models/digital-products/digital-product.model';
 
 type Particle = {
   x: number;
@@ -26,6 +33,16 @@ type Particle = {
   vx: number;
   vy: number;
   r: number;
+};
+
+type RecommendedItem = {
+  id: number;
+  type: 'game' | 'digital';
+  title: string;
+  subtitle: string;
+  price: number;
+  imageUrl: string;
+  route: string[];
 };
 
 @Component({
@@ -36,15 +53,28 @@ type Particle = {
   styleUrls: ['./user-dashboardd.css'],
   encapsulation: ViewEncapsulation.None,
 })
-export class UserDashboardComponent implements AfterViewInit, OnDestroy {
+export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('particleCanvas', { static: false })
   particleCanvas?: ElementRef<HTMLCanvasElement>;
 
-  cartCount = 0;
   isScrolled = false;
+  buyingGames = new Set<number>();
+  showBuyConfirmModal = false;
+  isBuyConfirmClosing = false;
+  pendingBuyGame: BestSeller | null = null;
+  recommendedItems: RecommendedItem[] = [];
+  activeRecommendedIndex = 0;
+  recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
+  private recommendedIntervalId?: number;
+  private isRecommendedHovered = false;
 
   private platformId = inject(PLATFORM_ID);
   private reportsService = inject(ReportsService);
+  private cartService = inject(CartService);
+  private orderService = inject(OrderService);
+  private router = inject(Router);
+  private videoGameService = inject(VideoGameService);
+  private digitalProductService = inject(DigitalProductService);
   private gsapContext?: gsap.Context;
   private navTrigger?: ScrollTrigger;
   private particles: Particle[] = [];
@@ -80,6 +110,10 @@ export class UserDashboardComponent implements AfterViewInit, OnDestroy {
     })
   );
 
+  ngOnInit(): void {
+    this.loadRecommendedItems();
+  }
+
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
@@ -111,12 +145,194 @@ export class UserDashboardComponent implements AfterViewInit, OnDestroy {
     if (this.refreshTimeoutId) {
       clearTimeout(this.refreshTimeoutId);
     }
+    if (this.recommendedIntervalId) {
+      clearInterval(this.recommendedIntervalId);
+    }
     
     this.removeScrollListeners();
   }
 
-  onAddToCart(): void {
-    this.cartCount++;
+  get recommendedLoopItems(): RecommendedItem[] {
+    if (!this.recommendedItems.length) return [];
+    return [...this.recommendedItems, ...this.recommendedItems];
+  }
+
+  get recommendedTrackTransform(): string {
+    return `translateX(-${this.activeRecommendedIndex * 100}%)`;
+  }
+
+  onRecommendedMouseEnter(): void {
+    this.isRecommendedHovered = true;
+  }
+
+  onRecommendedMouseLeave(): void {
+    this.isRecommendedHovered = false;
+  }
+
+  onRecommendedTransitionEnd(): void {
+    const total = this.recommendedItems.length;
+    if (!total) return;
+
+    // Jump back to first real slide after reaching duplicated first slide.
+    if (this.activeRecommendedIndex >= total) {
+      this.recommendedTrackTransition = 'none';
+      this.activeRecommendedIndex = 0;
+      requestAnimationFrame(() => {
+        this.recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
+      });
+    }
+  }
+
+  openBuyConfirm(game: BestSeller, event?: MouseEvent): void {
+    event?.stopPropagation();
+    const gameId = game.videoGameId;
+    if (!gameId || this.buyingGames.has(gameId)) return;
+
+    this.pendingBuyGame = game;
+    this.isBuyConfirmClosing = false;
+    this.showBuyConfirmModal = true;
+  }
+
+  closeBuyConfirm(): void {
+    this.isBuyConfirmClosing = true;
+    setTimeout(() => {
+      this.showBuyConfirmModal = false;
+      this.isBuyConfirmClosing = false;
+      this.pendingBuyGame = null;
+    }, 180);
+  }
+
+  confirmBuyNow(): void {
+    if (!this.pendingBuyGame) return;
+    const game = this.pendingBuyGame;
+    this.closeBuyConfirm();
+    this.buyNow(game);
+  }
+
+  buyNow(game: BestSeller, event?: MouseEvent): void {
+    event?.stopPropagation();
+
+    const gameId = game.videoGameId;
+    if (!gameId || this.buyingGames.has(gameId)) return;
+
+    this.buyingGames.add(gameId);
+
+    this.cartService.addToCart(gameId, 1).subscribe({
+      next: () => {
+        this.cartService.getCart().subscribe({
+          next: (cart) => {
+            const latestCartItem = [...(cart.items ?? [])]
+              .filter(i => i.videoGameId === gameId)
+              .sort((a, b) => b.cartItemId - a.cartItemId)[0];
+
+            const cartItemId = latestCartItem?.cartItemId;
+            if (!cartItemId) {
+              this.buyingGames.delete(gameId);
+              return;
+            }
+
+            this.orderService.checkout([cartItemId]).subscribe({
+              next: () => {
+                this.buyingGames.delete(gameId);
+                this.router.navigate(['/orders']);
+              },
+              error: () => {
+                this.buyingGames.delete(gameId);
+              }
+            });
+          },
+          error: () => {
+            this.buyingGames.delete(gameId);
+          }
+        });
+      },
+      error: () => {
+        this.buyingGames.delete(gameId);
+      }
+    });
+  }
+
+  private loadRecommendedItems(): void {
+    forkJoin({
+      games: this.videoGameService.getAll(),
+      digitalProducts: this.digitalProductService.getActiveProducts()
+    }).subscribe({
+      next: ({ games, digitalProducts }) => {
+        const gameRecommendations = this.shuffleArray((games ?? [])
+          .filter(g => !!g.id)
+        )
+          .slice(0, 2)
+          .map(g => this.mapGameToRecommended(g));
+
+        const digitalRecommendations = this.shuffleArray((digitalProducts ?? [])
+          .filter(p => p.id > 0)
+        )
+          .slice(0, 2)
+          .map(p => this.mapDigitalToRecommended(p));
+
+        this.recommendedItems = this.shuffleArray(
+          [...gameRecommendations, ...digitalRecommendations]
+        ).slice(0, 4);
+        this.activeRecommendedIndex = 0;
+        this.startRecommendedAutoCycle();
+      },
+      error: () => {
+        this.recommendedItems = [];
+      }
+    });
+  }
+
+  private mapGameToRecommended(game: VideoGame): RecommendedItem {
+    return {
+      id: game.id ?? 0,
+      type: 'game',
+      title: game.title,
+      subtitle: game.platform || 'Video Game',
+      price: game.price,
+      imageUrl: game.imageUrl || 'assets/no-image.png',
+      route: ['/games', String(game.id)]
+    };
+  }
+
+  private mapDigitalToRecommended(product: DigitalProduct): RecommendedItem {
+    return {
+      id: product.id,
+      type: 'digital',
+      title: product.name,
+      subtitle: product.brand || product.platform || 'Digital Product',
+      price: product.price,
+      imageUrl: product.imagePath || 'assets/no-image.png',
+      route: ['/digital-products']
+    };
+  }
+
+  private shuffleArray<T>(items: T[]): T[] {
+    const shuffled = [...items];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }
+
+  private startRecommendedAutoCycle(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.recommendedItems.length <= 1) {
+      if (this.recommendedIntervalId) {
+        clearInterval(this.recommendedIntervalId);
+        this.recommendedIntervalId = undefined;
+      }
+      return;
+    }
+    if (this.recommendedIntervalId) {
+      clearInterval(this.recommendedIntervalId);
+    }
+
+    // Pause -> slide -> pause rhythm.
+    this.recommendedIntervalId = window.setInterval(() => {
+      if (this.isRecommendedHovered) return;
+      this.activeRecommendedIndex += 1;
+    }, 3800);
   }
 
   @HostListener('window:scroll')

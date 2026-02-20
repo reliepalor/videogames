@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewEncapsulation, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { UserOrdersService, UserOrder, UserOrderItem } from 'src/app/core/services/user-orders.service';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
 import { DigitalOrder } from 'src/app/core/models/digital-orders/digital-order.model';
@@ -8,12 +9,11 @@ import { ReviewService } from '../../../core/services/review.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, Subscription } from 'rxjs';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component';
 
 @Component({
   standalone: true,
   selector: 'app-user-orders',
-  imports: [CommonModule, FormsModule, SkeletonBoxComponent],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './user-orders.html',
   styleUrls: ['./user-orders.css'],
   encapsulation: ViewEncapsulation.None,
@@ -25,6 +25,7 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private reviewService = inject(ReviewService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   orders: UserOrder[] = [];
   digitalOrders: DigitalOrder[] = [];
@@ -256,7 +257,13 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   }
 
   startReview(item: UserOrderItem) {
-    this.reviewingItem = item;
+    const gameId = item.videoGameId;
+    if (!gameId) {
+      this.errorMsg = 'Game review page is unavailable for this item.';
+      return;
+    }
+
+    this.router.navigate(['/games', gameId, 'reviews']);
   }
 
   onReviewSubmitted() {

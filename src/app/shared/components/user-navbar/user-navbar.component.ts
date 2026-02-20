@@ -117,6 +117,11 @@ export class UserNavbarComponent implements OnInit, OnDestroy {
       .slice(0, 2);
   }
 
+  /* ===================== NAVIGATION HELPERS ===================== */
+  isActive(path: string): boolean {
+    return this.router.url === path;
+  }
+
   /* ===================== CLICK OUTSIDE ===================== */
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {

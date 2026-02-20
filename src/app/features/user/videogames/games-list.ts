@@ -6,8 +6,8 @@ import { VideoGameService } from '../../../core/services/videogame.service'
 import { CartService } from '../../../core/services/cart.service'
 import { ThemeService } from '../../../core/services/theme.service'
 import { VideoGame } from '../../../core/models/videogame.model'
-import { SkeletonBoxComponent } from '../../../shared/skeleton/skeleton-box.component'
 import { environment } from 'src/environments/environment';
+import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component'
 import {
   Observable,
   filter,
@@ -28,6 +28,7 @@ import { takeUntil, finalize, catchError } from 'rxjs/operators';
   selector: 'app-games-list',
   imports: [CommonModule, RouterModule, SkeletonBoxComponent, FormsModule],
   templateUrl: './games-list.html',
+  styleUrls: ['./games-list.css'],
   encapsulation: ViewEncapsulation.None,
 })
 export class GamesListComponent implements OnInit, OnDestroy {
