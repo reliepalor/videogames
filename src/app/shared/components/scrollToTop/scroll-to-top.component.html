@@ -1,0 +1,32 @@
+<button
+  (click)="scrollToTop()"
+  class="
+    scroll-btn
+    fixed bottom-8 right-8
+    w-14 h-14
+    flex items-center justify-center
+    rounded-full
+    backdrop-blur-md
+    bg-white/10
+   
+    shadow-lg
+    transition-all duration-300 ease-in-out
+    group cursor-pointer border border-gray-100
+  "
+  [class.show]="isVisible"
+>
+  <!-- Arrow Icon -->
+  <svg xmlns="http://www.w3.org/2000/svg"
+       class="w-6 h-6 text-gray-800 transition-transform duration-300 group-hover:-translate-y-1"
+       fill="none"
+       viewBox="0 0 24 24"
+       stroke="currentColor">
+    <path stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M5 15l7-7 7 7"/>
+  </svg>
+
+  <!-- Glow Effect -->
+  <span class="absolute inset-0 rounded-full glow"></span>
+</button>

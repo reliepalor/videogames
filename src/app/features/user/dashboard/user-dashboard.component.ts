@@ -1,19 +1,14 @@
 import {
   AfterViewInit,
   Component,
-  ElementRef,
   HostListener,
   OnDestroy,
   OnInit,
-  ViewChild,
-  ViewEncapsulation,
   inject,
   PLATFORM_ID,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
   BestSeller,
   ReportsService,
@@ -26,14 +21,7 @@ import { VideoGameService } from 'src/app/core/services/videogame.service';
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { VideoGame } from 'src/app/core/models/videogame.model';
 import { DigitalProduct } from 'src/app/core/models/digital-products/digital-product.model';
-
-type Particle = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  r: number;
-};
+import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
 
 type RecommendedItem = {
   id: number;
@@ -48,26 +36,42 @@ type RecommendedItem = {
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ScrollToTopComponent],
   templateUrl: './user-dashboard.html',
-  styleUrls: ['./user-dashboardd.css'],
-  encapsulation: ViewEncapsulation.None,
+  styleUrls: ['./user-dashboard.css'],
 })
 export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('particleCanvas', { static: false })
-  particleCanvas?: ElementRef<HTMLCanvasElement>;
-
-  isScrolled = false;
+  
+  // ============================================
+  // STATE
+  // ============================================
+  
   buyingGames = new Set<number>();
   showBuyConfirmModal = false;
   isBuyConfirmClosing = false;
   pendingBuyGame: BestSeller | null = null;
+  
   recommendedItems: RecommendedItem[] = [];
   activeRecommendedIndex = 0;
   recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-  private recommendedIntervalId?: number;
+  
   private isRecommendedHovered = false;
+  private recommendedIntervalId?: number;
+  private scrollObserver?: IntersectionObserver;
+  private observeRetryTimeoutId?: number;
+  private bestSellerScrollEl?: HTMLElement;
+  private bestSellerLeftBtn?: HTMLButtonElement;
+  private bestSellerRightBtn?: HTMLButtonElement;
+  private bestSellerScrollHandler?: () => void;
+  private bestSellerLeftClickHandler?: () => void;
+  private bestSellerRightClickHandler?: () => void;
+  
+  apiUrl = environment.apiUrl;
 
+  // ============================================
+  // SERVICES
+  // ============================================
+  
   private platformId = inject(PLATFORM_ID);
   private reportsService = inject(ReportsService);
   private cartService = inject(CartService);
@@ -75,41 +79,32 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   private router = inject(Router);
   private videoGameService = inject(VideoGameService);
   private digitalProductService = inject(DigitalProductService);
-  private gsapContext?: gsap.Context;
-  private navTrigger?: ScrollTrigger;
-  private particles: Particle[] = [];
-  private particleCtx?: CanvasRenderingContext2D;
-  private animationFrameId?: number;
-  private refreshTimeoutId?: number;
-  private productsScroll?: HTMLElement;
-  private isDragging = false;
-  private startX = 0;
-  private scrollLeft = 0;
-  private scrollY = 0;
-  
-  apiUrl = environment.apiUrl;
 
+  // ============================================
+  // OBSERVABLES
+  // ============================================
+  
   bestSellers$: Observable<Array<BestSeller & { percent: number }> | null> =
     this.reportsService.getBestSellers().pipe(
-    map((sales) => {
-      if (!sales || sales.length === 0) return null;
-      const total = sales.reduce((sum, item) => sum + item.totalRevenue, 0);
-      return [...sales]
-        .sort((a, b) => b.totalRevenue - a.totalRevenue)
-        .slice(0, 6)
-        .map((item) => ({
-          ...item,
-          percent: total ? parseFloat(((item.totalRevenue / total) * 100).toFixed(1)) : 0,
-        }));
-    }),
-    catchError(() => of(null)),
-    tap(() => {
-      if (isPlatformBrowser(this.platformId)) {
-        this.deferVisualRefresh();
-      }
-    })
-  );
+      map((sales) => {
+        if (!sales || sales.length === 0) return null;
+        const total = sales.reduce((sum, item) => sum + item.totalRevenue, 0);
+        return [...sales]
+          .sort((a, b) => b.totalRevenue - a.totalRevenue)
+          .slice(0, 6)
+          .map((item) => ({
+            ...item,
+            percent: total ? parseFloat(((item.totalRevenue / total) * 100).toFixed(1)) : 0,
+          }));
+      }),
+      catchError(() => of(null)),
+      tap(() => this.scheduleObserveAnimations())
+    );
 
+  // ============================================
+  // LIFECYCLE HOOKS
+  // ============================================
+  
   ngOnInit(): void {
     this.loadRecommendedItems();
   }
@@ -119,16 +114,14 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    gsap.registerPlugin(ScrollTrigger);
-
-    this.setupNavTrigger();
-    this.setupAnimations();
-    this.setupParticles();
+    // Setup scroll animations
+    this.setupScrollAnimations();
+    
+    // Setup carousel controls
+    this.setupCarouselControls();
+    
+    // Update scroll progress
     this.updateScrollProgress();
-    this.setupHorizontalScroll();
-    this.setupAdvancedHeroAnimations();
-    this.addInteractiveEffects();
-    this.deferVisualRefresh();
   }
 
   ngOnDestroy(): void {
@@ -136,22 +129,168 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       return;
     }
 
-    this.navTrigger?.kill();
-    this.gsapContext?.revert();
-
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
-    if (this.refreshTimeoutId) {
-      clearTimeout(this.refreshTimeoutId);
-    }
+    // Clear intervals
     if (this.recommendedIntervalId) {
       clearInterval(this.recommendedIntervalId);
     }
-    
-    this.removeScrollListeners();
+
+    // Disconnect observer
+    if (this.scrollObserver) {
+      this.scrollObserver.disconnect();
+    }
+    if (this.observeRetryTimeoutId) {
+      clearTimeout(this.observeRetryTimeoutId);
+    }
+
+    // Remove carousel event listeners
+    this.cleanupBestSellerControls();
   }
 
+  // ============================================
+  // SCROLL ANIMATIONS
+  // ============================================
+  
+  private setupScrollAnimations(): void {
+    const observerOptions: IntersectionObserverInit = {
+      root: null,
+      rootMargin: '0px 0px -100px 0px',
+      threshold: 0.1
+    };
+
+    this.scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    this.observeAnimatedElements();
+  }
+
+  private observeAnimatedElements(): void {
+    if (!this.scrollObserver) return;
+
+    const animatedElements = document.querySelectorAll('.scroll-fade-in, .product-card');
+    animatedElements.forEach((el) => {
+      // Skip already-revealed elements and avoid duplicate observe calls.
+      if (!el.classList.contains('visible')) {
+        this.scrollObserver!.observe(el);
+      }
+    });
+  }
+
+  private scheduleObserveAnimations(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    requestAnimationFrame(() => {
+      this.observeAnimatedElements();
+      this.initOrRefreshBestSellerControls();
+      this.forceCriticalSectionsVisible();
+    });
+
+    if (this.observeRetryTimeoutId) {
+      clearTimeout(this.observeRetryTimeoutId);
+    }
+    // Some async templates render slightly after the first frame.
+    this.observeRetryTimeoutId = window.setTimeout(() => {
+      this.observeAnimatedElements();
+      this.initOrRefreshBestSellerControls();
+      this.forceCriticalSectionsVisible();
+    }, 80);
+  }
+
+  private forceCriticalSectionsVisible(): void {
+    const criticalBlocks = document.querySelectorAll(
+      '#featured .scroll-fade-in, #products .scroll-fade-in'
+    );
+    criticalBlocks.forEach((el) => el.classList.add('visible'));
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.updateScrollProgress();
+    }
+  }
+
+  private updateScrollProgress(): void {
+    const progressBar = document.getElementById('scroll-progress');
+    if (!progressBar) return;
+
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
+    progressBar.style.width = `${progress * 100}%`;
+  }
+
+  // ============================================
+  // CAROUSEL CONTROLS
+  // ============================================
+  
+  private setupCarouselControls(): void {
+    this.initOrRefreshBestSellerControls();
+  }
+
+  private initOrRefreshBestSellerControls(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const productsScroll = document.getElementById('products-scroll') as HTMLElement | null;
+    const scrollLeftBtn = document.getElementById('products-scroll-left') as HTMLButtonElement | null;
+    const scrollRightBtn = document.getElementById('products-scroll-right') as HTMLButtonElement | null;
+    if (!productsScroll || !scrollLeftBtn || !scrollRightBtn) return;
+
+    this.cleanupBestSellerControls();
+
+    this.bestSellerScrollEl = productsScroll;
+    this.bestSellerLeftBtn = scrollLeftBtn;
+    this.bestSellerRightBtn = scrollRightBtn;
+
+    const scrollStep = Math.max(260, Math.floor(productsScroll.clientWidth * 0.82));
+    this.bestSellerLeftClickHandler = () => {
+      productsScroll.scrollBy({ left: -scrollStep, behavior: 'smooth' });
+    };
+    this.bestSellerRightClickHandler = () => {
+      productsScroll.scrollBy({ left: scrollStep, behavior: 'smooth' });
+    };
+    this.bestSellerScrollHandler = () => {
+      const atStart = productsScroll.scrollLeft <= 1;
+      const atEnd = productsScroll.scrollLeft + productsScroll.clientWidth >= productsScroll.scrollWidth - 1;
+      scrollLeftBtn.disabled = atStart;
+      scrollRightBtn.disabled = atEnd;
+    };
+
+    scrollLeftBtn.addEventListener('click', this.bestSellerLeftClickHandler);
+    scrollRightBtn.addEventListener('click', this.bestSellerRightClickHandler);
+    productsScroll.addEventListener('scroll', this.bestSellerScrollHandler);
+
+    requestAnimationFrame(() => {
+      this.bestSellerScrollHandler?.();
+    });
+  }
+
+  private cleanupBestSellerControls(): void {
+    if (this.bestSellerLeftBtn && this.bestSellerLeftClickHandler) {
+      this.bestSellerLeftBtn.removeEventListener('click', this.bestSellerLeftClickHandler);
+    }
+    if (this.bestSellerRightBtn && this.bestSellerRightClickHandler) {
+      this.bestSellerRightBtn.removeEventListener('click', this.bestSellerRightClickHandler);
+    }
+    if (this.bestSellerScrollEl && this.bestSellerScrollHandler) {
+      this.bestSellerScrollEl.removeEventListener('scroll', this.bestSellerScrollHandler);
+    }
+
+    this.bestSellerScrollEl = undefined;
+    this.bestSellerLeftBtn = undefined;
+    this.bestSellerRightBtn = undefined;
+    this.bestSellerScrollHandler = undefined;
+    this.bestSellerLeftClickHandler = undefined;
+    this.bestSellerRightClickHandler = undefined;
+  }
+
+  // ============================================
+  // FEATURED SLIDER
+  // ============================================
+  
   get recommendedLoopItems(): RecommendedItem[] {
     if (!this.recommendedItems.length) return [];
     return [...this.recommendedItems, ...this.recommendedItems];
@@ -169,11 +308,32 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     this.isRecommendedHovered = false;
   }
 
+  onRecommendedPrev(): void {
+    const total = this.recommendedItems.length;
+    if (total <= 1) return;
+
+    if (this.activeRecommendedIndex === 0) {
+      this.recommendedTrackTransition = 'none';
+      this.activeRecommendedIndex = total;
+      requestAnimationFrame(() => {
+        this.recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
+        this.activeRecommendedIndex = total - 1;
+      });
+      return;
+    }
+
+    this.activeRecommendedIndex -= 1;
+  }
+
+  onRecommendedNext(): void {
+    if (this.recommendedItems.length <= 1) return;
+    this.activeRecommendedIndex += 1;
+  }
+
   onRecommendedTransitionEnd(): void {
     const total = this.recommendedItems.length;
     if (!total) return;
 
-    // Jump back to first real slide after reaching duplicated first slide.
     if (this.activeRecommendedIndex >= total) {
       this.recommendedTrackTransition = 'none';
       this.activeRecommendedIndex = 0;
@@ -183,6 +343,61 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     }
   }
 
+  private loadRecommendedItems(): void {
+    forkJoin({
+      games: this.videoGameService.getAll().pipe(
+        catchError(() => of([] as VideoGame[]))
+      ),
+      digitalProducts: this.digitalProductService.getActiveProducts().pipe(
+        catchError(() => of([] as DigitalProduct[]))
+      )
+    }).subscribe({
+      next: ({ games, digitalProducts }) => {
+        const gameRecommendations = this.shuffleArray((games ?? [])
+          .filter(g => !!g.id)
+        )
+          .map(g => this.mapGameToRecommended(g));
+
+        const digitalRecommendations = this.shuffleArray((digitalProducts ?? [])
+          .filter(p => p.id > 0)
+        )
+          .map(p => this.mapDigitalToRecommended(p));
+
+        this.recommendedItems = this.buildAlternatingRecommendations(
+          gameRecommendations,
+          digitalRecommendations,
+          4
+        );
+        
+        this.activeRecommendedIndex = 0;
+        this.startRecommendedAutoCycle();
+        this.scheduleObserveAnimations();
+      },
+      error: () => {
+        this.recommendedItems = [];
+        this.scheduleObserveAnimations();
+      }
+    });
+  }
+
+  private startRecommendedAutoCycle(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.recommendedItems.length <= 1) return;
+
+    if (this.recommendedIntervalId) {
+      clearInterval(this.recommendedIntervalId);
+    }
+
+    this.recommendedIntervalId = window.setInterval(() => {
+      if (this.isRecommendedHovered) return;
+      this.activeRecommendedIndex += 1;
+    }, 3800);
+  }
+
+  // ============================================
+  // BUY MODAL
+  // ============================================
+  
   openBuyConfirm(game: BestSeller, event?: MouseEvent): void {
     event?.stopPropagation();
     const gameId = game.videoGameId;
@@ -252,36 +467,10 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     });
   }
 
-  private loadRecommendedItems(): void {
-    forkJoin({
-      games: this.videoGameService.getAll(),
-      digitalProducts: this.digitalProductService.getActiveProducts()
-    }).subscribe({
-      next: ({ games, digitalProducts }) => {
-        const gameRecommendations = this.shuffleArray((games ?? [])
-          .filter(g => !!g.id)
-        )
-          .slice(0, 2)
-          .map(g => this.mapGameToRecommended(g));
-
-        const digitalRecommendations = this.shuffleArray((digitalProducts ?? [])
-          .filter(p => p.id > 0)
-        )
-          .slice(0, 2)
-          .map(p => this.mapDigitalToRecommended(p));
-
-        this.recommendedItems = this.shuffleArray(
-          [...gameRecommendations, ...digitalRecommendations]
-        ).slice(0, 4);
-        this.activeRecommendedIndex = 0;
-        this.startRecommendedAutoCycle();
-      },
-      error: () => {
-        this.recommendedItems = [];
-      }
-    });
-  }
-
+  // ============================================
+  // UTILITY METHODS
+  // ============================================
+  
   private mapGameToRecommended(game: VideoGame): RecommendedItem {
     return {
       id: game.id ?? 0,
@@ -289,7 +478,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       title: game.title,
       subtitle: game.platform || 'Video Game',
       price: game.price,
-      imageUrl: game.imageUrl || 'assets/no-image.png',
+      imageUrl: this.getRecommendedImageUrl(game.imageUrl),
       route: ['/games', String(game.id)]
     };
   }
@@ -301,9 +490,50 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       title: product.name,
       subtitle: product.brand || product.platform || 'Digital Product',
       price: product.price,
-      imageUrl: product.imagePath || 'assets/no-image.png',
+      imageUrl: this.getRecommendedImageUrl(product.imagePath),
       route: ['/digital-products']
     };
+  }
+
+  private cyclePick<T>(items: T[], index: number): T | null {
+    if (!items.length) return null;
+    return items[index % items.length] ?? null;
+  }
+
+  private buildAlternatingRecommendations(
+    games: RecommendedItem[],
+    digitalProducts: RecommendedItem[],
+    targetPairs = 4
+  ): RecommendedItem[] {
+    const sequence: RecommendedItem[] = [];
+
+    for (let i = 0; i < targetPairs; i++) {
+      const game = this.cyclePick(games, i);
+      const digital = this.cyclePick(digitalProducts, i);
+      const first = game ?? digital;
+      const second = digital ?? game;
+      if (first) sequence.push(first);
+      if (second) sequence.push(second);
+    }
+
+    return sequence;
+  }
+
+  private getRecommendedImageUrl(imagePath?: string | null): string {
+    const path = imagePath?.trim();
+    if (!path) return '/assets/images/games.png';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('/assets/')) return path;
+    if (path.startsWith('assets/')) return `/${path}`;
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    return `${this.apiUrl}${normalized}`;
+  }
+
+  onRecommendedImageError(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (!image) return;
+    if (image.src.endsWith('/assets/images/games.png')) return;
+    image.src = '/assets/images/games.png';
   }
 
   private shuffleArray<T>(items: T[]): T[] {
@@ -313,451 +543,6 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  }
-
-  private startRecommendedAutoCycle(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.recommendedItems.length <= 1) {
-      if (this.recommendedIntervalId) {
-        clearInterval(this.recommendedIntervalId);
-        this.recommendedIntervalId = undefined;
-      }
-      return;
-    }
-    if (this.recommendedIntervalId) {
-      clearInterval(this.recommendedIntervalId);
-    }
-
-    // Pause -> slide -> pause rhythm.
-    this.recommendedIntervalId = window.setInterval(() => {
-      if (this.isRecommendedHovered) return;
-      this.activeRecommendedIndex += 1;
-    }, 3800);
-  }
-
-  @HostListener('window:scroll')
-  onScroll(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.scrollY = window.scrollY;
-      this.updateScrollProgress();
-      this.applyParallaxEffect();
-    }
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      this.resizeCanvas();
-    }
-  }
-
-  private setupNavTrigger(): void {
-    const nav = document.getElementById('navbar');
-    if (!nav) return;
-
-    this.navTrigger = ScrollTrigger.create({
-      start: 'top -80',
-      onEnter: () => nav.classList.add('nav-solid'),
-      onLeaveBack: () => nav.classList.remove('nav-solid'),
-    });
-  }
-
-  private setupAnimations(): void {
-    this.gsapContext = gsap.context(() => {
-      // Original hero text animation (if using old hero)
-      const heroTextOld = document.querySelector('#heroText.old-hero');
-      if (heroTextOld) {
-        gsap.from('#heroText.old-hero span', {
-          opacity: 0,
-          y: 40,
-          rotateX: -90,
-          stagger: 0.08,
-          duration: 1.2,
-          ease: 'expo.out',
-        });
-      }
-
-      // Animate product cards on scroll into view
-      gsap.utils.toArray<HTMLElement>('.product-card').forEach((card, index) => {
-        gsap.fromTo(
-          card,
-          { 
-            opacity: 0,
-            y: 60,
-            scale: 0.9,
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 0.8,
-            delay: index * 0.1,
-            ease: 'power3.out',
-            scrollTrigger: {
-              trigger: '#products',
-              start: 'top 70%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      });
-    });
-  }
-
-  private updateScrollProgress(): void {
-    const progressBar = document.getElementById('scroll-progress');
-    if (!progressBar) return;
-
-    this.isScrolled = window.scrollY > 16;
-    const maxScroll = document.body.scrollHeight - innerHeight;
-    const progress = maxScroll > 0 ? window.scrollY / maxScroll : 0;
-    gsap.to(progressBar, { width: `${progress * 100}%`, duration: 0.1 });
-  }
-
-  private setupParticles(): void {
-    const canvas = this.particleCanvas?.nativeElement;
-    if (!canvas) return;
-
-    this.particleCtx = canvas.getContext('2d') ?? undefined;
-    if (!this.particleCtx) return;
-
-    this.resizeCanvas();
-
-    if (this.particles.length === 0) {
-      // Create particles with varied properties
-      this.particles = Array.from({ length: 50 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.5,
-        vy: (Math.random() - 0.5) * 0.5,
-        r: Math.random() * 2 + 0.5,
-      }));
-    }
-
-    if (!this.animationFrameId) {
-      this.animateParticles();
-    }
-  }
-
-  private resizeCanvas(): void {
-    const canvas = this.particleCanvas?.nativeElement;
-    if (!canvas) return;
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = window.innerWidth * dpr;
-    canvas.height = window.innerHeight * dpr;
-    canvas.style.width = `${window.innerWidth}px`;
-    canvas.style.height = `${window.innerHeight}px`;
-
-    if (this.particleCtx) {
-      this.particleCtx.scale(dpr, dpr);
-    }
-  }
-
-  private animateParticles(): void {
-    const ctx = this.particleCtx;
-    const canvas = this.particleCanvas?.nativeElement;
-    if (!ctx || !canvas) return;
-
-    const width = canvas.width / (window.devicePixelRatio || 1);
-    const height = canvas.height / (window.devicePixelRatio || 1);
-
-    ctx.clearRect(0, 0, width, height);
-
-    // Draw particles with glow effect
-    for (const p of this.particles) {
-      p.x += p.vx;
-      p.y += p.vy;
-
-      // Bounce off edges
-      if (p.x < 0 || p.x > width) p.vx *= -1;
-      if (p.y < 0 || p.y > height) p.vy *= -1;
-
-      // Draw particle with subtle glow
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      
-      // Gradient for glow effect
-      const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 3);
-      gradient.addColorStop(0, 'rgba(167, 139, 250, 0.8)');
-      gradient.addColorStop(0.5, 'rgba(167, 139, 250, 0.3)');
-      gradient.addColorStop(1, 'rgba(167, 139, 250, 0)');
-      
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      // Core particle
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * 0.5, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.fill();
-    }
-
-    // Draw connections between nearby particles
-    for (let i = 0; i < this.particles.length; i++) {
-      for (let j = i + 1; j < this.particles.length; j++) {
-        const dx = this.particles[i].x - this.particles[j].x;
-        const dy = this.particles[i].y - this.particles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < 150) {
-          ctx.beginPath();
-          ctx.moveTo(this.particles[i].x, this.particles[i].y);
-          ctx.lineTo(this.particles[j].x, this.particles[j].y);
-          ctx.strokeStyle = `rgba(167, 139, 250, ${0.15 * (1 - distance / 150)})`;
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
-      }
-    }
-
-    this.animationFrameId = requestAnimationFrame(() => this.animateParticles());
-  }
-
-  private applyParallaxEffect(): void {
-    const canvas = this.particleCanvas?.nativeElement;
-    if (!canvas) return;
-
-    // Subtle parallax - canvas moves slower than scroll
-    const offset = this.scrollY * 0.3;
-    canvas.style.transform = `translateY(${offset}px)`;
-  }
-
-  private setupAdvancedHeroAnimations(): void {
-    this.gsapContext?.add(() => {
-      // Eyebrow line animation
-      gsap.from('.eyebrow-line', {
-        width: 0,
-        duration: 0.8,
-        ease: 'power2.out',
-        delay: 0.1,
-      });
-
-      // CTA buttons
-      gsap.from('button', {
-        opacity: 0,
-        y: 20,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: 'power2.out',
-        delay: 0.8,
-      });
-
-      // Trust indicators with class
-      const trustIndicators = document.querySelectorAll('.flex.items-center.gap-2');
-      trustIndicators.forEach((el) => {
-        el.classList.add('trust-indicator');
-      });
-
-      // Stats container
-      const statsContainer = document.querySelector('.grid.grid-cols-2');
-      if (statsContainer) {
-        statsContainer.classList.add('stats-container');
-        
-        // Add stat-item class to children
-        const statItems = statsContainer.querySelectorAll(':scope > div');
-        statItems.forEach((item) => {
-          item.classList.add('stat-item');
-        });
-      }
-    });
-  }
-
-  private addInteractiveEffects(): void {
-    // Add magnetic effect to buttons
-    const buttons = document.querySelectorAll<HTMLElement>('button');
-    
-    buttons.forEach((button) => {
-      button.addEventListener('mousemove', (e: MouseEvent) => {
-        const rect = button.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-
-        gsap.to(button, {
-          x: x * 0.2,
-          y: y * 0.2,
-          duration: 0.3,
-          ease: 'power2.out',
-        });
-      });
-
-      button.addEventListener('mouseleave', () => {
-        gsap.to(button, {
-          x: 0,
-          y: 0,
-          duration: 0.5,
-          ease: 'elastic.out(1, 0.5)',
-        });
-      });
-    });
-
-    // Add 3D tilt to product cards in hero
-    const heroCards = document.querySelectorAll<HTMLElement>('[id^="productCard"]');
-    
-    heroCards.forEach((card) => {
-      card.addEventListener('mousemove', (e: MouseEvent) => {
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        
-        const rotateX = (y - centerY) / 10;
-        const rotateY = (centerX - x) / 10;
-
-        gsap.to(card, {
-          rotateX: rotateX,
-          rotateY: rotateY,
-          duration: 0.3,
-          ease: 'power2.out',
-          transformPerspective: 1000,
-        });
-      });
-
-      card.addEventListener('mouseleave', () => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          duration: 0.5,
-          ease: 'elastic.out(1, 0.5)',
-        });
-      });
-    });
-
-    // Cursor-following glow effect
-    this.addCursorGlow();
-  }
-
-  private addCursorGlow(): void {
-    const heroSection = document.querySelector<HTMLElement>('section');
-    if (!heroSection) return;
-
-    let glowElement = document.createElement('div');
-    glowElement.className = 'cursor-glow';
-    glowElement.style.cssText = `
-      position: absolute;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(167, 139, 250, 0.15) 0%, transparent 70%);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    `;
-
-    heroSection.style.position = 'relative';
-    heroSection.insertBefore(glowElement, heroSection.firstChild);
-
-    heroSection.addEventListener('mousemove', (e: MouseEvent) => {
-      const rect = heroSection.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      glowElement.style.left = `${x}px`;
-      glowElement.style.top = `${y}px`;
-      glowElement.style.opacity = '1';
-    });
-
-    heroSection.addEventListener('mouseleave', () => {
-      glowElement.style.opacity = '0';
-    });
-  }
-
-  private setupHorizontalScroll(): void {
-    this.productsScroll = document.getElementById('products-scroll') ?? undefined;
-    const scrollLeftBtn = document.getElementById('scroll-left');
-    const scrollRightBtn = document.getElementById('scroll-right');
-
-    if (!this.productsScroll) return;
-
-    // Scroll button controls
-    scrollLeftBtn?.addEventListener('click', () => this.scrollProducts(-400));
-    scrollRightBtn?.addEventListener('click', () => this.scrollProducts(400));
-
-    // Mouse drag to scroll
-    this.productsScroll.addEventListener('mousedown', this.handleMouseDown.bind(this));
-    this.productsScroll.addEventListener('mouseleave', this.handleMouseLeave.bind(this));
-    this.productsScroll.addEventListener('mouseup', this.handleMouseUp.bind(this));
-    this.productsScroll.addEventListener('mousemove', this.handleMouseMove.bind(this));
-
-    // Prevent card click when dragging
-    this.productsScroll.addEventListener('click', (e) => {
-      if (this.isDragging) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    }, true);
-  }
-
-  private scrollProducts(offset: number): void {
-    if (!this.productsScroll) return;
-    
-    gsap.to(this.productsScroll, {
-      scrollLeft: this.productsScroll.scrollLeft + offset,
-      duration: 0.6,
-      ease: 'power2.out',
-    });
-  }
-
-  private handleMouseDown(e: MouseEvent): void {
-    if (!this.productsScroll) return;
-    
-    this.isDragging = true;
-    this.startX = e.pageX - this.productsScroll.offsetLeft;
-    this.scrollLeft = this.productsScroll.scrollLeft;
-    this.productsScroll.style.cursor = 'grabbing';
-  }
-
-  private handleMouseLeave(): void {
-    this.isDragging = false;
-    if (this.productsScroll) {
-      this.productsScroll.style.cursor = 'grab';
-    }
-  }
-
-  private handleMouseUp(): void {
-    this.isDragging = false;
-    if (this.productsScroll) {
-      this.productsScroll.style.cursor = 'grab';
-    }
-  }
-
-  private handleMouseMove(e: MouseEvent): void {
-    if (!this.isDragging || !this.productsScroll) return;
-    
-    e.preventDefault();
-    const x = e.pageX - this.productsScroll.offsetLeft;
-    const walk = (x - this.startX) * 2; // Scroll speed multiplier
-    this.productsScroll.scrollLeft = this.scrollLeft - walk;
-  }
-
-  private removeScrollListeners(): void {
-    if (!this.productsScroll) return;
-    
-    const scrollLeftBtn = document.getElementById('scroll-left');
-    const scrollRightBtn = document.getElementById('scroll-right');
-    
-    scrollLeftBtn?.removeEventListener('click', () => this.scrollProducts(-400));
-    scrollRightBtn?.removeEventListener('click', () => this.scrollProducts(400));
-  }
-
-  private deferVisualRefresh(): void {
-    requestAnimationFrame(() => {
-      this.resizeCanvas();
-      this.setupParticles();
-      this.setupHorizontalScroll();
-      ScrollTrigger.refresh();
-    });
-
-    this.refreshTimeoutId = window.setTimeout(() => {
-      this.resizeCanvas();
-      this.setupParticles();
-      this.setupHorizontalScroll();
-      ScrollTrigger.refresh();
-    }, 200);
   }
 
   getBestSellerImageUrl(imagePath?: string | null): string | null {

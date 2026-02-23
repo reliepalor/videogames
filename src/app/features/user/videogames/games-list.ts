@@ -1,13 +1,3 @@
-import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewEncapsulation } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { FormsModule } from '@angular/forms'
-import { RouterModule, Router, NavigationEnd } from '@angular/router'
-import { VideoGameService } from '../../../core/services/videogame.service'
-import { CartService } from '../../../core/services/cart.service'
-import { ThemeService } from '../../../core/services/theme.service'
-import { VideoGame } from '../../../core/models/videogame.model'
-import { environment } from 'src/environments/environment';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component'
 import {
   Observable,
   filter,
@@ -22,11 +12,24 @@ import {
   debounceTime,
 } from 'rxjs'
 import { takeUntil, finalize, catchError } from 'rxjs/operators';
+import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewEncapsulation } from '@angular/core'
+import { CommonModule } from '@angular/common'
+import { FormsModule } from '@angular/forms'
+import { RouterModule, Router, NavigationEnd } from '@angular/router'
+import { VideoGameService } from '../../../core/services/videogame.service'
+import { CartService } from '../../../core/services/cart.service'
+import { ThemeService } from '../../../core/services/theme.service'
+import { VideoGame } from '../../../core/models/videogame.model'
+import { environment } from 'src/environments/environment';
+import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component'
+import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
+
 
 @Component({
   standalone: true,
   selector: 'app-games-list',
-  imports: [CommonModule, RouterModule, SkeletonBoxComponent, FormsModule],
+  imports: [CommonModule, RouterModule, SkeletonBoxComponent, FormsModule, ScrollToTopComponent
+  ],
   templateUrl: './games-list.html',
   styleUrls: ['./games-list.css'],
   encapsulation: ViewEncapsulation.None,
