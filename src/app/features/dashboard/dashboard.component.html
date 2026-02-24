@@ -1,93 +1,37 @@
 <style>
   /* Modern Dashboard Animations */
   @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(30px); }
+    to { opacity: 1; transform: translateX(0); }
   }
-
   @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
   }
-
   @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-    100% {
-      background-position: 1000px 0;
-    }
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
   }
-
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  .animate-slide-in-right {
-    animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  .animate-scale-in {
-    animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  /* Stagger delays */
+  .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-slide-in-right { animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-scale-in { animation: scaleIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .stagger-1 { animation-delay: 0.1s; opacity: 0; }
   .stagger-2 { animation-delay: 0.2s; opacity: 0; }
   .stagger-3 { animation-delay: 0.3s; opacity: 0; }
   .stagger-4 { animation-delay: 0.4s; opacity: 0; }
   .stagger-5 { animation-delay: 0.5s; opacity: 0; }
-
-  /* Card hover effects */
-  .metric-card {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .metric-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px -4px rgba(0, 0, 0, 0.08);
-  }
-
-  /* Shimmer skeleton effect */
+  .metric-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  .metric-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -4px rgba(0,0,0,0.08); }
   .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.04) 50%,
-      rgba(255, 255, 255, 0) 100%
-    );
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0) 100%);
     background-size: 1000px 100%;
     animation: shimmer 2s infinite;
   }
-
-  /* Chart container animation */
-  .chart-container {
-    position: relative;
-  }
-
+  .chart-container { position: relative; }
   .chart-container::before {
     content: '';
     position: absolute;
@@ -96,50 +40,80 @@
     border-radius: 1.5rem;
     pointer-events: none;
   }
-
-  /* Progress bar animation */
   @keyframes progressBar {
-    from {
-      transform: scaleX(0);
-      transform-origin: left;
-    }
-    to {
-      transform: scaleX(1);
-    }
+    from { transform: scaleX(0); transform-origin: left; }
+    to { transform: scaleX(1); }
+  }
+  .progress-bar { animation: progressBar 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+  /* Toggle pill */
+  .view-toggle-btn {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .view-toggle-btn.active-vg {
+    background: #0f172a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.25);
+  }
+  .view-toggle-btn.active-dp {
+    background: #3b82f6;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.35);
+  }
+  .view-toggle-btn.active-cb {
+    background: linear-gradient(135deg, #0f172a 0%, #3b82f6 100%);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(59,130,246,0.25);
   }
 
-  .progress-bar {
-    animation: progressBar 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  }
-
-  /* Tooltip enhancement */
-  [title]:hover::after {
-    content: attr(title);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 0.5rem 0.75rem;
-    background: rgba(15, 23, 42, 0.95);
-    color: white;
-    font-size: 0.75rem;
-    border-radius: 0.5rem;
-    white-space: nowrap;
-    margin-bottom: 0.5rem;
-    pointer-events: none;
-  }
+  /* Badge pill for product type */
+  .badge-vg { background: rgba(15,23,42,0.08); color: #0f172a; }
+  .badge-dp { background: rgba(59,130,246,0.1); color: #2563eb; }
 </style>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
-  
+
   <!-- Header Section -->
   <div class="max-w-7xl mx-auto px-6 pt-8 pb-6 animate-fade-in-up">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between flex-wrap gap-4">
       <div>
         <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Analytics Dashboard</h1>
         <p class="mt-1 text-sm text-slate-500">Monitor your sales performance and key metrics</p>
       </div>
-      <div class="flex items-center gap-3">
+
+      <div class="flex items-center gap-3 flex-wrap">
+
+        <!-- View Toggle -->
+        <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <button
+            class="view-toggle-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600"
+            [class.active-vg]="(activeView$ | async) === 'videogames'"
+            (click)="setView('videogames')">
+            <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Video Games
+          </button>
+          <button
+            class="view-toggle-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600"
+            [class.active-dp]="(activeView$ | async) === 'digital'"
+            (click)="setView('digital')">
+            <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Digital Products
+          </button>
+          <button
+            class="view-toggle-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-600"
+            [class.active-cb]="(activeView$ | async) === 'combined'"
+            (click)="setView('combined')">
+            <svg class="w-4 h-4 inline mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Combined
+          </button>
+        </div>
+
         <div class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-600 shadow-sm">
           <svg class="w-4 h-4 inline mr-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -150,341 +124,788 @@
     </div>
   </div>
 
-  <div class="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+  <!-- ========================================================= -->
+  <!-- VIDEO GAMES VIEW                                           -->
+  <!-- ========================================================= -->
+  <ng-container *ngIf="(activeView$ | async) === 'videogames'">
+    <div class="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-    <!-- LEFT SECTION -->
-    <div class="lg:col-span-9 space-y-6">
+      <!-- LEFT SECTION -->
+      <div class="lg:col-span-9 space-y-6">
 
-      <!-- METRIC CARDS -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- METRIC CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
-        <!-- Total Revenue -->
-        <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-1">
-          <div class="flex items-start justify-between mb-4">
-            <div class="p-3 bg-slate-900 rounded-xl">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+          <!-- Total Revenue -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-1">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-slate-900 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg">+12.5%</div>
             </div>
-            <div class="px-2 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg">
-              +12.5%
-            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Revenue</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">₱{{ totalRevenue$ | async | number:'1.0-0' }}</p>
+            <p class="text-xs text-slate-500">Combined earnings from all sales</p>
           </div>
 
-          <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
-            Total Revenue
-          </p>
-
-          <p class="text-3xl font-bold text-slate-900 mb-1">
-            ₱{{ totalRevenue$ | async | number:'1.0-0' }}
-          </p>
-
-          <p class="text-xs text-slate-500">
-            Combined earnings from all sales
-          </p>
-        </div>
-
-        <!-- Total Orders -->
-        <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-2">
-          <div class="flex items-start justify-between mb-4">
-            <div class="p-3 bg-blue-600 rounded-xl">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
+          <!-- Total Orders -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-2">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-blue-600 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg">Active</div>
             </div>
-            <div class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg">
-              Active
-            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Orders</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ totalNumbers$ | async | number }}</p>
+            <p class="text-xs text-slate-500">Number of individual orders placed</p>
           </div>
 
-          <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
-            Total Orders
-          </p>
-
-          <p class="text-3xl font-bold text-slate-900 mb-1">
-            {{ totalNumbers$ | async | number }}
-          </p>
-
-          <p class="text-xs text-slate-500">
-            Number of individual orders placed
-          </p>
-        </div>
-
-        <!-- Games Sold -->
-        <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-3">
-          <div class="flex items-start justify-between mb-4">
-            <div class="p-3 bg-amber-500 rounded-xl">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
+          <!-- Games Sold -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-3">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-amber-500 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg">Tracked</div>
             </div>
-            <div class="px-2 py-1 bg-amber-50 text-amber-700 text-xs font-semibold rounded-lg">
-              Tracked
-            </div>
-          </div>
-
-          <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">
-            Games Sold
-          </p>
-
-          <p class="text-3xl font-bold text-slate-900 mb-1">
-            {{ totalQuantity$ | async | number }}
-          </p>
-
-          <p class="text-xs text-slate-500">
-            Total game units sold
-          </p>
-        </div>
-
-      </div>
-
-      <!-- SALES TREND CHART -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-8 chart-container animate-fade-in-up stagger-4">
-        
-        <div class="flex items-center justify-between mb-8">
-          <div>
-            <h2 class="text-lg font-bold text-slate-900">Sales Trends</h2>
-            <p class="text-sm text-slate-500 mt-1">Revenue growth over time by product</p>
-          </div>
-          
-          <div class="flex items-center gap-2">
-            <button class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition">
-              7 Days
-            </button>
-            <button class="px-3 py-1.5 text-xs font-medium text-white bg-slate-900 rounded-lg">
-              30 Days
-            </button>
-            <button class="px-3 py-1.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition">
-              90 Days
-            </button>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Games Sold</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ totalQuantity$ | async | number }}</p>
+            <p class="text-xs text-slate-500">Total game units sold</p>
           </div>
         </div>
 
-        <div class="relative h-[320px]">
-          <canvas
-            *ngIf="lineChartData$ | async as lineData"
-            baseChart
-            [data]="lineData"
-            [options]="lineChartOptions"
-            [type]="lineChartType">
-          </canvas>
-        </div>
-      </div>
-
-      <!-- SALES TABLE -->
-      <div class="relative animate-fade-in-up stagger-5">
-
-        <div
-          *ngIf="sortedSalesByPurchaseRate$ | async as sales; else loading"
-          class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-
-          <div class="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent">
-            <h2 class="text-lg font-bold text-slate-900">Sales Breakdown</h2>
-            <p class="text-sm text-slate-500 mt-1">Detailed revenue summary per game</p>
-          </div>
-
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead class="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th class="px-8 py-4 text-left font-semibold text-slate-700">
-                    <div class="flex items-center gap-2">
-                      <span>Game Title</span>
-                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                      </svg>
-                    </div>
-                  </th>
-                  <th class="px-8 py-4 text-right font-semibold text-slate-700">Units Sold</th>
-                  <th class="px-8 py-4 text-right font-semibold text-slate-700">Revenue</th>
-                  <th class="px-8 py-4 text-right font-semibold text-slate-700">Purchase Rate</th>
-                </tr>
-              </thead>
-
-              <tbody class="divide-y divide-slate-100">
-                <tr
-                  *ngFor="let g of sales; let i = index"
-                  class="hover:bg-slate-50 transition-colors group">
-
-                  <td class="px-8 py-5">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">
-                        {{ i + 1 }}
-                      </div>
-                      <span class="font-medium text-slate-900 group-hover:text-slate-700">
-                        {{ g.title }}
-                      </span>
-                    </div>
-                  </td>
-
-                  <td class="px-8 py-5 text-right">
-                    <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 rounded-lg font-medium">
-                      {{ g.totalQuantity }}
-                    </span>
-                  </td>
-
-                  <td class="px-8 py-5 text-right">
-                    <span class="font-bold text-slate-900">
-                      ₱{{ g.totalRevenue | number:'1.0-0' }}
-                    </span>
-                  </td>
-
-                  <td class="px-8 py-5 text-right">
-                    <div class="flex items-center justify-end gap-2">
-                      <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          class="h-full bg-gradient-to-r from-slate-600 to-slate-900 rounded-full progress-bar"
-                          [style.width.%]="(g.totalRevenue / (totalRevenue$ | async)!) * 100"
-                          [style.animation-delay.s]="i * 0.1">
-                        </div>
-                      </div>
-                      <span class="text-xs text-slate-500 font-medium min-w-[3rem]">
-                        {{ ((g.totalRevenue / (totalRevenue$ | async)!) * 100).toFixed(1) }}%
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-
-    <!-- RIGHT SIDEBAR -->
-    <div class="lg:col-span-3 space-y-6">
-
-      <!-- DISTRIBUTION CHART -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-in-right stagger-3">
-
-        <div class="mb-6">
-          <h2 class="text-lg font-bold text-slate-900">Distribution</h2>
-          <p class="text-sm text-slate-500 mt-1">Sales share by game</p>
-        </div>
-
-        <!-- DOUGHNUT CHART -->
-        <div class="relative w-48 h-48 mx-auto mb-6">
-          <canvas
-            *ngIf="donutChartData$ | async as donutData"
-            baseChart
-            [data]="donutData"
-            [options]="donutChartOptions"
-            [type]="donutChartType">
-          </canvas>
-
-          <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <div class="text-2xl font-bold text-slate-900">
-              {{ donutCenterText$ | async }}
-            </div>
-            <div class="text-xs text-slate-500 mt-1">
-              Total Share
+        <!-- SALES TREND CHART -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 chart-container animate-fade-in-up stagger-4">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Sales Trends</h2>
+              <p class="text-sm text-slate-500 mt-1">Revenue growth over time by product</p>
             </div>
           </div>
+          <div class="relative h-[320px]">
+            <canvas
+              *ngIf="lineChartData$ | async as lineData"
+              baseChart
+              [data]="lineData"
+              [options]="lineChartOptions"
+              [type]="lineChartType">
+            </canvas>
+          </div>
         </div>
 
-        <!-- LEGEND -->
-        <div class="space-y-3">
+        <!-- SALES TABLE -->
+        <div class="relative animate-fade-in-up stagger-5">
           <div
-            *ngFor="let game of displayedGames$ | async; let i = index"
-            class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group">
-
-            <div class="flex items-center gap-3 flex-1 min-w-0">
-              <span
-                class="w-3 h-3 rounded-full flex-shrink-0 shadow-sm"
-                [style.background-color]="getColor(i)">
-              </span>
-
-              <span class="text-sm text-slate-700 font-medium truncate group-hover:text-slate-900">
-                {{ game.title }}
-              </span>
+            *ngIf="sortedSalesByPurchaseRate$ | async as sales; else loading"
+            class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent">
+              <h2 class="text-lg font-bold text-slate-900">Sales Breakdown</h2>
+              <p class="text-sm text-slate-500 mt-1">Detailed revenue summary per game</p>
             </div>
-
-            <div class="flex items-center gap-2">
-              <span class="text-sm font-bold text-slate-900">
-                {{ game.percent }}%
-              </span>
-              <svg class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="px-8 py-4 text-left font-semibold text-slate-700">
+                      <div class="flex items-center gap-2">
+                        <span>Game Title</span>
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                        </svg>
+                      </div>
+                    </th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Units Sold</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Revenue</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Purchase Rate</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr
+                    *ngFor="let g of sales; let i = index"
+                    class="hover:bg-slate-50 transition-colors group">
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-bold text-sm">
+                          {{ i + 1 }}
+                        </div>
+                        <span class="font-medium text-slate-900 group-hover:text-slate-700">{{ g.title }}</span>
+                      </div>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 rounded-lg font-medium">
+                        {{ g.totalQuantity }}
+                      </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="font-bold text-slate-900">₱{{ g.totalRevenue | number:'1.0-0' }}</span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            class="h-full bg-gradient-to-r from-slate-600 to-slate-900 rounded-full progress-bar"
+                            [style.width.%]="(g.totalRevenue / (totalRevenue$ | async)!) * 100"
+                            [style.animation-delay.s]="i * 0.1">
+                          </div>
+                        </div>
+                        <span class="text-xs text-slate-500 font-medium min-w-[3rem]">
+                          {{ ((g.totalRevenue / (totalRevenue$ | async)!) * 100).toFixed(1) }}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-          </div>
-
-          <button
-            *ngIf="((allGamesWithPercent$ | async) || []).length > 5"
-            (click)="toggleShowAll()"
-            class="w-full mt-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">
-            {{ (showAll$ | async) ? 'View Less' : 'View All Games' }}
-          </button>
-        </div>
-
-      </div>
-
-      <!-- QUICK STATS -->
-      <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg animate-slide-in-right stagger-4">
-        
-        <div class="mb-6">
-          <h2 class="text-lg font-bold text-white">Quick Stats</h2>
-          <p class="text-sm text-slate-400 mt-1">Performance overview</p>
-        </div>
-
-        <div class="space-y-4">
-          <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-white/10 rounded-lg">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <span class="text-sm text-slate-300">Avg. Order Value</span>
-            </div>
-            <span class="text-lg font-bold text-white">
-              ₱{{ ((totalRevenue$ | async)! / (totalNumbers$ | async)!) | number:'1.0-0' }}
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-white/10 rounded-lg">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-              <span class="text-sm text-slate-300">Conversion Rate</span>
-            </div>
-            <span class="text-lg font-bold text-white">
-              94.2%
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
-            <div class="flex items-center gap-3">
-              <div class="p-2 bg-white/10 rounded-lg">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span class="text-sm text-slate-300">Avg. Time</span>
-            </div>
-            <span class="text-lg font-bold text-white">
-              3.2 min
-            </span>
           </div>
         </div>
 
       </div>
 
+      <!-- RIGHT SIDEBAR -->
+      <div class="lg:col-span-3 space-y-6">
+
+        <!-- DISTRIBUTION CHART -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-in-right stagger-3">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-900">Distribution</h2>
+            <p class="text-sm text-slate-500 mt-1">Sales share by game</p>
+          </div>
+          <div class="relative w-48 h-48 mx-auto mb-6">
+            <canvas
+              *ngIf="donutChartData$ | async as donutData"
+              baseChart
+              [data]="donutData"
+              [options]="donutChartOptions"
+              [type]="donutChartType">
+            </canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="text-2xl font-bold text-slate-900">{{ donutCenterText$ | async }}</div>
+              <div class="text-xs text-slate-500 mt-1">Total Share</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div
+              *ngFor="let game of displayedGames$ | async; let i = index"
+              class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span class="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" [style.background-color]="getColor(i)"></span>
+                <span class="text-sm text-slate-700 font-medium truncate group-hover:text-slate-900">{{ game.title }}</span>
+              </div>
+              <span class="text-sm font-bold text-slate-900">{{ game.percent }}%</span>
+            </div>
+            <button
+              *ngIf="((allGamesWithPercent$ | async) || []).length > 5"
+              (click)="toggleShowAll()"
+              class="w-full mt-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">
+              {{ (showAll$ | async) ? 'View Less' : 'View All Games' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- QUICK STATS -->
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 rounded-2xl p-6 shadow-lg animate-slide-in-right stagger-4">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white">Quick Stats</h2>
+            <p class="text-sm text-slate-400 mt-1">Performance overview</p>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Avg. Order Value</span>
+              </div>
+              <span class="text-lg font-bold text-white">
+                ₱{{ ((totalRevenue$ | async)! / (totalNumbers$ | async)!) | number:'1.0-0' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Conversion Rate</span>
+              </div>
+              <span class="text-lg font-bold text-white">94.2%</span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Avg. Time</span>
+              </div>
+              <span class="text-lg font-bold text-white">3.2 min</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
+  </ng-container>
 
-  </div>
+  <!-- ========================================================= -->
+  <!-- DIGITAL PRODUCTS VIEW                                      -->
+  <!-- ========================================================= -->
+  <ng-container *ngIf="(activeView$ | async) === 'digital'">
+    <div class="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT SECTION -->
+      <div class="lg:col-span-9 space-y-6">
+
+        <!-- METRIC CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <!-- Total Revenue -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-1">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-blue-600 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg">Revenue</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Revenue</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">₱{{ digitalTotalRevenue$ | async | number:'1.0-0' }}</p>
+            <p class="text-xs text-slate-500">Earnings from digital products</p>
+          </div>
+
+          <!-- Total Orders -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-2">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-violet-600 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-violet-50 text-violet-700 text-xs font-semibold rounded-lg">Approved</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Orders</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ digitalTotalOrders$ | async | number }}</p>
+            <p class="text-xs text-slate-500">Approved digital orders</p>
+          </div>
+
+          <!-- Units Sold -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-3">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-teal-500 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-lg">Tracked</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Units Sold</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ digitalTotalQuantity$ | async | number }}</p>
+            <p class="text-xs text-slate-500">Total digital units delivered</p>
+          </div>
+        </div>
+
+        <!-- DIGITAL SALES TREND CHART -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 chart-container animate-fade-in-up stagger-4">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Digital Sales Trends</h2>
+              <p class="text-sm text-slate-500 mt-1">Revenue by digital product</p>
+            </div>
+            <div class="px-3 py-1.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg border border-blue-100">
+              Approved Only
+            </div>
+          </div>
+          <div class="relative h-[320px]">
+            <canvas
+              *ngIf="digitalLineChartData$ | async as digitalData"
+              baseChart
+              [data]="digitalData"
+              [options]="digitalLineChartOptions"
+              [type]="lineChartType">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- DIGITAL SALES TABLE -->
+        <div class="relative animate-fade-in-up stagger-5">
+          <div
+            *ngIf="sortedDigitalSales$ | async as digitalSales; else loading"
+            class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-transparent">
+              <h2 class="text-lg font-bold text-slate-900">Digital Product Breakdown</h2>
+              <p class="text-sm text-slate-500 mt-1">Detailed revenue summary per digital product</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="px-8 py-4 text-left font-semibold text-slate-700">Product Name</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Units Sold</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Orders</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Revenue</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Share</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr
+                    *ngFor="let g of digitalSales; let i = index"
+                    class="hover:bg-slate-50 transition-colors group">
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
+                          {{ i + 1 }}
+                        </div>
+                        <span class="font-medium text-slate-900 group-hover:text-slate-700">{{ g.name }}</span>
+                      </div>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-medium">
+                        {{ g.totalQuantity }}
+                      </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="inline-flex items-center px-3 py-1 bg-slate-100 text-slate-700 rounded-lg font-medium">
+                        {{ g.totalOrders }}
+                      </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="font-bold text-slate-900">₱{{ g.totalRevenue | number:'1.0-0' }}</span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            class="h-full bg-gradient-to-r from-blue-400 to-blue-600 rounded-full progress-bar"
+                            [style.width.%]="(g.totalRevenue / (digitalTotalRevenue$ | async)!) * 100"
+                            [style.animation-delay.s]="i * 0.1">
+                          </div>
+                        </div>
+                        <span class="text-xs text-slate-500 font-medium min-w-[3rem]">
+                          {{ ((g.totalRevenue / (digitalTotalRevenue$ | async)!) * 100).toFixed(1) }}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR (Digital) -->
+      <div class="lg:col-span-3 space-y-6">
+
+        <!-- DISTRIBUTION CHART -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-in-right stagger-3">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-900">Distribution</h2>
+            <p class="text-sm text-slate-500 mt-1">Sales share by product</p>
+          </div>
+          <div class="relative w-48 h-48 mx-auto mb-6">
+            <canvas
+              *ngIf="donutDigitalChartData$ | async as donutData"
+              baseChart
+              [data]="donutData"
+              [options]="donutChartOptions"
+              [type]="donutChartType">
+            </canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="text-2xl font-bold text-slate-900">{{ donutDigitalCenterText$ | async }}</div>
+              <div class="text-xs text-slate-500 mt-1">Total Share</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div
+              *ngFor="let game of displayedDigitalProducts$ | async; let i = index"
+              class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+              <div class="flex items-center gap-3 flex-1 min-w-0">
+                <span class="w-3 h-3 rounded-full flex-shrink-0 shadow-sm"
+                  [style.background-color]="i === 0 ? '#3b82f6' : getColor(i)">
+                </span>
+                <span class="text-sm text-slate-700 font-medium truncate group-hover:text-slate-900">{{ game.title }}</span>
+              </div>
+              <span class="text-sm font-bold text-slate-900">{{ game.percent }}%</span>
+            </div>
+            <button
+              *ngIf="((allDigitalWithPercent$ | async) || []).length > 5"
+              (click)="toggleShowAllDigital()"
+              class="w-full mt-4 py-2.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors">
+              {{ (showAllDigital$ | async) ? 'View Less' : 'View All Products' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- QUICK STATS (Digital) -->
+        <div class="bg-gradient-to-br from-blue-900 to-blue-800 border border-blue-700 rounded-2xl p-6 shadow-lg animate-slide-in-right stagger-4">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white">Quick Stats</h2>
+            <p class="text-sm text-blue-300 mt-1">Digital performance</p>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <span class="text-sm text-blue-200">Avg. Order Value</span>
+              </div>
+              <span class="text-lg font-bold text-white">
+                ₱{{ ((digitalTotalRevenue$ | async)! / (digitalTotalOrders$ | async)!) | number:'1.0-0' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <span class="text-sm text-blue-200">Approval Rate</span>
+              </div>
+              <span class="text-lg font-bold text-white">100%</span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl backdrop-blur-sm border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                </div>
+                <span class="text-sm text-blue-200">Unique Products</span>
+              </div>
+              <span class="text-lg font-bold text-white">
+                {{ (digitalSales$ | async)?.length || 0 }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ========================================================= -->
+  <!-- COMBINED VIEW                                              -->
+  <!-- ========================================================= -->
+  <ng-container *ngIf="(activeView$ | async) === 'combined'">
+    <div class="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- LEFT SECTION -->
+      <div class="lg:col-span-9 space-y-6">
+
+        <!-- SUMMARY METRIC CARDS -->
+        <div
+          *ngIf="dashboardSummary$ | async as summary"
+          class="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+          <!-- Total Revenue (Combined) -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-1">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 rounded-xl" style="background: linear-gradient(135deg, #0f172a 0%, #3b82f6 100%)">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-lg">All Sources</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Revenue</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">₱{{ (summary.totalVideoGameRevenue + summary.totalDigitalRevenue) | number:'1.0-0' }}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md text-slate-600">VG: ₱{{ summary.totalVideoGameRevenue | number:'1.0-0' }}</span>
+              <span class="text-xs px-2 py-0.5 bg-blue-50 rounded-md text-blue-600">DP: ₱{{ summary.totalDigitalRevenue | number:'1.0-0' }}</span>
+            </div>
+          </div>
+
+          <!-- Total Orders (Combined) -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-2">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 rounded-xl" style="background: linear-gradient(135deg, #0f172a 0%, #3b82f6 100%)">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-lg">Combined</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Orders</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ (summary.totalVideoGameOrders + summary.totalDigitalOrders) | number }}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-xs px-2 py-0.5 bg-slate-100 rounded-md text-slate-600">VG: {{ summary.totalVideoGameOrders | number }}</span>
+              <span class="text-xs px-2 py-0.5 bg-blue-50 rounded-md text-blue-600">DP: {{ summary.totalDigitalOrders | number }}</span>
+            </div>
+          </div>
+
+          <!-- Total Users -->
+          <div class="metric-card bg-white border border-slate-200 rounded-2xl p-6 animate-fade-in-up stagger-3">
+            <div class="flex items-start justify-between mb-4">
+              <div class="p-3 bg-emerald-500 rounded-xl">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg">Registered</div>
+            </div>
+            <p class="text-xs text-slate-500 uppercase tracking-wider font-semibold mb-2">Total Users</p>
+            <p class="text-3xl font-bold text-slate-900 mb-1">{{ summary.totalUsers | number }}</p>
+            <p class="text-xs text-slate-500">Registered platform accounts</p>
+          </div>
+        </div>
+
+        <!-- MONTHLY REVENUE BAR CHART -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-8 chart-container animate-fade-in-up stagger-4">
+          <div class="flex items-center justify-between mb-8">
+            <div>
+              <h2 class="text-lg font-bold text-slate-900">Monthly Revenue</h2>
+              <p class="text-sm text-slate-500 mt-1">Video Games vs Digital Products over time</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="flex items-center gap-1.5 text-xs text-slate-600">
+                <span class="w-3 h-3 rounded-sm inline-block bg-slate-900"></span> Video Games
+              </span>
+              <span class="flex items-center gap-1.5 text-xs text-slate-600">
+                <span class="w-3 h-3 rounded-sm inline-block bg-blue-500"></span> Digital
+              </span>
+            </div>
+          </div>
+          <div class="relative h-[320px]">
+            <canvas
+              *ngIf="monthlyBarChartData$ | async as barData"
+              baseChart
+              [data]="barData"
+              [options]="barChartOptions"
+              [type]="barChartType">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- TOP PRODUCTS TABLE -->
+        <div class="relative animate-fade-in-up stagger-5">
+          <div
+            *ngIf="topProductsWithPercent$ | async as products; else loading"
+            class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="px-8 py-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-transparent">
+              <h2 class="text-lg font-bold text-slate-900">Top 5 Products</h2>
+              <p class="text-sm text-slate-500 mt-1">Best performing products across all categories</p>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead class="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th class="px-8 py-4 text-left font-semibold text-slate-700">Product</th>
+                    <th class="px-8 py-4 text-center font-semibold text-slate-700">Type</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Revenue</th>
+                    <th class="px-8 py-4 text-right font-semibold text-slate-700">Share</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr
+                    *ngFor="let p of products; let i = index"
+                    class="hover:bg-slate-50 transition-colors group">
+                    <td class="px-8 py-5">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white"
+                          [style.background]="getTypeColor(p.type)">
+                          {{ i + 1 }}
+                        </div>
+                        <span class="font-medium text-slate-900 group-hover:text-slate-700">{{ p.title }}</span>
+                      </div>
+                    </td>
+                    <td class="px-8 py-5 text-center">
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-lg font-medium text-xs"
+                        [ngClass]="p.type === 'VideoGame' ? 'badge-vg' : 'badge-dp'">
+                        {{ p.type === 'VideoGame' ? '🎮 Video Game' : '💻 Digital' }}
+                      </span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <span class="font-bold text-slate-900">₱{{ p.revenue | number:'1.0-0' }}</span>
+                    </td>
+                    <td class="px-8 py-5 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            class="h-full rounded-full progress-bar"
+                            [style.background]="getTypeColor(p.type)"
+                            [style.width.%]="p.percent"
+                            [style.animation-delay.s]="i * 0.1">
+                          </div>
+                        </div>
+                        <span class="text-xs text-slate-500 font-medium min-w-[3rem]">{{ p.percent }}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT SIDEBAR (Combined) -->
+      <div class="lg:col-span-3 space-y-6">
+
+        <!-- DISTRIBUTION CHART (Top Products) -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-in-right stagger-3">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-slate-900">Top Products</h2>
+            <p class="text-sm text-slate-500 mt-1">Revenue share breakdown</p>
+          </div>
+          <div class="relative w-48 h-48 mx-auto mb-6">
+            <canvas
+              *ngIf="donutTopProductsData$ | async as donutData"
+              baseChart
+              [data]="donutData"
+              [options]="donutChartOptions"
+              [type]="donutChartType">
+            </canvas>
+            <div class="absolute inset-0 flex flex-col items-center justify-center">
+              <div class="text-2xl font-bold text-slate-900">{{ topProductsCenterText$ | async }}</div>
+              <div class="text-xs text-slate-500 mt-1">Total Share</div>
+            </div>
+          </div>
+          <div class="space-y-3">
+            <div
+              *ngFor="let p of topProductsWithPercent$ | async; let i = index"
+              class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors group">
+              <div class="flex items-center gap-2 flex-1 min-w-0">
+                <span class="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" [style.background-color]="getColor(i)"></span>
+                <span class="text-xs text-slate-700 font-medium truncate group-hover:text-slate-900">{{ p.title }}</span>
+              </div>
+              <span class="text-sm font-bold text-slate-900 ml-2">{{ p.percent }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- REVENUE SPLIT CARD -->
+        <div
+          *ngIf="dashboardSummary$ | async as summary"
+          class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm animate-slide-in-right stagger-4">
+          <div class="mb-5">
+            <h2 class="text-lg font-bold text-slate-900">Revenue Split</h2>
+            <p class="text-sm text-slate-500 mt-1">VG vs Digital contribution</p>
+          </div>
+          <div class="space-y-4">
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1.5">
+                <span class="text-slate-700">🎮 Video Games</span>
+                <span class="text-slate-900">
+                  {{ ((summary.totalVideoGameRevenue / (summary.totalVideoGameRevenue + summary.totalDigitalRevenue)) * 100).toFixed(1) }}%
+                </span>
+              </div>
+              <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-slate-900 rounded-full progress-bar"
+                  [style.width.%]="(summary.totalVideoGameRevenue / (summary.totalVideoGameRevenue + summary.totalDigitalRevenue)) * 100">
+                </div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-semibold mb-1.5">
+                <span class="text-slate-700">💻 Digital Products</span>
+                <span class="text-slate-900">
+                  {{ ((summary.totalDigitalRevenue / (summary.totalVideoGameRevenue + summary.totalDigitalRevenue)) * 100).toFixed(1) }}%
+                </span>
+              </div>
+              <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                <div
+                  class="h-full bg-blue-500 rounded-full progress-bar"
+                  [style.width.%]="(summary.totalDigitalRevenue / (summary.totalVideoGameRevenue + summary.totalDigitalRevenue)) * 100">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-5 pt-5 border-t border-slate-100 grid grid-cols-2 gap-3">
+            <div class="p-3 bg-slate-50 rounded-xl text-center cursor-pointer" title="Video Game Orders">
+              <p class="text-xs text-slate-500 mb-1 cursor-pointer"
+              >VG Orders</p>
+              <p class="font-bold text-slate-900">{{ summary.totalVideoGameOrders | number }}</p>
+            </div>
+            <div class="p-3 bg-blue-50 rounded-xl text-center cursor-pointer" title="Digital Product Orders">
+              <p class="text-xs text-blue-500 mb-1 cursor-pointer"
+              >DP Orders</p>
+              <p class="font-bold text-blue-900">{{ summary.totalDigitalOrders | number }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- QUICK STATS (Combined) -->
+        <div class="bg-gradient-to-br from-slate-900 to-blue-900 border border-slate-700 rounded-2xl p-6 shadow-lg animate-slide-in-right stagger-5">
+          <div class="mb-6">
+            <h2 class="text-lg font-bold text-white">Platform Stats</h2>
+            <p class="text-sm text-slate-400 mt-1">Overall performance</p>
+          </div>
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Total Users</span>
+              </div>
+              <span class="text-lg font-bold text-white" *ngIf="dashboardSummary$ | async as s">
+                {{ s.totalUsers | number }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Total Revenue</span>
+              </div>
+              <span class="text-lg font-bold text-white">
+                ₱{{ combinedTotalRevenue$ | async | number:'1.0-0' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="p-2 bg-white/10 rounded-lg">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                </div>
+                <span class="text-sm text-slate-300">Total Products</span>
+              </div>
+              <span class="text-lg font-bold text-white">
+                {{ ((sales$ | async)?.length || 0) + ((digitalSales$ | async)?.length || 0) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </ng-container>
 
 </div>
 
 <!-- LOADING STATE -->
 <ng-template #loading>
   <div class="bg-white border border-slate-200 rounded-2xl p-8">
-
     <div class="space-y-6">
       <div *ngFor="let i of [1,2,3,4,5]" class="flex items-center gap-4">
         <div class="w-12 h-12 bg-slate-100 rounded-xl skeleton-shimmer"></div>
@@ -495,6 +916,5 @@
         <div class="w-24 h-8 bg-slate-100 rounded-lg skeleton-shimmer"></div>
       </div>
     </div>
-
   </div>
 </ng-template>

@@ -1,5 +1,6 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
 import { DigitalOrder } from 'src/app/core/models/digital-orders/digital-order.model';
 
@@ -125,14 +126,10 @@ export class AdminDigitalOrdersPage implements OnInit {
         );
         this.loadOrders();
       },
-      error: () => {
+      error: (error: unknown) => {
         this.setActionLoading(order.id, false);
         this.closeConfirm();
-        this.showErrorMessage(
-          action === 'approve'
-            ? 'Failed to approve order. Please try again.'
-            : 'Failed to reject order. Please try again.'
-        );
+        this.showErrorMessage(this.getActionErrorMessage(action, order, error));
       }
     });
   }
@@ -185,6 +182,73 @@ export class AdminDigitalOrdersPage implements OnInit {
     this.successMessage.set('');
     this.errorMessage.set('');
     this.isMessageClosing = false;
+  }
+
+  private getActionErrorMessage(
+    action: 'approve' | 'reject',
+    order: DigitalOrder,
+    error: unknown
+  ): string {
+    const productName = order.digitalProductName?.trim() || 'this product';
+    const httpError = error instanceof HttpErrorResponse ? error : null;
+    if (httpError?.status === 404) {
+      return action === 'approve'
+        ? `Cannot approve order #${order.id} for "${productName}" because the order was not found.`
+        : `Cannot reject order #${order.id} for "${productName}" because the order was not found.`;
+    }
+
+    const backendMessage = this.extractBackendErrorMessage(error);
+    const normalized = backendMessage.toLowerCase();
+
+    if (
+      action === 'approve' &&
+      (normalized.includes('insufficient stock') ||
+        normalized.includes('not enough product keys'))
+    ) {
+      return 'Cannot approve order: no stock/product keys available.';
+    }
+
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    return action === 'approve'
+      ? 'Failed to approve order. Please try again.'
+      : 'Failed to reject order. Please try again.';
+  }
+
+  private extractBackendErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse) {
+      const payload = error.error as unknown;
+
+      if (typeof payload === 'string' && payload.trim()) {
+        return payload.trim();
+      }
+
+      if (
+        payload &&
+        typeof payload === 'object' &&
+        'message' in payload &&
+        typeof (payload as { message?: unknown }).message === 'string'
+      ) {
+        const message = (payload as { message: string }).message.trim();
+        if (message) return message;
+      }
+
+      if (
+        typeof error.message === 'string' &&
+        error.message.trim() &&
+        !error.message.startsWith('Http failure response for ')
+      ) {
+        return error.message.trim();
+      }
+    }
+
+    if (error instanceof Error && error.message.trim()) {
+      return error.message.trim();
+    }
+
+    return '';
   }
 
   getOrderUserDisplay(order: DigitalOrder): string {
