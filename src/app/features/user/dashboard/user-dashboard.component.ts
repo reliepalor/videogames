@@ -33,6 +33,10 @@ type RecommendedItem = {
   route: string[];
 };
 
+type DashboardDigitalProduct = DigitalProduct & {
+  digitalProductId?: number;
+};
+
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
@@ -57,6 +61,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   
   private isRecommendedHovered = false;
   private recommendedIntervalId?: number;
+  private recommendedRefreshIntervalId?: number;
   private scrollObserver?: IntersectionObserver;
   private observeRetryTimeoutId?: number;
   private bestSellerScrollEl?: HTMLElement;
@@ -65,6 +70,8 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   private bestSellerScrollHandler?: () => void;
   private bestSellerLeftClickHandler?: () => void;
   private bestSellerRightClickHandler?: () => void;
+  private allGameRecommendations: RecommendedItem[] = [];
+  private allDigitalRecommendations: RecommendedItem[] = [];
   
   apiUrl = environment.apiUrl;
 
@@ -132,6 +139,9 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     // Clear intervals
     if (this.recommendedIntervalId) {
       clearInterval(this.recommendedIntervalId);
+    }
+    if (this.recommendedRefreshIntervalId) {
+      clearInterval(this.recommendedRefreshIntervalId);
     }
 
     // Disconnect observer
@@ -349,28 +359,21 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
         catchError(() => of([] as VideoGame[]))
       ),
       digitalProducts: this.digitalProductService.getActiveProducts().pipe(
-        catchError(() => of([] as DigitalProduct[]))
+        catchError(() => of([] as DashboardDigitalProduct[]))
       )
     }).subscribe({
       next: ({ games, digitalProducts }) => {
-        const gameRecommendations = this.shuffleArray((games ?? [])
+        this.allGameRecommendations = (games ?? [])
           .filter(g => !!g.id)
-        )
           .map(g => this.mapGameToRecommended(g));
 
-        const digitalRecommendations = this.shuffleArray((digitalProducts ?? [])
-          .filter(p => p.id > 0)
-        )
-          .map(p => this.mapDigitalToRecommended(p));
+        this.allDigitalRecommendations = (digitalProducts ?? [])
+          .map(p => this.mapDigitalToRecommended(p))
+          .filter((item): item is RecommendedItem => item !== null);
 
-        this.recommendedItems = this.buildAlternatingRecommendations(
-          gameRecommendations,
-          digitalRecommendations,
-          4
-        );
-        
-        this.activeRecommendedIndex = 0;
+        this.refreshRecommendedItems();
         this.startRecommendedAutoCycle();
+        this.startRecommendedRefreshCycle();
         this.scheduleObserveAnimations();
       },
       error: () => {
@@ -382,16 +385,29 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
 
   private startRecommendedAutoCycle(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    if (this.recommendedItems.length <= 1) return;
-
     if (this.recommendedIntervalId) {
       clearInterval(this.recommendedIntervalId);
     }
+    if (this.recommendedItems.length <= 1) return;
 
     this.recommendedIntervalId = window.setInterval(() => {
       if (this.isRecommendedHovered) return;
       this.activeRecommendedIndex += 1;
     }, 3800);
+  }
+
+  private startRecommendedRefreshCycle(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    if (this.recommendedRefreshIntervalId) {
+      clearInterval(this.recommendedRefreshIntervalId);
+    }
+
+    this.recommendedRefreshIntervalId = window.setInterval(() => {
+      if (this.isRecommendedHovered) return;
+      this.refreshRecommendedItems();
+      this.startRecommendedAutoCycle();
+    }, 16000);
   }
 
   // ============================================
@@ -483,9 +499,12 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     };
   }
 
-  private mapDigitalToRecommended(product: DigitalProduct): RecommendedItem {
+  private mapDigitalToRecommended(product: DashboardDigitalProduct): RecommendedItem | null {
+    const productId = this.getDigitalProductId(product);
+    if (!productId) return null;
+
     return {
-      id: product.id,
+      id: productId,
       type: 'digital',
       title: product.name,
       subtitle: product.brand || product.platform || 'Digital Product',
@@ -495,28 +514,55 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     };
   }
 
-  private cyclePick<T>(items: T[], index: number): T | null {
-    if (!items.length) return null;
-    return items[index % items.length] ?? null;
-  }
-
   private buildAlternatingRecommendations(
     games: RecommendedItem[],
-    digitalProducts: RecommendedItem[],
-    targetPairs = 4
+    digitalProducts: RecommendedItem[]
   ): RecommendedItem[] {
     const sequence: RecommendedItem[] = [];
+    const maxLen = Math.max(games.length, digitalProducts.length);
 
-    for (let i = 0; i < targetPairs; i++) {
-      const game = this.cyclePick(games, i);
-      const digital = this.cyclePick(digitalProducts, i);
-      const first = game ?? digital;
-      const second = digital ?? game;
-      if (first) sequence.push(first);
-      if (second) sequence.push(second);
+    for (let i = 0; i < maxLen; i++) {
+      if (games[i]) {
+        sequence.push(games[i]);
+      }
+      if (digitalProducts[i]) {
+        sequence.push(digitalProducts[i]);
+      }
     }
 
     return sequence;
+  }
+
+  private refreshRecommendedItems(): void {
+    const selectedGames = this.pickRandomItemsWithCycle(this.allGameRecommendations, 4);
+    const selectedDigitalProducts = this.pickRandomItemsWithCycle(this.allDigitalRecommendations, 4);
+
+    this.recommendedItems = this.buildAlternatingRecommendations(
+      selectedGames,
+      selectedDigitalProducts
+    );
+    this.activeRecommendedIndex = 0;
+  }
+
+  private pickRandomItemsWithCycle<T>(items: T[], count: number): T[] {
+    if (!items.length) return [];
+
+    const shuffled = this.shuffleArray(items);
+    if (shuffled.length >= count) {
+      return shuffled.slice(0, count);
+    }
+
+    const cycled: T[] = [];
+    for (let i = 0; i < count; i++) {
+      cycled.push(shuffled[i % shuffled.length]);
+    }
+    return cycled;
+  }
+
+  private getDigitalProductId(product: DashboardDigitalProduct): number | null {
+    const fallbackId = (product as unknown as { digitalProductId?: number }).digitalProductId;
+    const id = product.id ?? fallbackId ?? 0;
+    return id > 0 ? id : null;
   }
 
   private getRecommendedImageUrl(imagePath?: string | null): string {

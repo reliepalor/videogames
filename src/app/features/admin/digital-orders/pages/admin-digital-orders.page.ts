@@ -39,8 +39,21 @@ export class AdminDigitalOrdersPage implements OnInit {
   // ================= COMPUTED =================
 
   filteredOrders = computed(() => {
-    if (this.filterStatus() === 'All') return this.orders();
-    return this.orders().filter(o => o.status === this.filterStatus());
+    const filtered =
+      this.filterStatus() === 'All'
+        ? this.orders()
+        : this.orders().filter(o => o.status === this.filterStatus());
+
+    return [...filtered].sort((a, b) => {
+      const dateA = new Date(a.createdAt).getTime();
+      const dateB = new Date(b.createdAt).getTime();
+
+      if (!Number.isNaN(dateA) && !Number.isNaN(dateB) && dateA !== dateB) {
+        return dateB - dateA;
+      }
+
+      return b.id - a.id;
+    });
   });
 
   constructor(private digitalOrderService: DigitalOrderService) {}

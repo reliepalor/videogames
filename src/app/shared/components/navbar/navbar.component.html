@@ -425,6 +425,7 @@
           routerLink="/admin/digital-orders"
           title="Digital Orders"
           routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
           class="nav-item nav-item-enter group
                  flex items-center px-3 py-2.5 rounded-lg
                  font-medium text-sm text-slate-600
@@ -445,6 +446,46 @@
             [class.w-0]="isMinimized"
             [class.overflow-hidden]="isMinimized">
             Digital Orders
+          </span>
+        </a>
+      </div>
+    </div>
+
+        <!-- USERS SECTION -->
+    <div>
+      <div 
+        *ngIf="!isMinimized"
+        class="px-3 mb-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        Users
+      </div>
+
+      <div class="space-y-1">
+        <!-- USER LISTS  -->
+        <a
+          routerLink="/admin/user-lists"
+          title="User Lists"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="nav-item nav-item-enter group
+                 flex items-center px-3 py-2.5 rounded-lg
+                 font-medium text-sm text-slate-600
+                 hover:bg-slate-100 hover:text-slate-900
+                 transition-all duration-200"
+          [class.justify-center]="isMinimized"
+          [class.gap-3]="!isMinimized"
+          [ngClass]="{'bg-slate-900 text-white': isActiveRoute('/admin/user-lists')}">
+
+          <svg class="nav-icon w-[18px] h-[18px] flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+
+          <span 
+            class="transition-all duration-300 whitespace-nowrap"
+            [class.opacity-0]="isMinimized"
+            [class.w-0]="isMinimized"
+            [class.overflow-hidden]="isMinimized">
+            User Lists
           </span>
         </a>
       </div>

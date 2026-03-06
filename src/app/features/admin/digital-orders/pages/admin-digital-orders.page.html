@@ -153,7 +153,7 @@
 
     <button *ngFor="let status of ['All','Pending','Approved','Rejected']"
             (click)="setFilter($any(status))"
-            class="px-4 py-2 rounded-lg transition-all duration-200"
+            class="px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer"
             [ngClass]="filterStatus() === status
               ? 'bg-slate-900 text-white font-medium'
               : 'text-slate-600 hover:bg-slate-100 bg-white border border-slate-200'">
@@ -215,7 +215,7 @@
 
             <td class="px-6 py-4">
               <span
-                class="px-3 py-1 text-xs rounded-full font-medium"
+                class="px-3 py-1 text-xs rounded-full font-medium "
                 [ngClass]="{
                   'bg-amber-50 text-amber-700': order.status === 'Pending',
                   'bg-green-50 text-green-700': order.status === 'Approved',
@@ -233,7 +233,7 @@
                   (click)="executeOrderAction(order, 'approve')"
                   [disabled]="isActionLoading(order.id)"
                   class="px-3 py-1.5 rounded-lg bg-slate-900 text-white hover:bg-slate-800
-                         font-medium transition-all duration-200 disabled:opacity-50">
+                         font-medium transition-all duration-200 disabled:opacity-50 cursor-pointer">
                   {{ isActionLoading(order.id) ? 'Processing...' : 'Approve' }}
                 </button>
 
@@ -242,7 +242,7 @@
                   (click)="executeOrderAction(order, 'reject')"
                   [disabled]="isActionLoading(order.id)"
                   class="px-3 py-1.5 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50
-                         transition-all duration-200 disabled:opacity-50">
+                         transition-all duration-200 disabled:opacity-50 cursor-pointer">
                   {{ isActionLoading(order.id) ? 'Processing...' : 'Reject' }}
                 </button>
 
@@ -348,7 +348,7 @@
                   (click)="executeOrderAction(order, 'reject')"
                   [disabled]="isActionLoading(order.id)"
                   class="flex-1 px-3 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50
-                         transition-all duration-200 disabled:opacity-50">
+                         transition-all duration-200 disabled:opacity-50 cursor-pointer">
             {{ isActionLoading(order.id) ? 'Processing...' : 'Reject' }}
           </button>
 

@@ -131,8 +131,10 @@
             </button>
 
             <button
-              (click)="openBuyConfirm()"
-              [disabled]="isBuyingNow"
+              type="button"
+              (pointerdown)="armBuyConfirmOpen($event)"
+              (click)="openBuyConfirm($event)"
+              [disabled]="isBuyingNow || isBuyConfirmBlocked"
               class="flex-1 sm:flex-none px-6 py-3 bg-gray-900 text-white text-sm font-medium rounded-xl
                      hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed
                      transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer">
@@ -214,38 +216,39 @@
 <!-- ================= BUY CONFIRM MODAL ================= -->
 <div
   *ngIf="showBuyConfirmModal"
-  class="buy-modal-backdrop fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+  class="buy-modal-backdrop fixed inset-0 bg-black/45 backdrop-blur-sm flex items-center justify-center z-50 px-4"
   [class.closing]="isBuyConfirmClosing"
-  (click)="closeBuyConfirm()">
+  (pointerdown)="closeBuyConfirm($event)">
 
   <div
     class="buy-modal-panel bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
     [class.closing]="isBuyConfirmClosing"
+    (pointerdown)="$event.stopPropagation()"
     (click)="$event.stopPropagation()">
 
     <!-- HEADER -->
-    <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-5">
-      <h3 class="text-xl font-semibold text-white">Confirm Purchase</h3>
+    <div class="bg-white border-b border-gray-200 px-6 py-5">
+      <h3 class="text-xl font-semibold text-black">Confirm Purchase</h3>
     </div>
 
     <!-- CONTENT -->
     <div class="p-6 space-y-4">
       <div>
-        <p class="text-sm text-gray-600 mb-2">
+        <p class="text-sm text-black mb-2">
           You're about to purchase:
         </p>
-        <p class="text-lg font-semibold text-gray-900">
+        <p class="text-lg font-semibold text-black">
           {{ game?.title }}
         </p>
-        <p class="text-sm text-gray-500 mt-1">
+        <p class="text-sm text-black mt-1">
           {{ game?.platform }}
         </p>
       </div>
 
-      <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+      <div class="p-4 bg-white rounded-xl border border-gray-200">
         <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-600">Total</span>
-          <span class="text-2xl font-bold text-gray-900">
+          <span class="text-sm text-black">Total</span>
+          <span class="text-2xl font-bold text-black">
             ₱{{ game?.price | number:'1.2-2' }}
           </span>
         </div>
@@ -253,11 +256,11 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end border-t border-gray-200">
+    <div class="bg-white px-6 py-4 flex gap-3 justify-end border-t border-gray-200">
       <button
         type="button"
-        (click)="closeBuyConfirm()"
-        class="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700
+        (click)="closeBuyConfirm($event)"
+        class="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-black
                hover:bg-gray-100 transition">
         Cancel
       </button>

@@ -16,7 +16,7 @@ import { environment } from 'src/environments/environment';
 
 export class DigitalProductService{
 
-    private readonly API_URL = 'http://localhost:5019/api';
+    private readonly API_URL = `${environment.apiUrl}/api`;
     private readonly BASE_URL = environment.apiUrl;
 
     constructor(private http: HttpClient) {}

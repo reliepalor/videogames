@@ -58,10 +58,10 @@ import { Subscription } from 'rxjs';
     .buy-modal-panel {
       width: min(92vw, 420px);
       border-radius: 14px;
-      border: 1px solid rgba(75, 85, 99, 0.6);
-      background: rgba(17, 24, 39, 0.96);
-      color: #f9fafb;
-      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.45);
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      color: #111827;
+      box-shadow: 0 22px 60px rgba(15, 23, 42, 0.18);
       padding: 1rem;
       animation: buy-panel-in 180ms cubic-bezier(0.16, 1, 0.3, 1);
     }
@@ -103,8 +103,13 @@ export class GameDetailsComponent implements OnInit, OnDestroy {
   successTimeout?: any;
   isFadingOut = false;
   isBuyingNow = false;
+  isBuyConfirmBlocked = false;
   showBuyConfirmModal = false;
   isBuyConfirmClosing = false;
+  private buyConfirmOpenArmed = false;
+  private buyConfirmCloseTimer?: ReturnType<typeof setTimeout>;
+  private buyConfirmBlockTimer?: ReturnType<typeof setTimeout>;
+  private suppressBuyConfirmUntil = 0;
   private themeSubscription?: Subscription;
 
   ngOnInit(): void {
@@ -134,6 +139,8 @@ export class GameDetailsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.themeSubscription?.unsubscribe();
+    if (this.buyConfirmCloseTimer) clearTimeout(this.buyConfirmCloseTimer);
+    if (this.buyConfirmBlockTimer) clearTimeout(this.buyConfirmBlockTimer);
   }
 
   get isLoggedIn(): boolean {
@@ -188,15 +195,42 @@ export class GameDetailsComponent implements OnInit, OnDestroy {
     });
   }
 
-  openBuyConfirm(): void {
+  armBuyConfirmOpen(event?: Event): void {
+    event?.stopPropagation();
+    this.buyConfirmOpenArmed = true;
+  }
+
+  openBuyConfirm(event?: Event): void {
+    event?.stopPropagation();
+    event?.preventDefault();
+
+    const isSuppressed = Date.now() < this.suppressBuyConfirmUntil;
     if (!this.game?.id || this.isBuyingNow) return;
+    if (this.isBuyConfirmClosing || this.isBuyConfirmBlocked || isSuppressed) return;
+    if (!(event instanceof KeyboardEvent) && !this.buyConfirmOpenArmed) return;
+
+    this.buyConfirmOpenArmed = false;
     this.isBuyConfirmClosing = false;
     this.showBuyConfirmModal = true;
   }
 
-  closeBuyConfirm(): void {
+  closeBuyConfirm(event?: Event): void {
+    event?.stopPropagation();
+    event?.preventDefault();
+    if (!this.showBuyConfirmModal || this.isBuyConfirmClosing) return;
+
+    // Prevent delayed ghost-click/tap from reopening the modal.
+    this.isBuyConfirmBlocked = true;
+    this.buyConfirmOpenArmed = false;
+    this.suppressBuyConfirmUntil = Date.now() + 1000;
+    if (this.buyConfirmBlockTimer) clearTimeout(this.buyConfirmBlockTimer);
+    this.buyConfirmBlockTimer = setTimeout(() => {
+      this.isBuyConfirmBlocked = false;
+    }, 1000);
+
     this.isBuyConfirmClosing = true;
-    setTimeout(() => {
+    if (this.buyConfirmCloseTimer) clearTimeout(this.buyConfirmCloseTimer);
+    this.buyConfirmCloseTimer = setTimeout(() => {
       this.showBuyConfirmModal = false;
       this.isBuyConfirmClosing = false;
     }, 180);

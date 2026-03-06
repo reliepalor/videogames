@@ -6,5 +6,5 @@ export interface User {
   isAdmin?: boolean;
   isExternalAuth: boolean;
   createdAt: string;
-  LastLoginAt: string;
+  lastLoginAt: string;
 }

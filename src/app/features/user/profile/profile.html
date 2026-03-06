@@ -1,0 +1,331 @@
+﻿<div class="max-w-4xl mx-auto px-6 py-8 space-y-8">
+
+  <div *ngIf="user$ | async as user">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-semibold text-gray-900">My Profile</h1>
+
+    </div>
+
+    <!-- PROFILE OVERVIEW CARD -->
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      
+      <!-- Cover Image / Gradient -->
+      <div class="h-32 bg-gradient-to-r from-gray-900 to-gray-700"></div>
+
+      <!-- Profile Content -->
+      <div class="px-8 pb-8">
+        
+        <!-- Avatar -->
+        <div class="flex items-start justify-between -mt-16 mb-6">
+          <div class="relative">
+            <!-- Avatar Circle -->
+            <div class="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden">
+              <div class="w-full h-full bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center">
+                <span class="text-white text-4xl font-bold">
+                  {{ user.username.charAt(0).toUpperCase() }}
+                </span>
+              </div>
+            </div>
+            
+            <!-- Upload Badge (for later) -->
+            <button class="absolute bottom-0 right-0 w-10 h-10 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+          </div>
+
+          <!-- Member Badge -->
+          <div class="mt-4">
+            <span class="inline-flex items-center px-3 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">
+              Member since {{ user.createdAt | date:'MMMM yyyy' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="space-y-1 mb-6">
+          <h2 class="text-2xl font-semibold text-gray-900">{{ user.username }}</h2>
+          <p class="text-gray-600">{{ user.email }}</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-3 gap-6 pt-6 border-t border-gray-200">
+          <div class="text-center">
+            <div class="text-2xl font-semibold text-gray-900">{{ user.totalOrders || 0 }}</div>
+            <div class="text-xs text-gray-500 mt-1">Total Orders</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-semibold text-gray-900">{{ user.totalReviews || 0 }}</div>
+            <div class="text-xs text-gray-500 mt-1">Reviews Written</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-semibold text-gray-900">{{ user.totalSpent || 0 | currency:'PHP':'symbol':'1.0-0' }}</div>
+            <div class="text-xs text-gray-500 mt-1">Total Spent</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ACCOUNT INFORMATION -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
+      <h3 class="text-lg font-semibold text-gray-900 mb-6">Account Information</h3>
+      
+      <div class="space-y-4">
+        <!-- Username -->
+        <div class="flex items-center justify-between py-3 border-b border-gray-100">
+          <div>
+            <p class="text-sm font-medium text-gray-900">Username</p>
+            <p class="text-sm text-gray-600 mt-1">{{ user.username }}</p>
+          </div>
+          <button class="text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+            Change
+          </button>
+        </div>
+
+        <!-- Email -->
+        <div class="flex items-center justify-between py-3 border-b border-gray-100">
+          <div>
+            <p class="text-sm font-medium text-gray-900">Email Address</p>
+            <p class="text-sm text-gray-600 mt-1">{{ user.email }}</p>
+          </div>
+          <button class="text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+            Change
+          </button>
+        </div>
+
+        <!-- Password 
+        <div class="flex items-center justify-between py-3 border-b border-gray-100">
+          <div>
+            <p class="text-sm font-medium text-gray-900">Password</p>
+            <p class="text-sm text-gray-600 mt-1">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢</p>
+          </div>
+          <button class="text-sm font-medium text-gray-700 hover:text-gray-900 transition">
+            Change
+          </button>
+        </div>
+      -->
+        <!-- Auth Type -->
+        <div class="flex items-center justify-between py-3">
+          <div>
+            <p class="text-sm font-medium text-gray-900">Account Type</p>
+            <p class="text-sm text-gray-600 mt-1">
+              <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="user.isExternalAuth 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-gray-100 text-gray-700'">
+                {{ user.isExternalAuth ? 'Google/Firebase Authentication' : 'Local Account' }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MY REVIEWS -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900">My Reviews</h3>
+        <span class="text-sm text-gray-500">{{ user.totalReviews || 0 }} reviews</span>
+      </div>      <ng-container *ngIf="(user.reviewedGames?.length || 0) > 0; else noReviewsYet">
+        <div class="space-y-3">
+          <div *ngFor="let reviewed of user.reviewedGames" class="flex items-center justify-between py-3 px-4 rounded-lg border border-gray-200 bg-gray-50">
+            <div class="flex items-center gap-3">
+              <img
+                [src]="getReviewedImageUrl(reviewed)"
+                [alt]="getReviewedTitle(reviewed)"
+                class="w-8 h-8 rounded object-cover border border-gray-200" />
+              <a
+                *ngIf="getReviewedGameId(reviewed) as reviewedGameId"
+                [routerLink]="['/games', reviewedGameId, 'reviews']"
+                class="text-sm font-medium text-gray-900 hover:underline">
+                {{ getReviewedTitle(reviewed) }}
+              </a>
+              <span *ngIf="!getReviewedGameId(reviewed)" class="text-sm font-medium text-gray-900">{{ getReviewedTitle(reviewed) }}</span>
+            </div>
+            <span class="text-xs text-gray-500">Reviewed</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noReviewsYet>
+        <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+          <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          </svg>
+          <p class="text-sm text-gray-500 mb-2">You haven't written any reviews yet</p>
+          <button class="text-sm font-medium text-gray-900 hover:underline">
+            Browse Games to Review
+          </button>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- PURCHASE HISTORY -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mt-4">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-lg font-semibold text-gray-900">Recent Orders</h3>
+        <button
+          class="text-sm font-medium text-gray-700 hover:text-gray-900 transition disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          [disabled]="(user.allOrders?.length || 0) === 0"
+          (click)="openAllOrdersModal()">
+          View All
+        </button>
+      </div>
+
+      <ng-container *ngIf="(user.recentOrders?.length || 0) > 0; else noOrdersYet">
+        <div class="space-y-3">
+          <div *ngFor="let order of user.recentOrders" class="flex items-center justify-between py-3 px-4 rounded-lg border border-gray-200 bg-gray-50">
+            <div class="min-w-0">
+              <p class="text-sm font-medium text-gray-900 truncate">{{ order.title }}</p>
+              <p class="text-xs text-gray-500 mt-1">
+                #{{ order.id }} Â· {{ order.type === 'digital' ? 'Digital' : 'Game' }} Â· Qty {{ order.quantity }} Â· {{ order.createdAt | date:'mediumDate' }}
+              </p>
+            </div>
+            <div class="text-right ml-4">
+              <p class="text-sm font-semibold text-gray-900">{{ order.totalPrice | currency:'PHP':'symbol':'1.0-0' }}</p>
+              <p class="text-xs text-green-700">{{ order.status }}</p>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-template #noOrdersYet>
+        <div class="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg">
+          <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <p class="text-sm text-gray-500 mb-2">No orders yet</p>
+          <button class="text-sm font-medium text-gray-900 hover:underline">
+            Start Shopping
+          </button>
+        </div>
+      </ng-template>
+    </div>
+
+    <div
+      *ngIf="showAllOrdersModal"
+      class="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4"
+      (click)="closeAllOrdersModal()">
+      <div
+        class="w-full max-w-2xl bg-white rounded-xl border border-gray-200 shadow-xl p-6 max-h-[80vh] overflow-hidden"
+        (click)="$event.stopPropagation()">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-semibold text-gray-900">All Orders</h4>
+          <button class="text-sm font-medium text-gray-600 hover:text-gray-900" (click)="closeAllOrdersModal()">
+            Close
+          </button>
+        </div>
+
+        <div class="overflow-auto max-h-[65vh] pr-1">
+          <div class="space-y-2 md:hidden">
+            <div
+              *ngFor="let order of user.allOrders"
+              class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+              <p class="text-sm font-medium text-gray-900">{{ order.title }}</p>
+              <p class="text-xs text-gray-500 mt-1">#{{ order.id }} · {{ order.createdAt | date:'mediumDate' }}</p>
+              <div class="mt-2 flex items-center justify-between text-xs text-gray-600">
+                <span>{{ order.type === 'digital' ? 'Digital' : 'Game' }}</span>
+                <span>Qty {{ order.quantity }}</span>
+                <span class="text-green-700">{{ order.status }}</span>
+              </div>
+              <p class="mt-2 text-sm font-semibold text-gray-900">{{ order.totalPrice | currency:'PHP':'symbol':'1.0-0' }}</p>
+            </div>
+          </div>
+
+          <div class="hidden md:block">
+            <table class="min-w-full text-sm">
+              <thead class="sticky top-0 bg-white">
+                <tr class="text-left text-gray-500 border-b border-gray-200">
+                  <th class="py-2 pr-3 font-medium">Order</th>
+                  <th class="py-2 pr-3 font-medium">Type</th>
+                  <th class="py-2 pr-3 font-medium">Qty</th>
+                  <th class="py-2 pr-3 font-medium">Date</th>
+                  <th class="py-2 pr-3 font-medium">Status</th>
+                  <th class="py-2 text-right font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let order of user.allOrders" class="border-b border-gray-100">
+                  <td class="py-2 pr-3">
+                    <p class="font-medium text-gray-900 truncate max-w-[220px]">{{ order.title }}</p>
+                    <p class="text-xs text-gray-500">#{{ order.id }}</p>
+                  </td>
+                  <td class="py-2 pr-3 text-gray-700">{{ order.type === 'digital' ? 'Digital' : 'Game' }}</td>
+                  <td class="py-2 pr-3 text-gray-700">{{ order.quantity }}</td>
+                  <td class="py-2 pr-3 text-gray-700">{{ order.createdAt | date:'mediumDate' }}</td>
+                  <td class="py-2 pr-3 text-green-700">{{ order.status }}</td>
+                  <td class="py-2 text-right font-semibold text-gray-900">{{ order.totalPrice | currency:'PHP':'symbol':'1.0-0' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUPPORT & SETTINGS -->
+    <div class="grid md:grid-cols-2">
+      
+      <!-- Contact Support -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 mt-2">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-semibold text-gray-900 mb-1">Need Help?</h4>
+            <p class="text-sm text-gray-600 mb-3">Contact our support team for assistance</p>
+            <button class="text-sm font-medium text-gray-900 hover:underline">
+              Open Conversation â†’
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Settings -->
+      <div class="bg-white rounded-xl border border-gray-200 p-6 mt-2 ">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-sm font-semibold text-gray-900 mb-1">Preferences</h4>
+            <p class="text-sm text-gray-600 mb-3">Manage notifications and settings</p>
+            <button class="text-sm font-medium text-gray-900 hover:underline">
+              Manage Settings â†’
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- DANGER ZONE -->
+    <div class="bg-white rounded-xl border border-red-200 p-6 mt-2">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h3>
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-900">Delete Account</p>
+          <p class="text-sm text-gray-600 mt-1">Permanently delete your account and all data</p>
+        </div>
+        <button class="px-4 py-2 text-sm font-medium text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition">
+          Delete Account
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+
