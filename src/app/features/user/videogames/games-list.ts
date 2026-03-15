@@ -1,28 +1,81 @@
 import {
   Observable,
   filter,
-  startWith,
-  switchMap,
   BehaviorSubject,
   combineLatest,
   map,
   Subscription,
   Subject,
   of,
+  defer,
   debounceTime,
+  startWith,
+  shareReplay,
 } from 'rxjs'
 import { takeUntil, finalize, catchError } from 'rxjs/operators';
-import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewEncapsulation } from '@angular/core'
+import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef, ViewEncapsulation, PLATFORM_ID } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
 import { VideoGameService } from '../../../core/services/videogame.service'
 import { CartService } from '../../../core/services/cart.service'
+import { CartService as MockCartService } from 'src/app/services/cart.service'
 import { ThemeService } from '../../../core/services/theme.service'
 import { VideoGame } from '../../../core/models/videogame.model'
+import { Game } from 'src/app/models/game.model'
 import { environment } from 'src/environments/environment';
 import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component'
 import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
+
+const DEMO_GAMES: VideoGame[] = [
+  {
+    id: 1,
+    title: 'Elden Ring',
+    platform: 'PC',
+    developer: 'Orbit Pixel Studio',
+    publisher: 'Blue Arcade',
+    price: 29.99,
+    imageUrl: '/assets/games/elden-ring.png',
+  },
+  {
+    id: 2,
+    title: 'Kingdoms of Ember',
+    platform: 'PlayStation 5',
+    developer: 'Iron Lantern Games',
+    publisher: 'Northwind Interactive',
+    price: 59.99,
+    imageUrl: '/assets/games/kingdoms-of-ember.png',
+  },
+  {
+    id: 3,
+    title: 'Starline Protocol',
+    platform: 'Xbox Series X|S',
+    developer: 'Helios Forge',
+    publisher: 'Epoch Entertainment',
+    price: 49.99,
+    imageUrl: '/assets/games/starline-protocol.jpg',
+  },
+  {
+    id: 4,
+    title: 'Echoes of Hollow Reef',
+    platform: 'Nintendo Switch',
+    developer: 'Tidebound Works',
+    publisher: 'Maple Finch',
+    price: 39.99,
+    imageUrl: '/assets/games/echoes-of-hollow-reef.jpg',
+  },
+  {
+    id: 5,
+    title: 'Rogue Circuit',
+    platform: 'PC',
+    developer: 'Silver Glyph',
+    publisher: 'Vector Realm',
+    price: 24.99,
+    imageUrl: '/assets/games/rogue-circuit.png',
+  },
+]
 
 
 @Component({
@@ -36,8 +89,11 @@ import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scro
 })
 export class GamesListComponent implements OnInit, OnDestroy {
   apiUrl = environment.apiUrl;
+  private http = inject(HttpClient)
+  private platformId = inject(PLATFORM_ID)
   private videoGameService = inject(VideoGameService)
   private cartService = inject(CartService)
+  private mockCartService = inject(MockCartService)
   private themeService = inject(ThemeService)
   private router = inject(Router)
   private ngZone = inject(NgZone)
@@ -45,12 +101,47 @@ export class GamesListComponent implements OnInit, OnDestroy {
 
   viewMode: 'table' | 'card' = 'card'
   isDarkMode = false
+  isInitialLoading = true
+  private isBrowser = isPlatformBrowser(this.platformId)
+  useMockData = environment.useMockData
 
-  private reload$ = new BehaviorSubject<void>(undefined)
+  private mockGames$: Observable<VideoGame[]> = defer(() => {
+    if (!this.isBrowser) {
+      return of(DEMO_GAMES)
+    }
 
-  games$: Observable<VideoGame[]> = this.reload$.pipe(
-    startWith(null),
-    switchMap(() => this.videoGameService.getAll())
+    return this.http.get<VideoGame[]>('/assets/mock/games.json').pipe(
+      map(games => (games?.length ? games : DEMO_GAMES)),
+      catchError(() => of(DEMO_GAMES))
+    )
+  }).pipe(shareReplay(1))
+
+  private backendGames$: Observable<VideoGame[] | null> = defer(() => {
+    if (!this.isBrowser || this.useMockData) {
+      return of(null)
+    }
+
+    return this.videoGameService.getAll().pipe(
+      map(games => games ?? []),
+      catchError(() => of(null)),
+      // Allow combineLatest to emit mock data immediately.
+      startWith(null)
+    )
+  }).pipe(shareReplay(1))
+
+  games$: Observable<VideoGame[]> = combineLatest([
+    this.mockGames$,
+    this.backendGames$,
+  ]).pipe(
+    map(([mockGames, backendGames]) => {
+      // When backend responds successfully (even with empty array), prefer backend data.
+      if (backendGames !== null) {
+        return backendGames
+      }
+
+      return mockGames
+    }),
+    shareReplay(1)
   )
 
   private navigationSub?: Subscription;
@@ -149,6 +240,11 @@ export class GamesListComponent implements OnInit, OnDestroy {
   private filteredGamesSub?: Subscription
 
   ngOnInit(): void {
+    setTimeout(() => {
+      this.isInitialLoading = false;
+      this.cdr.detectChanges();
+    }, 2000);
+
     this.themeService.isDarkMode$.pipe(takeUntil(this.destroy$)).subscribe(isDark => {
       this.isDarkMode = isDark;
       this.cdr.detectChanges();
@@ -159,22 +255,26 @@ export class GamesListComponent implements OnInit, OnDestroy {
       this.updatePagination(games)
     })
 
-    const toastStr = localStorage.getItem('toast')
-    if (toastStr) {
-      const toast = JSON.parse(toastStr)
-      this.showSuccessMessage(toast.message)
-      localStorage.removeItem('toast')
+    if (this.isBrowser) {
+      const toastStr = localStorage.getItem('toast')
+      if (toastStr) {
+        const toast = JSON.parse(toastStr)
+        this.showSuccessMessage(toast.message)
+        localStorage.removeItem('toast')
+      }
     }
 
     this.navigationSub = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       filter(() => this.router.url === '/games')
     ).subscribe(() => {
-      const toastStr = localStorage.getItem('toast')
-      if (toastStr) {
-        const toast = JSON.parse(toastStr)
-        this.showSuccessMessage(toast.message)
-        localStorage.removeItem('toast')
+      if (this.isBrowser) {
+        const toastStr = localStorage.getItem('toast')
+        if (toastStr) {
+          const toast = JSON.parse(toastStr)
+          this.showSuccessMessage(toast.message)
+          localStorage.removeItem('toast')
+        }
       }
     })
   }
@@ -229,9 +329,6 @@ export class GamesListComponent implements OnInit, OnDestroy {
     this.paginatedGames = games.slice(startIndex, endIndex)
     
     this.cdr.detectChanges()
-    
-    // Scroll to top smoothly when page changes
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   goToPage(page: number): void {
@@ -241,6 +338,10 @@ export class GamesListComponent implements OnInit, OnDestroy {
     this.filteredGames$.pipe(takeUntil(this.destroy$)).subscribe(games => {
       this.updatePagination(games)
     })
+
+    if (this.isBrowser) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   getStartIndex(): number {
@@ -287,6 +388,13 @@ export class GamesListComponent implements OnInit, OnDestroy {
     if (this.loadingGames.has(id)) return;
     this.loadingGames.add(id);
     this.cdr.detectChanges();
+
+    if (this.useMockData) {
+      this.mockCartService.addToCart(game as Game);
+      this.loadingGames.delete(id);
+      this.showSuccessMessage(`Added ${game.title} to cart!`);
+      return;
+    }
 
     this.cartService.addToCart(id, 1).subscribe({
       next: () => {

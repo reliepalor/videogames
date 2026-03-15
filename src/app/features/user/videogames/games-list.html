@@ -19,7 +19,7 @@
 
 
 <!-- MAIN -->
-<div *ngIf="filteredGames$ | async as games; else loadingSkeleton"
+<div *ngIf="!isInitialLoading && (filteredGames$ | async) as games; else loadingSkeleton"
      class="games-page min-h-screen bg-white text-[#111] mt-4">
 
   <!-- HERO -->

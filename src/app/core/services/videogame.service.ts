@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { VideoGame } from '../models/videogame.model';
+import { Game } from '../../models/game.model';
 import { environment } from '../../../environments/environment';
 
-interface VideoGameApiResponse extends Omit<VideoGame, 'imageUrl'> {
+interface VideoGameApiResponse extends Omit<Game, 'imageUrl'> {
   imagePath?: string;
 }
 
@@ -16,7 +16,7 @@ export class VideoGameService {
   private API = `${environment.apiUrl}/api/videogame`;
   private apiUrl = environment.apiUrl;
 
-  getAll(): Observable<VideoGame[]> {
+  getAll(): Observable<Game[]> {
     return this.http.get<VideoGameApiResponse[]>(this.API).pipe(
       map(games =>
         games.map(game => ({
@@ -27,8 +27,8 @@ export class VideoGameService {
     );
   }
 
-  getById(id: number): Observable<VideoGame> {
-    return this.http.get<VideoGame>(`${this.API}/${id}`).pipe(
+  getById(id: number): Observable<Game> {
+    return this.http.get<Game>(`${this.API}/${id}`).pipe(
       map(game => ({
         ...game,
         imageUrl: (game as any).imagePath ? `${this.apiUrl}${(game as any).imagePath}` : undefined
@@ -37,7 +37,7 @@ export class VideoGameService {
   }
 
   create(formData: FormData) {
-    return this.http.post<VideoGame>(this.API, formData);
+    return this.http.post<Game>(this.API, formData);
   }
 
   update(id: number, formData: FormData) {

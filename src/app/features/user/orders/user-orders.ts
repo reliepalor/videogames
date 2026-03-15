@@ -9,6 +9,8 @@ import { ReviewService } from '../../../core/services/review.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { CartService as MockCartService, DemoOrder } from 'src/app/services/cart.service';
 
 @Component({
   standalone: true,
@@ -24,8 +26,10 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   private themeService = inject(ThemeService);
   private authService = inject(AuthService);
   private reviewService = inject(ReviewService);
+  private mockCartService = inject(MockCartService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  useMockData = environment.useMockData;
 
   orders: UserOrder[] = [];
   digitalOrders: DigitalOrder[] = [];
@@ -67,6 +71,11 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
   }
 
   loadOrders() {
+    if (this.useMockData) {
+      this.loadMockOrders();
+      return;
+    }
+
     this.loading = true;
     this.errorMsg = '';
 
@@ -91,6 +100,55 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private loadMockOrders(): void {
+    this.loading = true;
+    this.errorMsg = '';
+
+    const demoOrders = this.mockCartService.getMockOrders();
+    this.orders = demoOrders.map(order => this.mapDemoOrderToUserOrder(order));
+    this.digitalOrders = [];
+    this.loading = false;
+    this.cdr.detectChanges();
+  }
+
+  private mapDemoOrderToUserOrder(order: DemoOrder): UserOrder {
+    const grouped = new Map<number, { title: string; price: number; quantity: number; imageUrl?: string }>();
+
+    for (const game of order.items) {
+      const key = game.id ?? 0;
+      const current = grouped.get(key);
+      if (current) {
+        current.quantity += 1;
+      } else {
+        grouped.set(key, {
+          title: game.title,
+          price: game.price,
+          quantity: 1,
+          imageUrl: game.imageUrl,
+        });
+      }
+    }
+
+    const items: UserOrderItem[] = Array.from(grouped.entries()).map(([gameId, item], index) => ({
+      id: index + 1,
+      gameTitle: item.title,
+      unitPrice: item.price,
+      quantity: item.quantity,
+      imageUrl: item.imageUrl || '/assets/no-image.png',
+      videoGameId: gameId || undefined,
+      productKey: null,
+    }));
+
+    return {
+      id: order.id,
+      totalPrice: order.totalPrice,
+      status: order.status,
+      createdAt: order.createdAt,
+      items,
+      showItems: false,
+    };
   }
 
   getStatusLabel(status: number) {

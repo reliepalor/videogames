@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "title": "Elden Ring",
+    "platform": "PC",
+    "developer": "Orbit Pixel Studio",
+    "publisher": "Blue Arcade",
+    "price": 29.99,
+    "imageUrl": "/assets/games/elden-ring.png"
+  },
+  {
+    "id": 2,
+    "title": "Kingdoms of Ember",
+    "platform": "PlayStation 5",
+    "developer": "Iron Lantern Games",
+    "publisher": "Northwind Interactive",
+    "price": 59.99,
+    "imageUrl": "/assets/games/kingdoms-of-ember.png"
+  },
+  {
+    "id": 3,
+    "title": "Starline Protocol",
+    "platform": "Xbox Series X|S",
+    "developer": "Helios Forge",
+    "publisher": "Epoch Entertainment",
+    "price": 49.99,
+    "imageUrl": "/assets/games/starline-protocol.jpg"
+  },
+  {
+    "id": 4,
+    "title": "Echoes of Hollow Reef",
+    "platform": "Nintendo Switch",
+    "developer": "Tidebound Works",
+    "publisher": "Maple Finch",
+    "price": 39.99,
+    "imageUrl": "/assets/games/echoes-of-hollow-reef.jpg"
+  },
+  {
+    "id": 5,
+    "title": "Rogue Circuit",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/rogue-circuit.png"
+  }
+]

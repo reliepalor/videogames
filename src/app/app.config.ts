@@ -10,6 +10,10 @@ import { provideToastr } from 'ngx-toastr';
 
 import { routes } from './app.routes';
 import { AuthInterceptor } from './core/interceptors/auth.interceptors';
+import { environment } from '../environments/environment';
+import { VideoGameService } from './core/services/videogame.service';
+import { GameApiService } from './services/game-api.service';
+import { GameMockService } from './services/videogame-mock.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -24,6 +28,11 @@ export const appConfig: ApplicationConfig = {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
+    },
+
+    {
+      provide: VideoGameService,
+      useClass: environment.useMockData ? GameMockService : GameApiService,
     },
 
     provideToastr({

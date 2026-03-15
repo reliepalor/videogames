@@ -4,6 +4,9 @@ import { Router } from '@angular/router';
 import { OrderService } from 'src/app/core/services/order.service';
 import { CartService, Cart } from 'src/app/core/services/cart.service';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { CartService as MockCartService } from 'src/app/services/cart.service';
+import { Game } from 'src/app/models/game.model';
 
 @Component({
   standalone: true,
@@ -14,12 +17,14 @@ import { BehaviorSubject } from 'rxjs';
 export class CheckoutComponent implements OnInit {
   private orderService = inject(OrderService);
   cartService = inject(CartService);
+  private mockCartService = inject(MockCartService);
   private router = inject(Router);
   private ngZone = inject(NgZone);
   private cdr = inject(ChangeDetectorRef);
 
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   cart$ = this.cartSubject.asObservable();
+  useMockData = environment.useMockData;
 
   isLoading = false;
   errorMessage = '';
@@ -35,15 +40,65 @@ export class CheckoutComponent implements OnInit {
   }
 
   private loadCart() {
+    if (this.useMockData) {
+      this.loadMockCart();
+      return;
+    }
+
     this.cartService.getCart().subscribe({
       next: (cart) => this.cartSubject.next(cart),
       error: () => this.errorMessage = 'Failed to load cart'
     });
   }
 
+  private loadMockCart(): void {
+    const games = this.mockCartService.getCart();
+    const grouped = new Map<number, { game: Game; quantity: number }>();
+
+    for (const game of games) {
+      const key = game.id ?? 0;
+      const current = grouped.get(key);
+      if (current) {
+        current.quantity += 1;
+      } else {
+        grouped.set(key, { game, quantity: 1 });
+      }
+    }
+
+    const items = Array.from(grouped.values()).map((entry, index) => ({
+      cartItemId: index + 1,
+      sourceCartItemId: index + 1,
+      id: index + 1,
+      videoGameId: entry.game.id ?? index + 1,
+      title: entry.game.title,
+      price: entry.game.price,
+      quantity: entry.quantity,
+      videoGame: {
+        id: entry.game.id ?? index + 1,
+        title: entry.game.title,
+        price: entry.game.price,
+        imageUrl: entry.game.imageUrl || '/assets/no-image.png',
+      },
+    }));
+
+    this.cartSubject.next({ items });
+  }
+
   checkout() {
     if (this.cartItemsToCheckout.length === 0) {
       this.errorMessage = 'Please select at least one item to checkout.';
+      return;
+    }
+
+    if (this.useMockData) {
+      this.isLoading = true;
+      const message = this.mockCartService.checkout();
+      this.showSuccessMessage(message);
+      this.isLoading = false;
+
+      setTimeout(() => {
+        this.router.navigate(['/orders']);
+      }, 1200);
       return;
     }
 

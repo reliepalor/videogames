@@ -2,11 +2,14 @@ import { Component, OnInit, OnDestroy, inject, NgZone, ChangeDetectorRef, signal
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService, CartItem } from 'src/app/core/services/cart.service';
+import { CartService as BackendCartService, CartItem } from 'src/app/core/services/cart.service';
 import { OrderService } from 'src/app/core/services/order.service';
 import { VideoGameService } from 'src/app/core/services/videogame.service';
 import { ThemeService } from 'src/app/core/services/theme.service';
 import { Subscription } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { CartService as MockCartService } from 'src/app/services/cart.service';
+import { Game } from 'src/app/models/game.model';
 
 interface CartItemWithSelection extends CartItem {
   selected: boolean;
@@ -32,6 +35,7 @@ export class CartComponent implements OnInit, OnDestroy {
   errorMsg = '';
   showSuccessModal = false;
   showRemoveSuccessModal = false;
+  useMockData = environment.useMockData;
 
   isDarkMode = signal(false);
   private themeSub?: Subscription;
@@ -40,7 +44,8 @@ export class CartComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   constructor(
-    private cartService: CartService,
+    private cartService: BackendCartService,
+    private mockCartService: MockCartService,
     private orderService: OrderService,
     private videoGameService: VideoGameService,
     private router: Router,
@@ -54,6 +59,10 @@ export class CartComponent implements OnInit, OnDestroy {
     });
 
     this.loadCart();
+
+    if (this.useMockData) {
+      return;
+    }
 
     this.cartService.cart$.subscribe({
       next: cart => {
@@ -84,6 +93,11 @@ export class CartComponent implements OnInit, OnDestroy {
 
   /* ================= LOAD CART ================= */
   loadCart(): void {
+    if (this.useMockData) {
+      this.loadMockCart();
+      return;
+    }
+
     this.loadingCart = true;
     this.cartService.getCart().subscribe({
       next: res => {
@@ -120,6 +134,41 @@ export class CartComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
+  private loadMockCart(): void {
+    this.loadingCart = true;
+
+    const raw = this.mockCartService.getCart();
+    const grouped = new Map<number, { game: Game; quantity: number }>();
+
+    for (const game of raw) {
+      const key = game.id ?? 0;
+      const existing = grouped.get(key);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        grouped.set(key, { game, quantity: 1 });
+      }
+    }
+
+    this.cartItems = Array.from(grouped.values()).map((entry, index) => ({
+      cartItemId: index + 1,
+      sourceCartItemId: index + 1,
+      id: index + 1,
+      videoGameId: entry.game.id ?? index + 1,
+      title: entry.game.title,
+      price: entry.game.price,
+      quantity: entry.quantity,
+      selected: false,
+      subtotal: (entry.game.price || 0) * entry.quantity,
+      imageUrl: entry.game.imageUrl || '/assets/no-image.png',
+    }));
+
+    this.filteredItems = [...this.cartItems];
+    this.loadingCart = false;
+    this.errorMsg = '';
+    this.cdr.detectChanges();
+  }
+
   /* ================= FILTER ================= */
   filterItems(): void {
     this.filteredItems = this.cartItems.filter(i =>
@@ -141,6 +190,12 @@ export class CartComponent implements OnInit, OnDestroy {
     if (qty < 1) return;
     item.quantity = qty;
 
+    if (this.useMockData) {
+      this.mockCartService.setQuantity(item.videoGameId, qty);
+      this.loadMockCart();
+      return;
+    }
+
     this.cartService.updateQuantity(item.cartItemId, qty).subscribe({
       next: () => this.loadCart(),
       error: err => {
@@ -152,6 +207,20 @@ export class CartComponent implements OnInit, OnDestroy {
 
   /* ================= REMOVE ================= */
   removeItem(item: CartItemWithSelection): void {
+    if (this.useMockData) {
+      this.mockCartService.removeFromCart(item.videoGameId);
+      this.ngZone.run(() => {
+        this.showRemoveSuccessModal = true;
+        this.cdr.detectChanges();
+        setTimeout(() => this.ngZone.run(() => {
+          this.showRemoveSuccessModal = false;
+          this.cdr.detectChanges();
+        }), 2000);
+        this.loadMockCart();
+      });
+      return;
+    }
+
     this.cartService.removeItem(item.videoGameId).subscribe({
       next: () => {
         this.ngZone.run(() => {
@@ -198,6 +267,23 @@ export class CartComponent implements OnInit, OnDestroy {
 
     if (!cartItemIds.length) {
       this.errorMsg = 'Please select at least one item.';
+      return;
+    }
+
+    if (this.useMockData) {
+      this.loading = true;
+      const message = this.mockCartService.checkout();
+      this.loading = false;
+      this.errorMsg = '';
+      this.showSuccessModal = true;
+      this.cdr.detectChanges();
+      localStorage.setItem('toast', JSON.stringify({ message }));
+
+      this.ngZone.run(() => {
+        setTimeout(() => {
+          this.router.navigate(['/orders']);
+        }, 1200);
+      });
       return;
     }
 

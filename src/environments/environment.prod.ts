@@ -1,5 +1,5 @@
 export const environment = {
-  production: false,
+  production: true,
   apiUrl: 'http://localhost:5019',
   useMockData: true,
 
@@ -12,5 +12,3 @@ export const environment = {
     appId: "1:1025422384054:web:2ec30d22703e53ee2b3f17"
   }
 };
-
-
