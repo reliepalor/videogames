@@ -363,6 +363,9 @@ export class UserOrdersComponent implements OnInit, OnDestroy {
       order.digitalProduct?.imagePath?.trim();
 
     if (!path) return null;
+    if (path.startsWith('/assets/') || path.startsWith('assets/')) {
+      return path.startsWith('/') ? path : `/${path}`;
+    }
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
 
     const normalized = path.startsWith('/') ? path : `/${path}`;

@@ -66,15 +66,7 @@ const DEMO_GAMES: VideoGame[] = [
     price: 39.99,
     imageUrl: '/assets/games/echoes-of-hollow-reef.jpg',
   },
-  {
-    id: 5,
-    title: 'Rogue Circuit',
-    platform: 'PC',
-    developer: 'Silver Glyph',
-    publisher: 'Vector Realm',
-    price: 24.99,
-    imageUrl: '/assets/games/rogue-circuit.png',
-  },
+ 
 ]
 
 
@@ -236,14 +228,19 @@ export class GamesListComponent implements OnInit, OnDestroy {
   successTimeout?: any
   isFadingOut = false
   loadingGames = new Set<number>()
+  private currentFilteredGames: VideoGame[] = []
 
   private filteredGamesSub?: Subscription
 
   ngOnInit(): void {
+    const initialSkeletonDelayMs = this.useMockData ? 1000 : 2000;
+
     setTimeout(() => {
-      this.isInitialLoading = false;
-      this.cdr.detectChanges();
-    }, 2000);
+      this.ngZone.run(() => {
+        this.isInitialLoading = false;
+        this.cdr.detectChanges();
+      });
+    }, initialSkeletonDelayMs);
 
     this.themeService.isDarkMode$.pipe(takeUntil(this.destroy$)).subscribe(isDark => {
       this.isDarkMode = isDark;
@@ -252,7 +249,11 @@ export class GamesListComponent implements OnInit, OnDestroy {
 
     // Subscribe to filtered games and update pagination
     this.filteredGamesSub = this.filteredGames$.subscribe(games => {
-      this.updatePagination(games)
+      this.ngZone.run(() => {
+        this.currentFilteredGames = games
+        this.updatePagination(games)
+        this.cdr.detectChanges()
+      })
     })
 
     if (this.isBrowser) {
@@ -307,9 +308,7 @@ export class GamesListComponent implements OnInit, OnDestroy {
 
   onItemsPerPageChange(): void {
     this.currentPage = 1 // Reset to first page when changing items per page
-    this.filteredGames$.pipe(takeUntil(this.destroy$)).subscribe(games => {
-      this.updatePagination(games)
-    })
+    this.updatePagination(this.currentFilteredGames)
   }
 
   // Pagination methods
@@ -334,10 +333,8 @@ export class GamesListComponent implements OnInit, OnDestroy {
   goToPage(page: number): void {
     if (page < 1 || page > this.totalPages) return
     this.currentPage = page
-    
-    this.filteredGames$.pipe(takeUntil(this.destroy$)).subscribe(games => {
-      this.updatePagination(games)
-    })
+
+    this.updatePagination(this.currentFilteredGames)
 
     if (this.isBrowser) {
       window.scrollTo({ top: 0, behavior: 'smooth' })

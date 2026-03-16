@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Microsoft Word",
+    "brand": "MS Office",
+    "platform": "PC / Xbox",
+    "productType": 1,
+    "licenseDuration": 2,
+    "price": 799,
+    "description": "Subscription access for a 3-month period.",
+    "imagePath": "/assets/digital-products/word.png",
+    "stock": 12,
+    "availableKeys": 12,
+    "isActive": true
+  },
+  {
+    "id": 2,
+    "name": "Microsoft Excel",
+    "brand": "MS Office",
+    "platform": "PC / Xbox",
+    "productType": 1,
+    "licenseDuration": 2,
+    "price": 799,
+    "description": "Subscription access for a 3-month period.",
+    "imagePath": "/assets/digital-products/excel1.png",
+    "stock": 12,
+    "availableKeys": 12,
+    "isActive": true
+  },
+  {
+    "id": 3,
+    "name": "Photoshop",
+    "brand": "Premiere",
+    "platform": "Editing Platform",
+    "productType": 0,
+    "licenseDuration": 0,
+    "price": 500,
+    "description": "Easy Editing Platform",
+    "imagePath": "/assets/digital-products/ps.png",
+    "stock": 8,
+    "availableKeys": 8,
+    "isActive": true
+  },
+  {
+    "id": 4,
+    "name": "Windows 11 Home",
+    "brand": "Microsoft Windows",
+    "platform": "Windows",
+    "productType": 1,
+    "licenseDuration": 3,
+    "price": 2599,
+    "description": "Core OS for personal computers — installs and runs apps, games, and software.",
+    "imagePath": "/assets/digital-products/win11.jpg",
+    "stock": 6,
+    "availableKeys": 6,
+    "isActive": true
+  },
+  {
+    "id": 5,
+    "name": "Adobe Premiere Pro",
+    "brand": "Adobe",
+    "platform": "Windows, MacOs",
+    "productType": 0,
+    "licenseDuration": 0,
+    "price": 300,
+    "description": "Professional software for editing videos and films.",
+    "imagePath": "/assets/digital-products/pr.png",
+    "stock": 15,
+    "availableKeys": 15,
+    "isActive": true
+  }
+]

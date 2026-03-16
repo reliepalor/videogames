@@ -83,6 +83,10 @@ export class DigitalProductTable implements OnChanges {
       return null;
     }
 
+    if (path.startsWith('/assets/') || path.startsWith('assets/')) {
+      return path.startsWith('/') ? path : `/${path}`;
+    }
+
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 
 export interface OrderItemApproval {
   orderItemId: number;
@@ -34,19 +34,143 @@ export interface Order {
 export class AdminOrdersService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+  private readonly useMockData = environment.useMockData;
+  private readonly mockOrdersStorageKey = 'demo_orders';
+  private readonly mockOrderKeysStorageKey = 'demo_order_item_keys';
 
   getPendingOrders(): Observable<Order[]> {
+    if (this.useMockData) {
+      const orders = this.readMockOrders();
+      return of(orders.map(order => this.toOrderFromMock(order)));
+    }
+
     return this.http.get<unknown[]>(`${this.apiUrl}/admin/orders/pending`).pipe(
       map((rows) => (rows ?? []).map((row) => this.toOrder(row)))
     );
   }
 
   approveOrder(orderId: number, items: OrderItemApproval[]) {
+    if (this.useMockData) {
+      const orders = this.readMockOrders();
+      const orderIndex = orders.findIndex(order => Number(order['id']) === orderId);
+
+      if (orderIndex < 0) {
+        throw new Error('Order not found in mock data.');
+      }
+
+      orders[orderIndex] = {
+        ...orders[orderIndex],
+        status: 1,
+      };
+
+      const keys = this.readFromStorage<Record<string, string>>(this.mockOrderKeysStorageKey, {});
+      for (const item of items ?? []) {
+        keys[`${orderId}:${item.orderItemId}`] = item.productKey;
+      }
+
+      this.writeToStorage(this.mockOrderKeysStorageKey, keys);
+      this.writeToStorage(this.mockOrdersStorageKey, orders);
+      return of({ message: 'Mock order approved.' });
+    }
+
     return this.http.post(`${this.apiUrl}/admin/orders/${orderId}/approve`, { items });
   }
 
   rejectOrder(orderId: number, reason?: string) {
+    if (this.useMockData) {
+      const orders = this.readMockOrders();
+      const orderIndex = orders.findIndex(order => Number(order['id']) === orderId);
+
+      if (orderIndex < 0) {
+        throw new Error('Order not found in mock data.');
+      }
+
+      orders[orderIndex] = {
+        ...orders[orderIndex],
+        status: 2,
+      };
+
+      this.writeToStorage(this.mockOrdersStorageKey, orders);
+      return of({ message: 'Mock order rejected.' });
+    }
+
     return this.http.post(`${this.apiUrl}/admin/orders/${orderId}/reject`, null);
+  }
+
+  private toOrderFromMock(row: Record<string, unknown>): Order {
+    const games = (row['items'] as Array<Record<string, unknown>> | undefined) ?? [];
+    const grouped = new Map<string, { title: string; quantity: number; unitPrice: number }>();
+
+    for (const game of games) {
+      const title = String(game['title'] ?? 'Game');
+      const unitPrice = Number(game['price'] ?? 0);
+      const key = title.toLowerCase();
+      const current = grouped.get(key);
+      if (current) {
+        current.quantity += 1;
+      } else {
+        grouped.set(key, { title, quantity: 1, unitPrice });
+      }
+    }
+
+    const keys = this.readFromStorage<Record<string, string>>(this.mockOrderKeysStorageKey, {});
+    const mockOrderId = Number(row['id'] ?? 0);
+    const items: OrderItem[] = Array.from(grouped.values()).map((entry, index) => {
+      const orderItemId = index + 1;
+      return {
+        id: orderItemId,
+        gameTitle: entry.title,
+        quantity: entry.quantity,
+        unitPrice: entry.unitPrice,
+        productKey: keys[`${mockOrderId}:${orderItemId}`] ?? null,
+      };
+    });
+
+    return {
+      id: mockOrderId,
+      username: 'demo_user',
+      email: 'demo.user@videogame.local',
+      totalPrice: Number(row['totalPrice'] ?? 0),
+      status: this.parseStatus(row['status']),
+      createdAt: String(row['createdAt'] ?? new Date().toISOString()),
+      items,
+      showItems: false,
+      expanded: false,
+    };
+  }
+
+  private readMockOrders(): Array<Record<string, unknown>> {
+    const orders = this.readFromStorage<Array<Record<string, unknown>>>(this.mockOrdersStorageKey, []);
+    return [...orders].sort((a, b) => {
+      const dateA = new Date(String(a['createdAt'] ?? '')).getTime();
+      const dateB = new Date(String(b['createdAt'] ?? '')).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  private readFromStorage<T>(key: string, fallback: T): T {
+    if (typeof localStorage === 'undefined') {
+      return fallback;
+    }
+
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      return fallback;
+    }
+
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return fallback;
+    }
+  }
+
+  private writeToStorage<T>(key: string, value: T): void {
+    if (typeof localStorage === 'undefined') {
+      return;
+    }
+
+    localStorage.setItem(key, JSON.stringify(value));
   }
 
   private toOrder(row: unknown): Order {

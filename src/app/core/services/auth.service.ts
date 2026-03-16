@@ -29,6 +29,9 @@ export interface TokenResponse {
 export class AuthService {
 
   private apiUrl = `${environment.apiUrl}/api/auth`;
+  private readonly useMockData = environment.useMockData;
+  private readonly mockAdminEmail = 'admin@test.com';
+  private readonly mockAdminPassword = 'Admin@123';
 
   constructor(
     private http: HttpClient,
@@ -36,6 +39,17 @@ export class AuthService {
   ) {}
 
   login(data: LoginRequest): Observable<TokenResponse> {
+    if (this.useMockData) {
+      const email = String(data.email ?? '').trim().toLowerCase();
+      const password = String(data.password ?? '');
+
+      if (email === this.mockAdminEmail.toLowerCase() && password === this.mockAdminPassword) {
+        const token = this.createMockAdminToken(email);
+        this.tokenService.setToken(token);
+        return of({ accessToken: token });
+      }
+    }
+
     return this.http
       .post<TokenResponse>(`${this.apiUrl}/login`, data)
       .pipe(
@@ -140,6 +154,20 @@ private createMockToken(firebasePayload: any): string {
   const encodedPayload = btoa(JSON.stringify(payload));
   // Mock signature (not secure, for development only)
   const signature = btoa('mock_signature');
+  return `${header}.${encodedPayload}.${signature}`;
+}
+
+private createMockAdminToken(email: string): string {
+  const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+  const payload = {
+    nameid: 1,
+    email,
+    username: 'mock_admin',
+    role: 'Admin',
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 8,
+  };
+  const encodedPayload = btoa(JSON.stringify(payload));
+  const signature = btoa('mock_admin_signature');
   return `${header}.${encodedPayload}.${signature}`;
 }
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -6,6 +6,7 @@ import { DigitalProduct } from 'src/app/core/models/digital-products/digital-pro
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
 import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
+import { environment } from 'src/environments/environment';
 
 @Component({
   standalone: true,
@@ -16,6 +17,9 @@ import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scro
 })
 export class DigitalStorePage implements OnInit {
   private readonly API_URL = 'http://localhost:5019';
+  private readonly mockSkeletonMs = 1000;
+  private readonly backendSkeletonMs = 6000;
+  private readonly useMockData = environment.useMockData;
 
   //  TAB STATE 
   activeTab = signal<'products' | 'orders'>('products');
@@ -131,7 +135,9 @@ export class DigitalStorePage implements OnInit {
 
   constructor(
     private digitalProductService: DigitalProductService,
-    private digitalOrderService: DigitalOrderService
+    private digitalOrderService: DigitalOrderService,
+    private ngZone: NgZone,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -143,7 +149,6 @@ export class DigitalStorePage implements OnInit {
 
   loadProducts(): void {
     const startTime = Date.now();
-    const minSkeletonMs = 6000;
     this.productsLoading.set(true);
     this.productsError.set(null);
 
@@ -151,17 +156,23 @@ export class DigitalStorePage implements OnInit {
       next: (products) => {
         this.products.set(products ?? []);
         const elapsed = Date.now() - startTime;
-        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        const remaining = Math.max(this.getSkeletonDelayMs() - elapsed, 0);
         setTimeout(() => {
-          this.productsLoading.set(false);
+          this.ngZone.run(() => {
+            this.productsLoading.set(false);
+            this.cdr.detectChanges();
+          });
         }, remaining);
       },
       error: () => {
         this.productsError.set('Failed to load products.');
         const elapsed = Date.now() - startTime;
-        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        const remaining = Math.max(this.getSkeletonDelayMs() - elapsed, 0);
         setTimeout(() => {
-          this.productsLoading.set(false);
+          this.ngZone.run(() => {
+            this.productsLoading.set(false);
+            this.cdr.detectChanges();
+          });
         }, remaining);
       }
     });
@@ -171,7 +182,6 @@ export class DigitalStorePage implements OnInit {
 
   loadOrders(): void {
     const startTime = Date.now();
-    const minSkeletonMs = 6000;
     this.ordersLoading.set(true);
     this.ordersError.set(null);
 
@@ -179,17 +189,23 @@ export class DigitalStorePage implements OnInit {
       next: (orders) => {
         this.orders.set(orders);
         const elapsed = Date.now() - startTime;
-        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        const remaining = Math.max(this.getSkeletonDelayMs() - elapsed, 0);
         setTimeout(() => {
-          this.ordersLoading.set(false);
+          this.ngZone.run(() => {
+            this.ordersLoading.set(false);
+            this.cdr.detectChanges();
+          });
         }, remaining);
       },
       error: () => {
         this.ordersError.set('Failed to load orders.');
         const elapsed = Date.now() - startTime;
-        const remaining = Math.max(minSkeletonMs - elapsed, 0);
+        const remaining = Math.max(this.getSkeletonDelayMs() - elapsed, 0);
         setTimeout(() => {
-          this.ordersLoading.set(false);
+          this.ngZone.run(() => {
+            this.ordersLoading.set(false);
+            this.cdr.detectChanges();
+          });
         }, remaining);
       }
     });
@@ -330,6 +346,12 @@ export class DigitalStorePage implements OnInit {
     }, 2000);
   }
 
+  private getSkeletonDelayMs(): number {
+    return this.useMockData
+      ? this.mockSkeletonMs
+      : this.backendSkeletonMs;
+  }
+
   getOrderProductImageUrl(order: any): string | null {
     const path =
       order?.digitalProductImagePath?.trim?.() ||
@@ -337,6 +359,10 @@ export class DigitalStorePage implements OnInit {
       order?.digitalProduct?.imagePath?.trim?.();
 
     if (!path) return null;
+
+    if (path.startsWith('/assets/') || path.startsWith('assets/')) {
+      return path.startsWith('/') ? path : `/${path}`;
+    }
 
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;

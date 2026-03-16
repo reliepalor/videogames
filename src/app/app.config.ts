@@ -1,4 +1,4 @@
-import { ApplicationConfig } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, inject } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import {
   provideHttpClient,
@@ -14,9 +14,16 @@ import { environment } from '../environments/environment';
 import { VideoGameService } from './core/services/videogame.service';
 import { GameApiService } from './services/game-api.service';
 import { GameMockService } from './services/videogame-mock.service';
+import { initializeRuntimeDataMode } from './core/config/runtime-data-mode.initializer';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeRuntimeDataMode,
+      multi: true,
+    },
+
     provideRouter(routes),
 
     provideHttpClient(
@@ -32,7 +39,10 @@ export const appConfig: ApplicationConfig = {
 
     {
       provide: VideoGameService,
-      useClass: environment.useMockData ? GameMockService : GameApiService,
+      useFactory: () =>
+        environment.useMockData
+          ? inject(GameMockService)
+          : inject(GameApiService),
     },
 
     provideToastr({

@@ -46,7 +46,7 @@ export class CartService {
         id: nextId,
         items: [...cart],
         totalPrice,
-        status: 1,
+        status: 0,
         createdAt: new Date().toISOString(),
       };
 

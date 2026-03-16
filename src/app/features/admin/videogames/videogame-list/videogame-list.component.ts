@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
+import { HttpClient } from '@angular/common/http'
 import { VideoGameService } from '../../../../core/services/videogame.service'
 import { VideoGame } from '../../../../core/models/videogame.model'
 import { SkeletonBoxComponent } from '../../../../shared/skeleton/skeleton-box.component'
@@ -9,14 +10,17 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 
 import {
   Observable,
+  of,
   filter,
   startWith,
   switchMap,
   BehaviorSubject,
   combineLatest,
   map,
+  tap,
   Subscription,
 } from 'rxjs'
+import { catchError } from 'rxjs/operators'
 
 @Component({
   standalone: true,
@@ -26,10 +30,14 @@ import {
 })
 export class VideoGameListComponent implements OnInit, OnDestroy {
   apiUrl = environment.apiUrl;
+  useMockData = environment.useMockData
+  private readonly mockGamesKey = 'mock_games'
+  private readonly mockGamesSeedPath = '/assets/mock/games.json'
 
   /* ================= INJECTIONS ================= */
   private videoGameService = inject(VideoGameService)
   private router = inject(Router)
+  private http = inject(HttpClient)
   private ngZone = inject(NgZone)
   private cdr = inject(ChangeDetectorRef)
   private fb = inject(FormBuilder)
@@ -82,7 +90,11 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
     ),
     this.reload$,
   ]).pipe(
-    switchMap(() => this.videoGameService.getAll())
+    switchMap(() =>
+      this.useMockData
+        ? this.getMockGamesForAdmin()
+        : this.videoGameService.getAll()
+    )
   )
 
   /* ================= SUCCESS MODAL ON NAVIGATION ================= */
@@ -339,6 +351,42 @@ export class VideoGameListComponent implements OnInit, OnDestroy {
 
     this.navigationSub?.unsubscribe()
 
+  }
+
+  private getMockGamesForAdmin(): Observable<VideoGame[]> {
+    return this.http.get<VideoGame[]>(this.mockGamesSeedPath).pipe(
+      map(games => games ?? []),
+      tap(games => this.writeToStorage(this.mockGamesKey, games)),
+      catchError(() => {
+        const stored = this.readFromStorage<VideoGame[]>(this.mockGamesKey, [])
+        return of(stored)
+      })
+    )
+  }
+
+  private readFromStorage<T>(key: string, fallback: T): T {
+    if (typeof localStorage === 'undefined') {
+      return fallback
+    }
+
+    const raw = localStorage.getItem(key)
+    if (!raw) {
+      return fallback
+    }
+
+    try {
+      return JSON.parse(raw) as T
+    } catch {
+      return fallback
+    }
+  }
+
+  private writeToStorage<T>(key: string, value: T): void {
+    if (typeof localStorage === 'undefined') {
+      return
+    }
+
+    localStorage.setItem(key, JSON.stringify(value))
   }
 
 }

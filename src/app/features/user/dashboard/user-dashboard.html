@@ -114,97 +114,69 @@
     <div class="max-w-[1600px] mx-auto px-8 lg:px-16">
 
       <!-- Section Header -->
-      <div class="scroll-fade-in visible mb-12">
-        <p class="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-3">Featured</p>
-        <h2 class="text-4xl md:text-6xl font-semibold tracking-tight text-gray-900">
-          Most Popular
-        </h2>
+      <div class="scroll-fade-in visible mb-10 flex flex-col gap-4 md:mb-12 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.2em] text-gray-500 mb-3">Featured</p>
+          <h2 class="text-4xl md:text-6xl font-semibold tracking-tight text-gray-900">
+            Most Popular
+          </h2>
+        </div>
+        <p class="max-w-md text-sm leading-6 text-gray-500 md:text-right">
+          Scroll sideways to explore featured games and digital products curated for quick picks.
+        </p>
       </div>
 
-      <!-- Slider Container -->
-      <div *ngIf="recommendedItems.length > 0" class="scroll-fade-in visible relative">
+      <!-- Featured Rail -->
+      <div *ngIf="recommendedItems.length > 0" class="scroll-fade-in visible featured-rail-wrap">
+        <div
+          id="featured-scroll"
+          class="featured-rail flex snap-x snap-mandatory gap-4 overflow-x-auto overflow-y-hidden pb-4 pt-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <article
+            *ngFor="let item of recommendedItems; let i = index"
+            class="featured-card group relative snap-start overflow-hidden rounded-[28px] border border-gray-200 bg-gray-100"
+            [style.animation-delay]="(i * 0.08) + 's'"
+            [routerLink]="item.route">
 
-        <!-- Navigation Buttons -->
-        <button
-          type="button"
-          (click)="onRecommendedPrev()"
-          [disabled]="recommendedItems.length <= 1"
-          class="absolute -left-4 lg:-left-14 top-1/2 -translate-y-1/2 z-20
-                 w-12 h-12 rounded-full bg-white border border-gray-200
-                 flex items-center justify-center cursor-pointer
-                 transition-all duration-300 hover:bg-gray-900 hover:text-white hover:border-gray-900
-                 disabled:opacity-30 disabled:cursor-not-allowed">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-          </svg>
-        </button>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.2),transparent_55%)]"></div>
+            <img
+              [src]="item.imageUrl"
+              [alt]="item.title"
+              (error)="onRecommendedImageError($event)"
+              class="featured-card-image h-full w-full object-cover" />
 
-        <!-- Slider Track - 80vh height -->
-        <div class="overflow-hidden rounded-none">
-          <div
-            class="flex transition-transform duration-700 ease-out"
-            [style.transform]="recommendedTrackTransform"
-            [style.transition]="recommendedTrackTransition"
-            (transitionend)="onRecommendedTransitionEnd()"
-            (mouseenter)="onRecommendedMouseEnter()"
-            (mouseleave)="onRecommendedMouseLeave()">
+            <div class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
 
-            <article
-              *ngFor="let item of recommendedLoopItems"
-              class="group relative w-full flex-shrink-0 cursor-pointer rounded-xl"
-              [routerLink]="item.route">
-
-              <!-- Image - 80vh height -->
-              <div class="relative h-[80vh] bg-gray-100 overflow-hidden rounded-xl">
-                <img
-                  [src]="item.imageUrl"
-                  [alt]="item.title"
-                  (error)="onRecommendedImageError($event)"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-
-                <!-- Gradient Overlay -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="absolute inset-x-0 bottom-0 p-5 md:p-7">
+              <div class="mb-4 inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1 text-[11px] uppercase tracking-[0.18em] text-white/85 backdrop-blur-sm">
+                <span class="h-1.5 w-1.5 rounded-full bg-emerald-300"></span>
+                {{ item.type === 'game' ? 'Video Game' : 'Digital Product' }}
               </div>
 
-              <!-- Content Overlay -->
-              <div class="absolute bottom-0 left-0 right-0 p-8">
-                <p class="text-xs uppercase tracking-[0.2em] text-white/70 mb-2">
-                  {{ item.type === 'game' ? 'Video Game' : 'Digital Product' }}
-                </p>
-                <h3 class="text-3xl md:text-5xl font-semibold text-white mb-3 leading-tight">
-                  {{ item.title }}
-                </h3>
-                <p class="text-sm text-white/90 mb-4">{{ item.subtitle }}</p>
-                <div class="flex items-center justify-between">
-                  <span class="text-lg font-medium text-white">₱{{ item.price | number:'1.0-0' }}</span>
-                  <span class="inline-flex items-center gap-2 text-sm text-white group-hover:underline">
-                    <span>{{ item.type === 'game' ? 'View Game' : 'Shop Now' }}</span>
-                    <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
-                    </svg>
-                  </span>
+              <h3 class="max-w-[12ch] text-[clamp(1.7rem,3vw,3.5rem)] font-semibold leading-[0.95] tracking-tight text-white">
+                {{ item.title }}
+              </h3>
+
+              <div class="mt-4 flex items-end justify-between gap-4">
+                <div>
+                  <p class="text-sm text-white/75">{{ item.subtitle }}</p>
+                  <p class="mt-2 text-lg font-medium text-white">₱{{ item.price | number:'1.0-0' }}</p>
                 </div>
+
+                <span class="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-medium text-gray-900 transition-transform duration-500 group-hover:translate-x-1">
+                  {{ item.type === 'game' ? 'View Game' : 'Shop Now' }}
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+                  </svg>
+                </span>
               </div>
-
-            </article>
-
-          </div>
+            </div>
+          </article>
         </div>
 
-        <button
-          type="button"
-          (click)="onRecommendedNext()"
-          [disabled]="recommendedItems.length <= 1"
-          class="absolute -right-4 lg:-right-14 top-1/2 -translate-y-1/2 z-20
-                 w-12 h-12 rounded-full bg-white border border-gray-200
-                 flex items-center justify-center cursor-pointer
-                 transition-all duration-300 hover:bg-gray-900 hover:text-white hover:border-gray-900
-                 disabled:opacity-30 disabled:cursor-not-allowed">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-          </svg>
-        </button>
-
+        <div class="mt-4 flex items-center justify-between gap-4 text-xs uppercase tracking-[0.18em] text-gray-400">
+          <span>Swipe or scroll sideways</span>
+          <span>{{ recommendedItems.length }} featured picks</span>
+        </div>
       </div>
 
     </div>
@@ -248,17 +220,17 @@
                       px-8 lg:px-16 py-4 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [-webkit-overflow-scrolling:touch]">
 
             <div
-              *ngFor="let game of bestSellers; let i = index"
-              [routerLink]="['/games', game.videoGameId]"
+              *ngFor="let item of bestSellers; let i = index"
+              [routerLink]="item.route"
               class="product-card flex-shrink-0 w-[320px] snap-center cursor-pointer"
               [style.animation-delay]="(i * 0.1) + 's'">
 
               <!-- Image Container -->
               <div class="relative aspect-square bg-gray-200 overflow-hidden rounded-lg mb-4">
                 <img
-                  *ngIf="getBestSellerImageUrl(game.imagePath); else noImage"
-                  [src]="getBestSellerImageUrl(game.imagePath)"
-                  [alt]="game.title"
+                  *ngIf="getBestSellerImageUrl(item.imagePath); else noImage"
+                  [src]="getBestSellerImageUrl(item.imagePath)"
+                  [alt]="item.title"
                   loading="lazy"
                   class="w-full h-full object-cover transition-transform duration-500 hover:scale-110" />
 
@@ -280,32 +252,39 @@
                 <!-- Badge -->
                 <div class="flex items-center gap-2">
                   <span class="text-xs uppercase tracking-wide text-gray-500">
-                    {{ game.totalQuantity }} sold
+                    {{ item.totalQuantity }} sold
+                  </span>
+                  <span class="text-[10px] uppercase tracking-wide text-gray-400">
+                    {{ item.type === 'game' ? 'Game' : 'Digital' }}
                   </span>
                 </div>
 
                 <!-- Title -->
                 <h3 class="text-base font-medium text-gray-900 leading-tight min-h-[3rem] overflow-hidden [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
-                  {{ game.title }}
+                  {{ item.title }}
                 </h3>
 
                 <!-- Price -->
                 <p class="text-lg font-semibold text-gray-900">
-                  ₱{{ game.totalRevenue | number:'1.0-0' }}
+                  ₱{{ item.totalRevenue | number:'1.0-0' }}
                 </p>
               </div>
 
               <!-- Buy Button -->
               <button
                 type="button"
-                (click)="openBuyConfirm(game, $event)"
-                [disabled]="buyingGames.has(game.videoGameId)"
+                (click)="onBestSellerAction(item, $event)"
+                [disabled]="isBestSellerGameBuying(item)"
                 class="mt-4 w-full py-3 bg-gray-900 text-white text-sm font-medium rounded-full
                        transition-all duration-300 hover:bg-gray-800 active:scale-95
                        disabled:opacity-50 disabled:cursor-not-allowed
                        flex items-center justify-center gap-2 cursor-pointer">
-                <span>{{ buyingGames.has(game.videoGameId) ? 'Processing...' : 'Buy Now' }}</span>
-                <svg *ngIf="!buyingGames.has(game.videoGameId)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <span>
+                  {{ isBestSellerGameBuying(item)
+                    ? 'Processing...'
+                    : (item.type === 'game' ? 'Buy Now' : 'Browse Product') }}
+                </span>
+                <svg *ngIf="!isBestSellerGameBuying(item)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
                 </svg>
               </button>

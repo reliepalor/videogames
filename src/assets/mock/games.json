@@ -10,38 +10,85 @@
   },
   {
     "id": 2,
-    "title": "Kingdoms of Ember",
+    "title": "Hogwarts Legacy",
     "platform": "PlayStation 5",
     "developer": "Iron Lantern Games",
     "publisher": "Northwind Interactive",
     "price": 59.99,
-    "imageUrl": "/assets/games/kingdoms-of-ember.png"
+    "imageUrl": "/assets/games/hogwarts.png"
   },
   {
     "id": 3,
-    "title": "Starline Protocol",
+    "title": "Cyberpunk",
     "platform": "Xbox Series X|S",
     "developer": "Helios Forge",
     "publisher": "Epoch Entertainment",
     "price": 49.99,
-    "imageUrl": "/assets/games/starline-protocol.jpg"
+    "imageUrl": "/assets/games/cyberpunk.png"
   },
   {
     "id": 4,
-    "title": "Echoes of Hollow Reef",
+    "title": "Grand Theft Auto V",
     "platform": "Nintendo Switch",
     "developer": "Tidebound Works",
     "publisher": "Maple Finch",
     "price": 39.99,
-    "imageUrl": "/assets/games/echoes-of-hollow-reef.jpg"
+    "imageUrl": "/assets/games/gta5.png"
   },
   {
     "id": 5,
-    "title": "Rogue Circuit",
+    "title": "Assassins Creed",
     "platform": "PC",
     "developer": "Silver Glyph",
     "publisher": "Vector Realm",
     "price": 24.99,
-    "imageUrl": "/assets/games/rogue-circuit.png"
+    "imageUrl": "/assets/games/creed.png"
+  },
+  {
+    "id": 6 ,
+    "title": "Horizon Forbidden West",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/horizon.png"
+  },
+  {
+    "id": 7 ,
+    "title": "The Witcher | Wild Hunt",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/witcher.png"
+  },
+  {
+    "id": 8 ,
+    "title": "The Witcher | Wild Hunt",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/red.png"
+  }
+  ,
+  {
+    "id": 9 ,
+    "title": "God of War | Ragnarök",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/war.png"
+  }
+    ,
+  {
+    "id": 10 ,
+    "title": "Final Fantasy VII",
+    "platform": "PC",
+    "developer": "Silver Glyph",
+    "publisher": "Vector Realm",
+    "price": 24.99,
+    "imageUrl": "/assets/games/final.png"
   }
 ]

@@ -133,6 +133,10 @@ export class DigitalOrdersPage implements OnInit {
 
     if (!path) return null;
 
+    if (path.startsWith('/assets/') || path.startsWith('assets/')) {
+      return path.startsWith('/') ? path : `/${path}`;
+    }
+
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return path;
     }

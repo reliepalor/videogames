@@ -4,6 +4,7 @@ import {
   HostListener,
   OnDestroy,
   OnInit,
+  NgZone,
   inject,
   PLATFORM_ID,
 } from '@angular/core';
@@ -13,6 +14,7 @@ import {
   BestSeller,
   ReportsService,
 } from 'src/app/core/services/bestseller/reports.service';
+import { HttpClient } from '@angular/common/http';
 import { CartService } from 'src/app/core/services/cart.service';
 import { OrderService } from 'src/app/core/services/order.service';
 import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
@@ -37,6 +39,22 @@ type DashboardDigitalProduct = DigitalProduct & {
   digitalProductId?: number;
 };
 
+type DashboardBestSellerItem = {
+  id: number;
+  type: 'game' | 'digital';
+  title: string;
+  totalQuantity: number;
+  totalRevenue: number;
+  imagePath?: string | null;
+  price: number;
+  percent: number;
+  route: string[];
+  videoGameId?: number;
+  digitalProductId?: number;
+};
+
+type DashboardBestSellerSeedItem = Omit<DashboardBestSellerItem, 'percent'>;
+
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
@@ -56,14 +74,10 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   pendingBuyGame: BestSeller | null = null;
   
   recommendedItems: RecommendedItem[] = [];
-  activeRecommendedIndex = 0;
-  recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-  
-  private isRecommendedHovered = false;
-  private recommendedIntervalId?: number;
-  private recommendedRefreshIntervalId?: number;
   private scrollObserver?: IntersectionObserver;
   private observeRetryTimeoutId?: number;
+  private featuredScrollEl?: HTMLElement;
+  private featuredWheelHandler?: (event: WheelEvent) => void;
   private bestSellerScrollEl?: HTMLElement;
   private bestSellerLeftBtn?: HTMLButtonElement;
   private bestSellerRightBtn?: HTMLButtonElement;
@@ -74,37 +88,54 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   private allDigitalRecommendations: RecommendedItem[] = [];
   
   apiUrl = environment.apiUrl;
+  useMockData = environment.useMockData;
+  private readonly featuredSignatureStorageKey = 'dashboard_featured_signature';
 
   // ============================================
   // SERVICES
   // ============================================
   
   private platformId = inject(PLATFORM_ID);
+  private http = inject(HttpClient);
   private reportsService = inject(ReportsService);
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private router = inject(Router);
   private videoGameService = inject(VideoGameService);
   private digitalProductService = inject(DigitalProductService);
+  private ngZone = inject(NgZone);
 
   // ============================================
   // OBSERVABLES
   // ============================================
   
-  bestSellers$: Observable<Array<BestSeller & { percent: number }> | null> =
-    this.reportsService.getBestSellers().pipe(
-      map((sales) => {
-        if (!sales || sales.length === 0) return null;
-        const total = sales.reduce((sum, item) => sum + item.totalRevenue, 0);
-        return [...sales]
-          .sort((a, b) => b.totalRevenue - a.totalRevenue)
-          .slice(0, 6)
-          .map((item) => ({
-            ...item,
-            percent: total ? parseFloat(((item.totalRevenue / total) * 100).toFixed(1)) : 0,
-          }));
-      }),
-      catchError(() => of(null)),
+  bestSellers$: Observable<DashboardBestSellerItem[] | null> =
+    (this.useMockData
+      ? forkJoin({
+          games: this.http.get<VideoGame[]>('/assets/mock/games.json').pipe(
+            map(games => games ?? []),
+            catchError(() => of([] as VideoGame[]))
+          ),
+          digitalProducts: this.http.get<DashboardDigitalProduct[]>('/assets/mock/digital-products.json').pipe(
+            map(products => (products ?? []).filter(product => product.isActive !== false)),
+            catchError(() => of([] as DashboardDigitalProduct[]))
+          )
+        }).pipe(
+          map(({ games, digitalProducts }) => this.mapMockBestSellers(games, digitalProducts)),
+          catchError(() => of(null))
+        )
+      : forkJoin({
+          gameSales: this.reportsService.getBestSellers().pipe(
+            catchError(() => of([] as BestSeller[]))
+          ),
+          digitalProducts: this.digitalProductService.getActiveProducts().pipe(
+            catchError(() => of([] as DashboardDigitalProduct[]))
+          )
+        }).pipe(
+          map(({ gameSales, digitalProducts }) => this.mapBackendBestSellers(gameSales, digitalProducts)),
+          catchError(() => of(null))
+        )
+    ).pipe(
       tap(() => this.scheduleObserveAnimations())
     );
 
@@ -126,6 +157,9 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     
     // Setup carousel controls
     this.setupCarouselControls();
+
+    // Setup featured horizontal scroll
+    this.setupFeaturedScroller();
     
     // Update scroll progress
     this.updateScrollProgress();
@@ -134,14 +168,6 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   ngOnDestroy(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
-    }
-
-    // Clear intervals
-    if (this.recommendedIntervalId) {
-      clearInterval(this.recommendedIntervalId);
-    }
-    if (this.recommendedRefreshIntervalId) {
-      clearInterval(this.recommendedRefreshIntervalId);
     }
 
     // Disconnect observer
@@ -153,6 +179,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     // Remove carousel event listeners
+    this.cleanupFeaturedScroller();
     this.cleanupBestSellerControls();
   }
 
@@ -195,6 +222,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
 
     requestAnimationFrame(() => {
       this.observeAnimatedElements();
+      this.initOrRefreshFeaturedScroller();
       this.initOrRefreshBestSellerControls();
       this.forceCriticalSectionsVisible();
     });
@@ -205,6 +233,7 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     // Some async templates render slightly after the first frame.
     this.observeRetryTimeoutId = window.setTimeout(() => {
       this.observeAnimatedElements();
+      this.initOrRefreshFeaturedScroller();
       this.initOrRefreshBestSellerControls();
       this.forceCriticalSectionsVisible();
     }, 80);
@@ -239,6 +268,44 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   
   private setupCarouselControls(): void {
     this.initOrRefreshBestSellerControls();
+  }
+
+  private setupFeaturedScroller(): void {
+    this.initOrRefreshFeaturedScroller();
+  }
+
+  private initOrRefreshFeaturedScroller(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const featuredScroll = document.getElementById('featured-scroll') as HTMLElement | null;
+    if (!featuredScroll) return;
+
+    this.cleanupFeaturedScroller();
+    this.featuredScrollEl = featuredScroll;
+    this.featuredWheelHandler = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+        return;
+      }
+
+      event.preventDefault();
+      this.ngZone.runOutsideAngular(() => {
+        this.featuredScrollEl?.scrollBy({
+          left: event.deltaY * 0.9,
+          behavior: 'smooth',
+        });
+      });
+    };
+
+    featuredScroll.addEventListener('wheel', this.featuredWheelHandler, { passive: false });
+  }
+
+  private cleanupFeaturedScroller(): void {
+    if (this.featuredScrollEl && this.featuredWheelHandler) {
+      this.featuredScrollEl.removeEventListener('wheel', this.featuredWheelHandler);
+    }
+
+    this.featuredScrollEl = undefined;
+    this.featuredWheelHandler = undefined;
   }
 
   private initOrRefreshBestSellerControls(): void {
@@ -297,70 +364,28 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     this.bestSellerRightClickHandler = undefined;
   }
 
-  // ============================================
-  // FEATURED SLIDER
-  // ============================================
-  
-  get recommendedLoopItems(): RecommendedItem[] {
-    if (!this.recommendedItems.length) return [];
-    return [...this.recommendedItems, ...this.recommendedItems];
-  }
-
-  get recommendedTrackTransform(): string {
-    return `translateX(-${this.activeRecommendedIndex * 100}%)`;
-  }
-
-  onRecommendedMouseEnter(): void {
-    this.isRecommendedHovered = true;
-  }
-
-  onRecommendedMouseLeave(): void {
-    this.isRecommendedHovered = false;
-  }
-
-  onRecommendedPrev(): void {
-    const total = this.recommendedItems.length;
-    if (total <= 1) return;
-
-    if (this.activeRecommendedIndex === 0) {
-      this.recommendedTrackTransition = 'none';
-      this.activeRecommendedIndex = total;
-      requestAnimationFrame(() => {
-        this.recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-        this.activeRecommendedIndex = total - 1;
-      });
-      return;
-    }
-
-    this.activeRecommendedIndex -= 1;
-  }
-
-  onRecommendedNext(): void {
-    if (this.recommendedItems.length <= 1) return;
-    this.activeRecommendedIndex += 1;
-  }
-
-  onRecommendedTransitionEnd(): void {
-    const total = this.recommendedItems.length;
-    if (!total) return;
-
-    if (this.activeRecommendedIndex >= total) {
-      this.recommendedTrackTransition = 'none';
-      this.activeRecommendedIndex = 0;
-      requestAnimationFrame(() => {
-        this.recommendedTrackTransition = 'transform 900ms cubic-bezier(0.22, 0.61, 0.36, 1)';
-      });
-    }
-  }
-
   private loadRecommendedItems(): void {
+    const gamesSource$ = this.useMockData
+      ? this.http.get<VideoGame[]>('/assets/mock/games.json').pipe(
+          map(games => games ?? []),
+          catchError(() => of([] as VideoGame[]))
+        )
+      : this.videoGameService.getAll().pipe(
+          catchError(() => of([] as VideoGame[]))
+        );
+
+    const digitalProductsSource$ = this.useMockData
+      ? this.http.get<DashboardDigitalProduct[]>('/assets/mock/digital-products.json').pipe(
+          map(products => (products ?? []).filter(product => product.isActive !== false)),
+          catchError(() => of([] as DashboardDigitalProduct[]))
+        )
+      : this.digitalProductService.getActiveProducts().pipe(
+          catchError(() => of([] as DashboardDigitalProduct[]))
+        );
+
     forkJoin({
-      games: this.videoGameService.getAll().pipe(
-        catchError(() => of([] as VideoGame[]))
-      ),
-      digitalProducts: this.digitalProductService.getActiveProducts().pipe(
-        catchError(() => of([] as DashboardDigitalProduct[]))
-      )
+      games: gamesSource$,
+      digitalProducts: digitalProductsSource$
     }).subscribe({
       next: ({ games, digitalProducts }) => {
         this.allGameRecommendations = (games ?? [])
@@ -372,8 +397,6 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
           .filter((item): item is RecommendedItem => item !== null);
 
         this.refreshRecommendedItems();
-        this.startRecommendedAutoCycle();
-        this.startRecommendedRefreshCycle();
         this.scheduleObserveAnimations();
       },
       error: () => {
@@ -381,33 +404,6 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
         this.scheduleObserveAnimations();
       }
     });
-  }
-
-  private startRecommendedAutoCycle(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.recommendedIntervalId) {
-      clearInterval(this.recommendedIntervalId);
-    }
-    if (this.recommendedItems.length <= 1) return;
-
-    this.recommendedIntervalId = window.setInterval(() => {
-      if (this.isRecommendedHovered) return;
-      this.activeRecommendedIndex += 1;
-    }, 3800);
-  }
-
-  private startRecommendedRefreshCycle(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-
-    if (this.recommendedRefreshIntervalId) {
-      clearInterval(this.recommendedRefreshIntervalId);
-    }
-
-    this.recommendedRefreshIntervalId = window.setInterval(() => {
-      if (this.isRecommendedHovered) return;
-      this.refreshRecommendedItems();
-      this.startRecommendedAutoCycle();
-    }, 16000);
   }
 
   // ============================================
@@ -422,6 +418,23 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     this.pendingBuyGame = game;
     this.isBuyConfirmClosing = false;
     this.showBuyConfirmModal = true;
+  }
+
+  onBestSellerAction(item: DashboardBestSellerItem, event?: MouseEvent): void {
+    event?.stopPropagation();
+
+    if (item.type === 'game') {
+      const game = this.toGameBestSeller(item);
+      if (!game) return;
+      this.openBuyConfirm(game, event);
+      return;
+    }
+
+    this.router.navigate(item.route);
+  }
+
+  isBestSellerGameBuying(item: DashboardBestSellerItem): boolean {
+    return item.type === 'game' && !!item.videoGameId && this.buyingGames.has(item.videoGameId);
   }
 
   closeBuyConfirm(): void {
@@ -534,14 +547,49 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   private refreshRecommendedItems(): void {
-    const selectedGames = this.pickRandomItemsWithCycle(this.allGameRecommendations, 4);
-    const selectedDigitalProducts = this.pickRandomItemsWithCycle(this.allDigitalRecommendations, 4);
+    const previousSignature = this.getPreviousFeaturedSignature();
 
-    this.recommendedItems = this.buildAlternatingRecommendations(
-      selectedGames,
-      selectedDigitalProducts
-    );
-    this.activeRecommendedIndex = 0;
+    let nextItems: RecommendedItem[] = [];
+    let nextSignature = '';
+
+    // Try a few rolls so a refresh is very unlikely to repeat the same exact set.
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const selectedGames = this.pickRandomItemsWithCycle(this.allGameRecommendations, 4);
+      const selectedDigitalProducts = this.pickRandomItemsWithCycle(this.allDigitalRecommendations, 4);
+
+      nextItems = this.buildAlternatingRecommendations(
+        selectedGames,
+        selectedDigitalProducts
+      );
+
+      nextSignature = this.createFeaturedSignature(nextItems);
+      if (!previousSignature || nextSignature !== previousSignature) {
+        break;
+      }
+    }
+
+    this.recommendedItems = nextItems;
+    this.saveFeaturedSignature(nextSignature);
+  }
+
+  private createFeaturedSignature(items: RecommendedItem[]): string {
+    return items.map(item => `${item.type}:${item.id}`).join('|');
+  }
+
+  private getPreviousFeaturedSignature(): string {
+    if (!isPlatformBrowser(this.platformId)) {
+      return '';
+    }
+
+    return sessionStorage.getItem(this.featuredSignatureStorageKey) ?? '';
+  }
+
+  private saveFeaturedSignature(signature: string): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+
+    sessionStorage.setItem(this.featuredSignatureStorageKey, signature);
   }
 
   private pickRandomItemsWithCycle<T>(items: T[], count: number): T[] {
@@ -595,7 +643,140 @@ export class UserDashboardComponent implements OnInit, AfterViewInit, OnDestroy 
     const path = imagePath?.trim();
     if (!path) return null;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('/assets/')) return path;
+    if (path.startsWith('assets/')) return `/${path}`;
     const normalized = path.startsWith('/') ? path : `/${path}`;
     return `${this.apiUrl}${normalized}`;
+  }
+
+  private mapMockBestSellers(
+    games: VideoGame[],
+    digitalProducts: DashboardDigitalProduct[]
+  ): DashboardBestSellerItem[] | null {
+    if (!games.length && !digitalProducts.length) {
+      return null;
+    }
+
+    const randomGames = this.shuffleArray(games).slice(0, Math.min(3, games.length));
+    const randomDigital = this.shuffleArray(digitalProducts).slice(0, Math.min(3, digitalProducts.length));
+
+    const gameItems: DashboardBestSellerSeedItem[] = randomGames.map(game => {
+      const totalQuantity = this.randomInt(8, 120);
+      const price = Number(game.price) || 0;
+      const totalRevenue = Number((price * totalQuantity).toFixed(2));
+
+      return {
+        id: game.id ?? 0,
+        type: 'game',
+        videoGameId: game.id ?? 0,
+        title: game.title,
+        totalQuantity,
+        totalRevenue,
+        imagePath: game.imageUrl,
+        price,
+        route: ['/games', String(game.id ?? 0)],
+      };
+    });
+
+    const digitalItems: DashboardBestSellerSeedItem[] = randomDigital.map(product => {
+      const totalQuantity = this.randomInt(4, 60);
+      const price = Number(product.price) || 0;
+      const totalRevenue = Number((price * totalQuantity).toFixed(2));
+
+      return {
+        id: product.id ?? 0,
+        type: 'digital',
+        digitalProductId: product.id ?? 0,
+        title: product.name,
+        totalQuantity,
+        totalRevenue,
+        imagePath: product.imagePath,
+        price,
+        route: ['/digital-products'],
+      };
+    });
+
+    const withSales = this.shuffleArray([...gameItems, ...digitalItems]);
+    const sliced = withSales.slice(0, Math.min(6, withSales.length));
+
+    return this.withBestSellerPercent(sliced);
+  }
+
+  private mapBackendBestSellers(
+    gameSales: BestSeller[],
+    digitalProducts: DashboardDigitalProduct[]
+  ): DashboardBestSellerItem[] | null {
+    const gameItems: DashboardBestSellerSeedItem[] = (gameSales ?? [])
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 6)
+      .map(item => ({
+        id: item.videoGameId,
+        type: 'game' as const,
+        videoGameId: item.videoGameId,
+        title: item.title,
+        totalQuantity: item.totalQuantity,
+        totalRevenue: item.totalRevenue,
+        imagePath: item.imagePath,
+        price: item.price,
+        route: ['/games', String(item.videoGameId)],
+      }));
+
+    const digitalItems: DashboardBestSellerSeedItem[] = (digitalProducts ?? [])
+      .map(product => {
+        const soldEstimate = Math.max((product.stock ?? 0) - (product.availableKeys ?? 0), 1);
+        const price = Number(product.price) || 0;
+        const revenue = Number((soldEstimate * price).toFixed(2));
+
+        return {
+          id: product.id,
+          type: 'digital' as const,
+          digitalProductId: product.id,
+          title: product.name,
+          totalQuantity: soldEstimate,
+          totalRevenue: revenue,
+          imagePath: product.imagePath,
+          price,
+          route: ['/digital-products'],
+        };
+      })
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 3);
+
+    const merged = [...gameItems, ...digitalItems]
+      .sort((a, b) => b.totalRevenue - a.totalRevenue)
+      .slice(0, 6);
+
+    if (!merged.length) {
+      return null;
+    }
+
+    return this.withBestSellerPercent(merged);
+  }
+
+  private withBestSellerPercent(items: DashboardBestSellerSeedItem[]): DashboardBestSellerItem[] {
+    const total = items.reduce((sum, item) => sum + item.totalRevenue, 0);
+    return items.map(item => ({
+      ...item,
+      percent: total ? parseFloat(((item.totalRevenue / total) * 100).toFixed(1)) : 0,
+    }));
+  }
+
+  private toGameBestSeller(item: DashboardBestSellerItem): BestSeller | null {
+    if (item.type !== 'game' || !item.videoGameId) {
+      return null;
+    }
+
+    return {
+      videoGameId: item.videoGameId,
+      title: item.title,
+      totalQuantity: item.totalQuantity,
+      totalRevenue: item.totalRevenue,
+      imagePath: item.imagePath,
+      price: item.price,
+    };
+  }
+
+  private randomInt(min: number, max: number): number {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 }
