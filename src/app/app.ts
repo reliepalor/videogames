@@ -2,6 +2,9 @@ import { Component, signal, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
 import { ThemeService } from './core/services/ui/theme.service';
+import { inject } from '@vercel/analytics';
+import { environment } from '../environments/environment';
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
@@ -15,5 +18,12 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     // ThemeService handles loading and applying theme
+    
+    // Initialize Vercel Analytics only in the browser
+    if (isPlatformBrowser(this.platformId)) {
+      inject({
+        mode: environment.production ? 'production' : 'development'
+      });
+    }
   }
 }
