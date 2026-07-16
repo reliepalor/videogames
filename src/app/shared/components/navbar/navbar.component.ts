@@ -10,8 +10,8 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { UserService } from '../../../core/services/user.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { UserService } from '../../../core/services/user/user.service';
 import { Profile } from '../../../core/models/user/UserProfile.model';
 import { Observable, of } from 'rxjs';
 import { catchError, filter } from 'rxjs/operators';

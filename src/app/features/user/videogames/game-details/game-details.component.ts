@@ -1,14 +1,14 @@
 import { Component, inject, OnInit, OnDestroy, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { VideoGameService } from '../../../../core/services/videogame.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { VideoGameService } from '../../../../core/services/catalog/videogame.service';
+import { AuthService } from '../../../../core/services/auth/auth.service';
 import { VideoGame } from '../../../../core/models/videogame.model';
 import { GameReviewsComponent } from '../../reviews/game-reviews';
 import { SkeletonBoxComponent } from '../../../../shared/skeleton/skeleton-box.component';
-import { OrderService } from '../../../../core/services/order.service';
-import { ThemeService } from '../../../../core/services/theme.service';
-import { CartService } from '../../../../core/services/cart.service';
+import { OrderService } from '../../../../core/services/orders/order.service';
+import { ThemeService } from '../../../../core/services/ui/theme.service';
+import { CartService } from '../../../../core/services/cart/cart.service';
 import { Subscription } from 'rxjs';
 
 @Component({

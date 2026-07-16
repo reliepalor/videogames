@@ -13,9 +13,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Observable, of, Subscription } from 'rxjs';
 
-import { AuthService } from '../../../core/services/auth.service';
-import { UserService } from '../../../core/services/user.service';
-import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { UserService } from '../../../core/services/user/user.service';
+import { ThemeService } from '../../../core/services/ui/theme.service';
 import { Profile } from '../../../core/models/user/UserProfile.model';
 
 @Component({

@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 import { DigitalProductSales } from 'src/app/core/models/analytics/digital-product-sales';
 import { DashboardSummary } from 'src/app/core/models/analytics/dashboard-summary';
 import { MonthlyRevenue } from 'src/app/core/models/analytics/monthly-revenue';

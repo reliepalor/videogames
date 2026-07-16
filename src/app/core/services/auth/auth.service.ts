@@ -1,4 +1,4 @@
-// src/app/core/services/auth.service.ts
+// src/app/core/services/auth/auth.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, tap, of } from 'rxjs';
@@ -6,7 +6,7 @@ import { catchError, timeout } from 'rxjs/operators';
 import { environment } from 'environments/environment';
 import { TokenService } from './token.service';
 import { signInWithPopup } from 'firebase/auth';
-import { firebaseAuth, googleProvider } from '../firebase/firebase';
+import { firebaseAuth, googleProvider } from '../../firebase/firebase';
 
 export interface LoginRequest {
   email: string;

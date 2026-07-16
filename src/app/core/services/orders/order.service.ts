@@ -1,8 +1,8 @@
                                                                                    import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { environment } from 'src/environments/environment'
+import { environment } from 'environments/environment'
 import { Observable, map, switchMap } from 'rxjs'
-import { VideoGameService } from './videogame.service'
+                                                                                  import { VideoGameService } from '../catalog/videogame.service'
 
 export interface OrderItem {
   id: number;

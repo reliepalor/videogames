@@ -2,7 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { VideoGameService } from '../../../../core/services/videogame.service';
+import { VideoGameService } from '../../../../core/services/catalog/videogame.service';
 
 @Component({
   standalone: true,

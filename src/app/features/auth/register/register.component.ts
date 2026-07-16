@@ -7,7 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { signInWithPopup } from 'firebase/auth';
 import { firebaseAuth, googleProvider } from '../../../core/firebase/firebase';
 
-import { AuthService, RegisterRequest } from '../../../core/services/auth.service';
+import { AuthService, RegisterRequest } from '../../../core/services/auth/auth.service';
 
 @Component({
   selector: 'app-register',

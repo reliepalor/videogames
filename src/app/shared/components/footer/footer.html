@@ -1,0 +1,193 @@
+<style>
+        /* footer.component.scss */
+
+    /* ─── Entrance animations ─── */
+    .footer-root {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &.footer-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+
+    .footer-col {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &.col-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    }
+
+    .footer-bottom {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+
+    &.bottom-visible {
+        opacity: 1;
+    }
+    }
+
+    /* ─── Link underline sweep ─── */
+    .footer-link {
+    position: relative;
+    display: inline-block;
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 0;
+        height: 1px;
+        background-color: #1d1d1f;
+        transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    &:hover::after {
+        width: 100%;
+    }
+    }
+
+    /* ─── Subscribe button press ─── */
+    .footer-btn {
+    &:active {
+        transform: scale(0.96);
+    }
+    }
+
+    /* ─── Heading letter spacing entrance ─── */
+    .footer-heading {
+    letter-spacing: 0.12em;
+    }
+
+    /* ─── Tailwind gradient radial utility ─── */
+    .bg-gradient-radial {
+    background-image: radial-gradient(var(--tw-gradient-stops));
+    }
+</style>
+
+<footer class="footer-root relative overflow-hidden bg-[#f5f5f7] border-t border-gray-200/80">
+
+  <!-- Subtle ambient gradient -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute bottom-0 left-1/4 w-[600px] h-[300px] bg-gradient-radial from-gray-200/50 to-transparent rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative max-w-[1440px] mx-auto px-8 md:px-16 lg:px-24">
+
+    <!-- Top section -->
+    <div class="pt-20 pb-14 grid grid-cols-1 md:grid-cols-12 gap-12 border-b border-gray-300/60">
+
+      <!-- Brand column -->
+      <div class="md:col-span-4 footer-col" style="--delay: 0ms">
+        <div class="flex items-center gap-2.5 mb-5">
+          <div class="w-7 h-7 rounded-lg bg-gray-900 flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7L7 2L12 7L7 12L2 7Z" fill="white"/>
+            </svg>
+          </div>
+          <span class="text-gray-900 font-semibold tracking-tight text-lg" style="font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif">DigitalKey</span>
+        </div>
+        <p class="text-[15px] text-gray-500 leading-relaxed max-w-[260px]" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+          Premium software licenses at the best price. Instant delivery, verified and secure.
+        </p>
+
+        <!-- Newsletter input -->
+        <div class="mt-8 flex items-center gap-2">
+          <div class="relative flex-1">
+            <input
+              type="email"
+              placeholder="Enter your email"
+              class="w-full text-[13px] bg-white border border-gray-200 rounded-full px-4 py-2.5 text-gray-700 placeholder-gray-400 outline-none focus:border-gray-400 transition-colors duration-200"
+              style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif"
+            />
+          </div>
+          <button class="footer-btn shrink-0 bg-gray-900 hover:bg-gray-700 text-white text-[13px] font-medium px-5 py-2.5 rounded-full transition-all duration-300">
+            Subscribe
+          </button>
+        </div>
+      </div>
+
+      <!-- Spacer -->
+      <div class="hidden md:block md:col-span-1"></div>
+
+      <!-- Links columns -->
+      <div class="md:col-span-7 grid grid-cols-3 gap-8">
+
+        <!-- Products -->
+        <div class="footer-col" style="--delay: 80ms">
+          <h4 class="footer-heading text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-5"
+            style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+            Products
+          </h4>
+          <ul class="space-y-3.5">
+            <li *ngFor="let item of products">
+              <a href="#" class="footer-link text-[14px] text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+                {{ item }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Support -->
+        <div class="footer-col" style="--delay: 160ms">
+          <h4 class="footer-heading text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-5"
+            style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+            Support
+          </h4>
+          <ul class="space-y-3.5">
+            <li *ngFor="let item of support">
+              <a href="#" class="footer-link text-[14px] text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+                {{ item }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Social -->
+        <div class="footer-col" style="--delay: 240ms">
+          <h4 class="footer-heading text-[11px] font-semibold tracking-widest text-gray-400 uppercase mb-5"
+            style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+            Follow Us
+          </h4>
+          <ul class="space-y-3.5">
+            <li *ngFor="let item of social">
+              <a href="#" class="footer-link group inline-flex items-center gap-2 text-[14px] text-gray-600 hover:text-gray-900 transition-colors duration-200"
+                style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+                <span class="w-5 h-5 rounded-md bg-gray-200 group-hover:bg-gray-300 transition-colors duration-200 flex items-center justify-center" [innerHTML]="item.icon"></span>
+                {{ item.label }}
+              </a>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-[12px] text-gray-400" style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">
+        © {{ currentYear }} DigitalKey. All rights reserved.
+      </p>
+      <div class="flex items-center gap-6">
+        <a href="#" class="text-[12px] text-gray-400 hover:text-gray-700 transition-colors duration-200"
+          style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">Privacy</a>
+        <a href="#" class="text-[12px] text-gray-400 hover:text-gray-700 transition-colors duration-200"
+          style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">Terms</a>
+        <a href="#" class="text-[12px] text-gray-400 hover:text-gray-700 transition-colors duration-200"
+          style="font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif">Cookies</a>
+      </div>
+    </div>
+
+  </div>
+</footer>

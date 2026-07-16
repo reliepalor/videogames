@@ -1,15 +1,15 @@
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, ViewEncapsulation, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { UserOrdersService, UserOrder, UserOrderItem } from 'src/app/core/services/user-orders.service';
+import { UserOrdersService, UserOrder, UserOrderItem } from 'src/app/core/services/orders/user-orders.service';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
 import { DigitalOrder } from 'src/app/core/models/digital-orders/digital-order.model';
-import { ThemeService } from '../../../core/services/theme.service';
-import { AuthService } from '../../../core/services/auth.service';
-import { ReviewService } from '../../../core/services/review.service';
+import { ThemeService } from '../../../core/services/ui/theme.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { ReviewService } from '../../../core/services/reviews/review.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, Subscription } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 import { CartService as MockCartService, DemoOrder } from 'src/app/services/cart.service';
 
 @Component({

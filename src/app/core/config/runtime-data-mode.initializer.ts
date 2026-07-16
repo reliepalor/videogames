@@ -1,4 +1,4 @@
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 
 const BACKEND_PROBE_PATH = '/api/reports/best-sellers';
 const BACKEND_PROBE_TIMEOUT_MS = 1500;

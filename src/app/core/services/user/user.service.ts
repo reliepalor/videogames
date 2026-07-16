@@ -1,12 +1,12 @@
-// src/app/core/services/user.service.ts
+// src/app/core/services/user/user.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { timeout, map, catchError } from 'rxjs/operators';
-import { environment } from '../../../environments/environment';
-import { User } from '../models/user/user.model';
-import { Profile } from '../models/user/UserProfile.model';
-import { TokenService } from './token.service';
+import { environment } from 'environments/environment';
+import { User } from '../../models/user/user.model';
+import { Profile } from '../../models/user/UserProfile.model';
+import { TokenService } from '../auth/token.service';
 
 @Injectable({
   providedIn: 'root'

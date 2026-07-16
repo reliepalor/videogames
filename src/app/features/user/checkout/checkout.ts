@@ -1,10 +1,10 @@
 import { Component, inject, OnInit, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { OrderService } from 'src/app/core/services/order.service';
-import { CartService, Cart } from 'src/app/core/services/cart.service';
+import { OrderService } from 'src/app/core/services/orders/order.service';
+import { CartService, Cart } from 'src/app/core/services/cart/cart.service';
 import { BehaviorSubject } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 import { CartService as MockCartService } from 'src/app/services/cart.service';
 import { Game } from 'src/app/models/game.model';
 

@@ -4,12 +4,12 @@ import { RouterLink } from '@angular/router';
 import { combineLatest, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { UserService } from '../../../core/services/user.service';
-import { UserOrdersService, UserOrder } from '../../../core/services/user-orders.service';
+import { UserService } from '../../../core/services/user/user.service';
+import { UserOrdersService, UserOrder } from '../../../core/services/orders/user-orders.service';
 import { DigitalOrderService } from '../../../core/services/digital-products/digital-order.service';
-import { ReviewEligibility, ReviewService } from '../../../core/services/review.service';
+import { ReviewEligibility, ReviewService } from '../../../core/services/reviews/review.service';
 import { DigitalOrder } from '../../../core/models/digital-orders/digital-order.model';
-import { VideoGameService } from '../../../core/services/videogame.service';
+import { VideoGameService } from '../../../core/services/catalog/videogame.service';
 import { VideoGame } from '../../../core/models/videogame.model';
 import { Profile, ProfileRecentOrder } from '../../../core/models/user/UserProfile.model';
 

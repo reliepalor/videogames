@@ -11,7 +11,7 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { AuthInterceptor } from './core/interceptors/auth.interceptors';
 import { environment } from '../environments/environment';
-import { VideoGameService } from './core/services/videogame.service';
+import { VideoGameService } from './core/services/catalog/videogame.service';
 import { GameApiService } from './services/game-api.service';
 import { GameMockService } from './services/videogame-mock.service';
 import { initializeRuntimeDataMode } from './core/config/runtime-data-mode.initializer';

@@ -3,9 +3,9 @@ import { RouterOutlet, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from 'src/app/shared/components/navbar/navbar.component';
 import { UserNavbarComponent } from 'src/app/shared/components/user-navbar/user-navbar.component';
-import { AuthService } from 'src/app/core/services/auth.service';
-import { SidebarService } from 'src/app/core/services/sidebar.service';
-import { ThemeService } from 'src/app/core/services/theme.service';
+import { AuthService } from 'src/app/core/services/auth/auth.service';
+import { SidebarService } from 'src/app/core/services/ui/sidebar.service';
+import { ThemeService } from 'src/app/core/services/ui/theme.service';
 import { Subscription } from 'rxjs';
 
 @Component({

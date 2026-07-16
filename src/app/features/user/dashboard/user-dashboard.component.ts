@@ -15,17 +15,20 @@ import {
   ReportsService,
 } from 'src/app/core/services/bestseller/reports.service';
 import { HttpClient } from '@angular/common/http';
-import { CartService } from 'src/app/core/services/cart.service';
-import { OrderService } from 'src/app/core/services/order.service';
+import { CartService } from 'src/app/core/services/cart/cart.service';
+import { OrderService } from 'src/app/core/services/orders/order.service';
 import { Observable, catchError, forkJoin, map, of, tap } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { VideoGameService } from 'src/app/core/services/videogame.service';
+import { environment } from 'environments/environment';
+import { VideoGameService } from 'src/app/core/services/catalog/videogame.service';
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { VideoGame } from 'src/app/core/models/videogame.model';
 import { DigitalProduct } from 'src/app/core/models/digital-products/digital-product.model';
 import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
+import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
-type RecommendedItem = {
+
+
+ type RecommendedItem = {
   id: number;
   type: 'game' | 'digital';
   title: string;
@@ -58,7 +61,7 @@ type DashboardBestSellerSeedItem = Omit<DashboardBestSellerItem, 'percent'>;
 @Component({
   standalone: true,
   selector: 'app-user-dashboard',
-  imports: [CommonModule, RouterLink, ScrollToTopComponent],
+  imports: [CommonModule, RouterLink, ScrollToTopComponent, FooterComponent],
   templateUrl: './user-dashboard.html',
   styleUrls: ['./user-dashboard.css'],
 })

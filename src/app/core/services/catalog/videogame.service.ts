@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
-import { Game } from '../../models/game.model';
-import { environment } from '../../../environments/environment';
+import { Game } from '../../../models/game.model';
+import { environment } from 'environments/environment';
 
 interface VideoGameApiResponse extends Omit<Game, 'imageUrl'> {
   imagePath?: string;

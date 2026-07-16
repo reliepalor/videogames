@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject, signal } from '@angular/core';
-import { AdminOrdersService, Order, OrderItemApproval } from 'src/app/core/services/admin-orders.service';
+import { AdminOrdersService, Order, OrderItemApproval } from 'src/app/core/services/orders/admin-orders.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';

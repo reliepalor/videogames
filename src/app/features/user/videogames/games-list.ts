@@ -19,14 +19,12 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
-import { VideoGameService } from '../../../core/services/videogame.service'
-import { CartService } from '../../../core/services/cart.service'
+import { VideoGameService } from '../../../core/services/catalog/videogame.service'
+import { CartService } from '../../../core/services/cart/cart.service'
 import { CartService as MockCartService } from 'src/app/services/cart.service'
-import { ThemeService } from '../../../core/services/theme.service'
+import { ThemeService } from '../../../core/services/ui/theme.service'
 import { VideoGame } from '../../../core/models/videogame.model'
-import { Game } from 'src/app/models/game.model'
-import { environment } from 'src/environments/environment';
-import { SkeletonBoxComponent } from 'src/app/shared/skeleton/skeleton-box.component'
+import { environment } from 'environments/environment';
 import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
 
 const DEMO_GAMES: VideoGame[] = [
@@ -73,7 +71,7 @@ const DEMO_GAMES: VideoGame[] = [
 @Component({
   standalone: true,
   selector: 'app-games-list',
-  imports: [CommonModule, RouterModule, SkeletonBoxComponent, FormsModule, ScrollToTopComponent
+  imports: [CommonModule, RouterModule, FormsModule, ScrollToTopComponent
   ],
   templateUrl: './games-list.html',
   styleUrls: ['./games-list.css'],
@@ -387,7 +385,7 @@ export class GamesListComponent implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     if (this.useMockData) {
-      this.mockCartService.addToCart(game as Game);
+      this.mockCartService.addToCart(game as VideoGame);
       this.loadingGames.delete(id);
       this.showSuccessMessage(`Added ${game.title} to cart!`);
       return;

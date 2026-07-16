@@ -13,10 +13,10 @@ import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subscription } from 'rxjs';
 
-import { ReviewService, ReviewEligibility } from '../../../core/services/review.service';
+import { ReviewService, ReviewEligibility } from '../../../core/services/reviews/review.service';
 import { GameReviewsResponse } from '../../../core/models/review.model';
 import { SkeletonBoxComponent } from '../../../shared/skeleton/skeleton-box.component';
-import { ThemeService } from '../../../core/services/theme.service';
+import { ThemeService } from '../../../core/services/ui/theme.service';
 
 @Component({
   selector: 'app-game-reviews',

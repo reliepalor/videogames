@@ -7,7 +7,7 @@ import { CreateDigitalProductDto } from '../../models/digital-products/create-di
 import { UpdateDigitalProductDto } from '../../models/digital-products/update-digital-product.dto';
 import { DigitalProductKey } from '../../models/digital-products/digital-product-key.model';
 
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 
 
 @Injectable({

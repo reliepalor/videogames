@@ -2,10 +2,10 @@ import { Component, inject, OnInit, OnDestroy, NgZone, ChangeDetectorRef } from 
 import { CommonModule } from '@angular/common'
 import { RouterModule, Router, NavigationEnd } from '@angular/router'
 import { HttpClient } from '@angular/common/http'
-import { VideoGameService } from '../../../../core/services/videogame.service'
+import { VideoGameService } from '../../../../core/services/catalog/videogame.service'
 import { VideoGame } from '../../../../core/models/videogame.model'
 import { SkeletonBoxComponent } from '../../../../shared/skeleton/skeleton-box.component'
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms'
 
 import {

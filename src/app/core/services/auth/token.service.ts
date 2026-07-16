@@ -1,4 +1,4 @@
-// src/app/core/services/token.service.ts
+// src/app/core/services/auth/token.service.ts
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 

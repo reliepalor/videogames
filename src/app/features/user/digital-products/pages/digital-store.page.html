@@ -172,7 +172,7 @@
 
               <button
                 *ngIf="product.availableKeys > 0"
-                class="absolute bottom-3 left-3 right-3 translate-y-0 rounded-[14px] border border-white/35 bg-white/45 px-4 py-[13px] text-center text-sm font-semibold tracking-[0.02em] text-[#4f4f4f] opacity-100 shadow-[0_4px_20px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px] backdrop-saturate-[1.6] transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)] hover:bg-white/40 hover:shadow-[0_6px_28px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.35)] disabled:cursor-not-allowed disabled:opacity-60 md:pointer-events-none md:translate-y-2 md:opacity-0 md:group-hover:pointer-events-auto md:group-hover:translate-y-0 md:group-hover:opacity-100"
+                class="absolute bottom-3 left-3 right-3 hidden rounded-[14px] border border-white/35 bg-white/45 px-4 py-[13px] text-center text-sm font-semibold tracking-[0.02em] text-[#4f4f4f] shadow-[0_4px_20px_rgba(0,0,0,0.18),inset_0_1px_0_rgba(255,255,255,0.25)] backdrop-blur-[18px] backdrop-saturate-[1.6] transition-all duration-300 ease-[cubic-bezier(0.22,0.61,0.36,1)] hover:bg-white/40 hover:shadow-[0_6px_28px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.35)] disabled:cursor-not-allowed disabled:opacity-60 md:block md:pointer-events-none md:translate-y-2 md:opacity-0 md:group-hover:pointer-events-auto md:group-hover:translate-y-0 md:group-hover:opacity-100"
                 (click)="$event.stopPropagation(); openPurchaseModal(product)">
                 Buy now
               </button>

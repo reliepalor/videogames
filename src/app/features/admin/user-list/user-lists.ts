@@ -1,6 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserService } from 'src/app/core/services/user.service';
+import { UserService } from 'src/app/core/services/user/user.service';
 import { User } from 'src/app/core/models/user/user.model';
 
 @Component({

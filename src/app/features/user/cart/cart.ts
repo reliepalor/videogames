@@ -2,12 +2,12 @@ import { Component, OnInit, OnDestroy, inject, NgZone, ChangeDetectorRef, signal
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { CartService as BackendCartService, CartItem } from 'src/app/core/services/cart.service';
-import { OrderService } from 'src/app/core/services/order.service';
-import { VideoGameService } from 'src/app/core/services/videogame.service';
-import { ThemeService } from 'src/app/core/services/theme.service';
+import { CartService as BackendCartService, CartItem } from 'src/app/core/services/cart/cart.service';
+import { OrderService } from 'src/app/core/services/orders/order.service';
+import { VideoGameService } from 'src/app/core/services/catalog/videogame.service';
+import { ThemeService } from 'src/app/core/services/ui/theme.service';
 import { Subscription } from 'rxjs';
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 import { CartService as MockCartService } from 'src/app/services/cart.service';
 import { Game } from 'src/app/models/game.model';
 

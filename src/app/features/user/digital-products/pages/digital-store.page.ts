@@ -6,7 +6,7 @@ import { DigitalProduct } from 'src/app/core/models/digital-products/digital-pro
 import { DigitalProductService } from 'src/app/core/services/digital-products/digital-product.service';
 import { DigitalOrderService } from 'src/app/core/services/digital-products/digital-order.service';
 import { ScrollToTopComponent } from 'src/app/shared/components/scrollToTop/scroll-to-top.component';
-import { environment } from 'src/environments/environment';
+import { environment } from 'environments/environment';
 
 @Component({
   standalone: true,

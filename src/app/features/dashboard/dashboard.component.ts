@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReportsService } from 'src/app/core/services/reports.service';
-import { SidebarService } from 'src/app/core/services/sidebar.service';
+import { ReportsService } from 'src/app/core/services/reports/reports.service';
+import { SidebarService } from 'src/app/core/services/ui/sidebar.service';
 import { VideoGameSales } from 'src/app/shared/models/videogame-sales';
 
 import { DigitalProductSales } from 'src/app/core/models/analytics/digital-product-sales';

@@ -1,7 +1,7 @@
 import { Component, signal, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { ThemeService } from './core/services/theme.service';
+import { ThemeService } from './core/services/ui/theme.service';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
