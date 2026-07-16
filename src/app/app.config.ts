@@ -15,12 +15,21 @@ import { VideoGameService } from './core/services/videogame.service';
 import { GameApiService } from './services/game-api.service';
 import { GameMockService } from './services/videogame-mock.service';
 import { initializeRuntimeDataMode } from './core/config/runtime-data-mode.initializer';
+import { AnalyticsService } from './core/services/analytics.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     {
       provide: APP_INITIALIZER,
       useFactory: initializeRuntimeDataMode,
+      multi: true,
+    },
+    {
+      provide: APP_INITIALIZER,
+      useFactory: () => {
+        const analyticsService = inject(AnalyticsService);
+        return () => analyticsService.initialize();
+      },
       multi: true,
     },
 
